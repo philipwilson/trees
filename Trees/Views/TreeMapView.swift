@@ -5,6 +5,7 @@ import MapKit
 struct TreeMapView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var trees: [Tree]
+    @AppStorage("mapShowVariety") private var showVariety = false
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedTree: Tree?
     @State private var showingCaptureSheet = false
@@ -16,7 +17,7 @@ struct TreeMapView: View {
                 Map(position: $position, selection: $selectedTree) {
                     ForEach(trees) { tree in
                         Annotation(
-                            tree.species.isEmpty ? "Tree" : tree.species,
+                            labelFor(tree),
                             coordinate: CLLocationCoordinate2D(
                                 latitude: tree.latitude,
                                 longitude: tree.longitude
@@ -63,6 +64,18 @@ struct TreeMapView: View {
             }
             .navigationTitle("Map")
             .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        showVariety.toggle()
+                    } label: {
+                        Label(
+                            showVariety ? "Show Species" : "Show Variety",
+                            systemImage: showVariety ? "leaf.fill" : "leaf"
+                        )
+                    }
+                }
+            }
             .sheet(isPresented: $showingCaptureSheet) {
                 CaptureTreeView()
             }
@@ -76,6 +89,13 @@ struct TreeMapView: View {
                 locationManager.requestPermission()
             }
         }
+    }
+
+    private func labelFor(_ tree: Tree) -> String {
+        if showVariety, let variety = tree.variety, !variety.isEmpty {
+            return variety
+        }
+        return tree.species.isEmpty ? "Tree" : tree.species
     }
 
     private func centerOnUser() {
