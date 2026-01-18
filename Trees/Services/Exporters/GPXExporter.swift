@@ -19,8 +19,19 @@ struct GPXExporter {
 
         for tree in trees {
             let name = escapeXML(tree.species.isEmpty ? "Unknown Tree" : tree.species)
-            let desc = escapeXML(tree.notes)
             let time = dateFormatter.string(from: tree.createdAt)
+
+            var descParts: [String] = []
+            if let variety = tree.variety {
+                descParts.append("Variety: \(variety)")
+            }
+            if let rootstock = tree.rootstock {
+                descParts.append("Rootstock: \(rootstock)")
+            }
+            if !tree.notes.isEmpty {
+                descParts.append(tree.notes)
+            }
+            let desc = escapeXML(descParts.joined(separator: "\n"))
 
             gpx += "  <wpt lat=\"\(tree.latitude)\" lon=\"\(tree.longitude)\">\n"
 
@@ -31,7 +42,7 @@ struct GPXExporter {
             gpx += "    <time>\(time)</time>\n"
             gpx += "    <name>\(name)</name>\n"
 
-            if !tree.notes.isEmpty {
+            if !desc.isEmpty {
                 gpx += "    <desc>\(desc)</desc>\n"
             }
 

@@ -53,12 +53,30 @@ struct TreeDetailView: View {
             Section {
                 if isEditing {
                     TextField("Species", text: $tree.species)
+                    TextField("Variety", text: Binding(
+                        get: { tree.variety ?? "" },
+                        set: { tree.variety = $0.isEmpty ? nil : $0 }
+                    ))
+                    TextField("Rootstock", text: Binding(
+                        get: { tree.rootstock ?? "" },
+                        set: { tree.rootstock = $0.isEmpty ? nil : $0 }
+                    ))
                     TextField("Notes", text: $tree.notes, axis: .vertical)
                         .lineLimit(3...10)
                 } else {
                     LabeledContent("Species") {
                         Text(tree.species.isEmpty ? "Not specified" : tree.species)
                             .foregroundStyle(tree.species.isEmpty ? .secondary : .primary)
+                    }
+                    if let variety = tree.variety {
+                        LabeledContent("Variety") {
+                            Text(variety)
+                        }
+                    }
+                    if let rootstock = tree.rootstock {
+                        LabeledContent("Rootstock") {
+                            Text(rootstock)
+                        }
                     }
                     if !tree.notes.isEmpty {
                         VStack(alignment: .leading, spacing: 4) {

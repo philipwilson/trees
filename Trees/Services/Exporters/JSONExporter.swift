@@ -8,6 +8,8 @@ struct JSONExporter {
         let horizontalAccuracy: Double
         let altitude: Double?
         let species: String
+        let variety: String?
+        let rootstock: String?
         let notes: String
         let photoCount: Int
         let photos: [String]?
@@ -26,6 +28,8 @@ struct JSONExporter {
                 horizontalAccuracy: tree.horizontalAccuracy,
                 altitude: tree.altitude,
                 species: tree.species,
+                variety: tree.variety,
+                rootstock: tree.rootstock,
                 notes: tree.notes,
                 photoCount: tree.photos.count,
                 photos: includePhotos ? tree.photos.map { $0.base64EncodedString() } : nil,

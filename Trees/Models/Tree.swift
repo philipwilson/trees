@@ -9,6 +9,8 @@ class Tree {
     var horizontalAccuracy: Double
     var altitude: Double?
     var species: String
+    var variety: String?
+    var rootstock: String?
     var notes: String
     @Attribute(.externalStorage) var photos: [Data]
     var createdAt: Date
@@ -21,6 +23,8 @@ class Tree {
         horizontalAccuracy: Double,
         altitude: Double? = nil,
         species: String = "",
+        variety: String? = nil,
+        rootstock: String? = nil,
         notes: String = "",
         photos: [Data] = [],
         createdAt: Date = Date(),
@@ -32,6 +36,8 @@ class Tree {
         self.horizontalAccuracy = horizontalAccuracy
         self.altitude = altitude
         self.species = species
+        self.variety = variety
+        self.rootstock = rootstock
         self.notes = notes
         self.photos = photos
         self.createdAt = createdAt

@@ -2,13 +2,15 @@ import Foundation
 
 struct CSVExporter {
     static func export(trees: [Tree]) -> String {
-        var csv = "id,latitude,longitude,accuracy_meters,altitude,species,notes,created_at,updated_at\n"
+        var csv = "id,latitude,longitude,accuracy_meters,altitude,species,variety,rootstock,notes,created_at,updated_at\n"
 
         let dateFormatter = ISO8601DateFormatter()
 
         for tree in trees {
             let altitudeStr = tree.altitude.map { String($0) } ?? ""
             let speciesEscaped = escapeCSV(tree.species)
+            let varietyEscaped = escapeCSV(tree.variety ?? "")
+            let rootstockEscaped = escapeCSV(tree.rootstock ?? "")
             let notesEscaped = escapeCSV(tree.notes)
 
             let row = [
@@ -18,6 +20,8 @@ struct CSVExporter {
                 String(tree.horizontalAccuracy),
                 altitudeStr,
                 speciesEscaped,
+                varietyEscaped,
+                rootstockEscaped,
                 notesEscaped,
                 dateFormatter.string(from: tree.createdAt),
                 dateFormatter.string(from: tree.updatedAt)

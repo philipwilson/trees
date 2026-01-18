@@ -8,6 +8,8 @@ struct CaptureTreeView: View {
     @State private var locationManager = LocationManager()
 
     @State private var species = ""
+    @State private var variety = ""
+    @State private var rootstock = ""
     @State private var notes = ""
     @State private var photos: [Data] = []
     @State private var capturedLocation: CLLocation?
@@ -61,6 +63,8 @@ struct CaptureTreeView: View {
 
                 Section {
                     TextField("Species", text: $species)
+                    TextField("Variety (optional)", text: $variety)
+                    TextField("Rootstock (optional)", text: $rootstock)
                     TextField("Notes", text: $notes, axis: .vertical)
                         .lineLimit(3...6)
                 } header: {
@@ -138,12 +142,17 @@ struct CaptureTreeView: View {
     private func saveTree() {
         guard let location = capturedLocation else { return }
 
+        let trimmedVariety = variety.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedRootstock = rootstock.trimmingCharacters(in: .whitespacesAndNewlines)
+
         let tree = Tree(
             latitude: location.coordinate.latitude,
             longitude: location.coordinate.longitude,
             horizontalAccuracy: location.horizontalAccuracy,
             altitude: location.altitude,
             species: species.trimmingCharacters(in: .whitespacesAndNewlines),
+            variety: trimmedVariety.isEmpty ? nil : trimmedVariety,
+            rootstock: trimmedRootstock.isEmpty ? nil : trimmedRootstock,
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
             photos: photos
         )
