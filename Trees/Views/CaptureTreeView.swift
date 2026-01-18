@@ -6,6 +6,7 @@ struct CaptureTreeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Collection.name) private var collections: [Collection]
+    @AppStorage("lastUsedCollectionID") private var lastUsedCollectionID: String?
     @State private var locationManager = LocationManager()
 
     var preselectedCollection: Collection?
@@ -120,7 +121,13 @@ struct CaptureTreeView: View {
             .onAppear {
                 checkPermissionAndStartLocation()
                 if selectedCollection == nil {
-                    selectedCollection = preselectedCollection
+                    if let preselected = preselectedCollection {
+                        selectedCollection = preselected
+                    } else if let lastID = lastUsedCollectionID,
+                              let lastUUID = UUID(uuidString: lastID),
+                              let lastCollection = collections.first(where: { $0.id == lastUUID }) {
+                        selectedCollection = lastCollection
+                    }
                 }
             }
             .onDisappear {
@@ -178,6 +185,7 @@ struct CaptureTreeView: View {
         )
 
         tree.collection = selectedCollection
+        lastUsedCollectionID = selectedCollection?.id.uuidString
         modelContext.insert(tree)
         dismiss()
     }
