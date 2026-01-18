@@ -1,0 +1,74 @@
+import SwiftUI
+
+struct TreeRowView: View {
+    let tree: Tree
+
+    var body: some View {
+        HStack(spacing: 12) {
+            if let firstPhoto = tree.photos.first,
+               let uiImage = UIImage(data: firstPhoto) {
+                Image(uiImage: uiImage)
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: 50, height: 50)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            } else {
+                Image(systemName: "tree.fill")
+                    .font(.title2)
+                    .foregroundStyle(.green)
+                    .frame(width: 50, height: 50)
+                    .background(Color.green.opacity(0.1))
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
+            VStack(alignment: .leading, spacing: 4) {
+                Text(tree.species.isEmpty ? "Unknown Species" : tree.species)
+                    .font(.headline)
+
+                Text(tree.coordinateString)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                Text(tree.formattedDate)
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+            }
+
+            Spacer()
+
+            VStack(alignment: .trailing, spacing: 4) {
+                AccuracyBadge(accuracy: tree.horizontalAccuracy)
+
+                if tree.photos.count > 0 {
+                    HStack(spacing: 2) {
+                        Image(systemName: "photo")
+                            .font(.caption2)
+                        Text("\(tree.photos.count)")
+                            .font(.caption2)
+                    }
+                    .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+#Preview {
+    List {
+        TreeRowView(tree: Tree(
+            latitude: 45.123456,
+            longitude: -122.654321,
+            horizontalAccuracy: 3.5,
+            species: "Red Maple",
+            notes: "Large tree near the parking lot"
+        ))
+        TreeRowView(tree: Tree(
+            latitude: 45.123456,
+            longitude: -122.654321,
+            horizontalAccuracy: 12.0,
+            species: "",
+            notes: ""
+        ))
+    }
+}

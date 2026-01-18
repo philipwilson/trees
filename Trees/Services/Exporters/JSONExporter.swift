@@ -1,0 +1,69 @@
+import Foundation
+
+struct JSONExporter {
+    struct ExportedTree: Codable {
+        let id: String
+        let latitude: Double
+        let longitude: Double
+        let horizontalAccuracy: Double
+        let altitude: Double?
+        let species: String
+        let notes: String
+        let photoCount: Int
+        let photos: [String]?
+        let createdAt: String
+        let updatedAt: String
+    }
+
+    static func export(trees: [Tree], includePhotos: Bool = false) -> String {
+        let dateFormatter = ISO8601DateFormatter()
+
+        let exportedTrees = trees.map { tree in
+            ExportedTree(
+                id: tree.id.uuidString,
+                latitude: tree.latitude,
+                longitude: tree.longitude,
+                horizontalAccuracy: tree.horizontalAccuracy,
+                altitude: tree.altitude,
+                species: tree.species,
+                notes: tree.notes,
+                photoCount: tree.photos.count,
+                photos: includePhotos ? tree.photos.map { $0.base64EncodedString() } : nil,
+                createdAt: dateFormatter.string(from: tree.createdAt),
+                updatedAt: dateFormatter.string(from: tree.updatedAt)
+            )
+        }
+
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
+
+        guard let data = try? encoder.encode(exportedTrees),
+              let jsonString = String(data: data, encoding: .utf8) else {
+            return "[]"
+        }
+
+        return jsonString
+    }
+
+    static func exportToFile(trees: [Tree], includePhotos: Bool = false) -> URL? {
+        let content = export(trees: trees, includePhotos: includePhotos)
+        let filename = "trees_\(formattedDate()).json"
+
+        guard let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) else {
+            return nil
+        }
+
+        do {
+            try content.write(to: url, atomically: true, encoding: .utf8)
+            return url
+        } catch {
+            return nil
+        }
+    }
+
+    private static func formattedDate() -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HHmmss"
+        return formatter.string(from: Date())
+    }
+}
