@@ -5,7 +5,10 @@ import CoreLocation
 struct CaptureTreeView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Collection.name) private var collections: [Collection]
     @State private var locationManager = LocationManager()
+
+    var preselectedCollection: Collection?
 
     @State private var species = ""
     @State private var variety = ""
@@ -14,6 +17,7 @@ struct CaptureTreeView: View {
     @State private var photos: [Data] = []
     @State private var capturedLocation: CLLocation?
     @State private var showingPermissionAlert = false
+    @State private var selectedCollection: Collection?
 
     private var canSave: Bool {
         capturedLocation != nil
@@ -72,6 +76,19 @@ struct CaptureTreeView: View {
                 }
 
                 Section {
+                    Picker("Collection", selection: $selectedCollection) {
+                        Text("None").tag(nil as Collection?)
+                        ForEach(collections) { collection in
+                            Text(collection.name).tag(collection as Collection?)
+                        }
+                    }
+                } header: {
+                    Text("Collection")
+                } footer: {
+                    Text("Optionally add this tree to a collection")
+                }
+
+                Section {
                     if !photos.isEmpty {
                         EditablePhotoGalleryView(photos: $photos)
                     }
@@ -102,6 +119,9 @@ struct CaptureTreeView: View {
             }
             .onAppear {
                 checkPermissionAndStartLocation()
+                if selectedCollection == nil {
+                    selectedCollection = preselectedCollection
+                }
             }
             .onDisappear {
                 locationManager.stopUpdatingLocation()
@@ -157,6 +177,7 @@ struct CaptureTreeView: View {
             photos: photos
         )
 
+        tree.collection = selectedCollection
         modelContext.insert(tree)
         dismiss()
     }
@@ -164,5 +185,5 @@ struct CaptureTreeView: View {
 
 #Preview {
     CaptureTreeView()
-        .modelContainer(for: Tree.self, inMemory: true)
+        .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
 }

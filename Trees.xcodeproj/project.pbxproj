@@ -9,13 +9,17 @@
 /* Begin PBXBuildFile section */
 		01DD1BC657317FC4E0A59126 /* TreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */; };
 		0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5335BA670CB205F7556844DA /* JSONExporter.swift */; };
+		1C04A1E99D1EBC61354CC81D /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7FF05273647DCDC1D213C2 /* Collection.swift */; };
 		2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE000A01E50BF4C4432D684 /* ContentView.swift */; };
+		3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */; };
 		3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817793E263FCDD0C5A146B35 /* TreesApp.swift */; };
 		444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
 		54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */; };
 		6267E5503C16DEB9E26388B3 /* Tree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC825F3082A2B90559D7B68 /* Tree.swift */; };
 		62F379748862624975606356 /* TreeMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888A735E0810BFF9906BE845 /* TreeMapView.swift */; };
+		6FC5777C8B87E14A7DAF1DA5 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */; };
+		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
 		9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */; };
 		9A5889B04F1AA99705144D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D622F80312FFD765AB887763 /* Assets.xcassets */; };
 		AF9528309D016F7DB08770FE /* CaptureTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */; };
@@ -34,12 +38,16 @@
 		5335BA670CB205F7556844DA /* JSONExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONExporter.swift; sourceTree = "<group>"; };
 		559396C03C40B0AA63C15D57 /* GPXExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPXExporter.swift; sourceTree = "<group>"; };
 		56120BD39256244311587662 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
+		5F7FF05273647DCDC1D213C2 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		61B8886E85F005476434A363 /* TreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeDetailView.swift; sourceTree = "<group>"; };
 		665D107F0BC118E07EC6BBF4 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
+		6DDE1784DB8250757C69B763 /* CollectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionListView.swift; sourceTree = "<group>"; };
 		817793E263FCDD0C5A146B35 /* TreesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesApp.swift; sourceTree = "<group>"; };
 		888A735E0810BFF9906BE845 /* TreeMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMapView.swift; sourceTree = "<group>"; };
 		8DC825F3082A2B90559D7B68 /* Tree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tree.swift; sourceTree = "<group>"; };
+		8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCollectionView.swift; sourceTree = "<group>"; };
 		90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeRowView.swift; sourceTree = "<group>"; };
+		9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		9FC480362398E233AA910840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		BA501EF33874C584E39F8F8F /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -53,8 +61,11 @@
 			isa = PBXGroup;
 			children = (
 				52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */,
+				9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */,
+				6DDE1784DB8250757C69B763 /* CollectionListView.swift */,
 				1FE000A01E50BF4C4432D684 /* ContentView.swift */,
 				3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */,
+				8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */,
 				61B8886E85F005476434A363 /* TreeDetailView.swift */,
 				F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */,
 				888A735E0810BFF9906BE845 /* TreeMapView.swift */,
@@ -94,6 +105,7 @@
 		9470E5D03EFB573F9F965EB6 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				5F7FF05273647DCDC1D213C2 /* Collection.swift */,
 				8DC825F3082A2B90559D7B68 /* Tree.swift */,
 			);
 			path = Models;
@@ -158,7 +170,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2610;
+				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					8DADEBCD00920B0F4C517383 = {
 						ProvisioningStyle = Automatic;
@@ -202,10 +214,14 @@
 				9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */,
 				F0ECD25D6291205F476B22B1 /* CSVExporter.swift in Sources */,
 				AF9528309D016F7DB08770FE /* CaptureTreeView.swift in Sources */,
+				1C04A1E99D1EBC61354CC81D /* Collection.swift in Sources */,
+				6FC5777C8B87E14A7DAF1DA5 /* CollectionDetailView.swift in Sources */,
+				7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */,
 				2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */,
 				54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */,
 				CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */,
 				DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */,
+				3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */,
 				0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */,
 				E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */,
 				BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */,
@@ -228,6 +244,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3L3ASPMXH9;
 				INFOPLIST_FILE = Trees/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -247,6 +264,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3L3ASPMXH9;
 				INFOPLIST_FILE = Trees/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -294,10 +312,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 3L3ASPMXH9;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -319,7 +335,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
@@ -361,10 +376,8 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 3L3ASPMXH9;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -379,7 +392,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;

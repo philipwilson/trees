@@ -41,9 +41,9 @@ struct CSVExporter {
         return value
     }
 
-    static func exportToFile(trees: [Tree]) -> URL? {
+    static func exportToFile(trees: [Tree], filePrefix: String = "trees") -> URL? {
         let content = export(trees: trees)
-        let filename = "trees_\(formattedDate()).csv"
+        let filename = "\(filePrefix)_\(formattedDate()).csv"
 
         guard let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) else {
             return nil

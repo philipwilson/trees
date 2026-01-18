@@ -13,6 +13,7 @@ class Tree {
     var rootstock: String?
     var notes: String
     @Attribute(.externalStorage) var photos: [Data]
+    var collection: Collection?
     var createdAt: Date
     var updatedAt: Date
 

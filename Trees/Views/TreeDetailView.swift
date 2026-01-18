@@ -6,6 +6,7 @@ struct TreeDetailView: View {
     @Bindable var tree: Tree
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Collection.name) private var collections: [Collection]
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
 
@@ -93,6 +94,24 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
+                    Picker("Collection", selection: $tree.collection) {
+                        Text("None").tag(nil as Collection?)
+                        ForEach(collections) { collection in
+                            Text(collection.name).tag(collection as Collection?)
+                        }
+                    }
+                } else {
+                    LabeledContent("Collection") {
+                        Text(tree.collection?.name ?? "None")
+                            .foregroundStyle(tree.collection == nil ? .secondary : .primary)
+                    }
+                }
+            } header: {
+                Text("Collection")
+            }
+
+            Section {
+                if isEditing {
                     EditablePhotoGalleryView(photos: $tree.photos)
                     PhotosPicker(selectedPhotos: $tree.photos)
                 } else {
@@ -162,5 +181,5 @@ struct TreeDetailView: View {
             notes: "Large tree near the parking lot. Has distinctive red leaves in autumn."
         ))
     }
-    .modelContainer(for: Tree.self, inMemory: true)
+    .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
 }

@@ -11,16 +11,22 @@ struct ContentView: View {
                 }
                 .tag(0)
 
+            CollectionListView()
+                .tabItem {
+                    Label("Collections", systemImage: "folder.fill")
+                }
+                .tag(1)
+
             TreeMapView()
                 .tabItem {
                     Label("Map", systemImage: "map.fill")
                 }
-                .tag(1)
+                .tag(2)
         }
     }
 }
 
 #Preview {
     ContentView()
-        .modelContainer(for: Tree.self, inMemory: true)
+        .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
 }

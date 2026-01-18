@@ -36,6 +36,7 @@ enum ExportFormat: String, CaseIterable, Identifiable {
 
 struct ExportView: View {
     let trees: [Tree]
+    var collectionName: String? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var selectedFormat: ExportFormat = .csv
     @State private var includePhotosInJSON = false
@@ -43,10 +44,24 @@ struct ExportView: View {
     @State private var showingShareSheet = false
     @State private var isExporting = false
 
+    private var filePrefix: String {
+        if let name = collectionName {
+            return name.replacingOccurrences(of: " ", with: "_").lowercased()
+        }
+        return "trees"
+    }
+
     var body: some View {
         NavigationStack {
             Form {
                 Section {
+                    if let name = collectionName {
+                        HStack {
+                            Image(systemName: "folder.fill")
+                                .foregroundStyle(.orange)
+                            Text(name)
+                        }
+                    }
                     HStack {
                         Image(systemName: "tree.fill")
                             .foregroundStyle(.green)
@@ -129,17 +144,18 @@ struct ExportView: View {
 
     private func exportData() {
         isExporting = true
+        let prefix = filePrefix
 
         DispatchQueue.global(qos: .userInitiated).async {
             let url: URL?
 
             switch selectedFormat {
             case .csv:
-                url = CSVExporter.exportToFile(trees: trees)
+                url = CSVExporter.exportToFile(trees: trees, filePrefix: prefix)
             case .json:
-                url = JSONExporter.exportToFile(trees: trees, includePhotos: includePhotosInJSON)
+                url = JSONExporter.exportToFile(trees: trees, includePhotos: includePhotosInJSON, filePrefix: prefix)
             case .gpx:
-                url = GPXExporter.exportToFile(trees: trees)
+                url = GPXExporter.exportToFile(trees: trees, filePrefix: prefix)
             }
 
             DispatchQueue.main.async {

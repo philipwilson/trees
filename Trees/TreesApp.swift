@@ -7,6 +7,6 @@ struct TreesApp: App {
         WindowGroup {
             ContentView()
         }
-        .modelContainer(for: Tree.self)
+        .modelContainer(for: [Tree.self, Collection.self])
     }
 }

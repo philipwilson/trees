@@ -119,5 +119,5 @@ struct TreeMapPin: View {
 
 #Preview {
     TreeMapView()
-        .modelContainer(for: Tree.self, inMemory: true)
+        .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
 }

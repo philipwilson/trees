@@ -64,9 +64,9 @@ struct GPXExporter {
             .replacingOccurrences(of: "'", with: "&apos;")
     }
 
-    static func exportToFile(trees: [Tree]) -> URL? {
+    static func exportToFile(trees: [Tree], filePrefix: String = "trees") -> URL? {
         let content = export(trees: trees)
-        let filename = "trees_\(formattedDate()).gpx"
+        let filename = "\(filePrefix)_\(formattedDate()).gpx"
 
         guard let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) else {
             return nil

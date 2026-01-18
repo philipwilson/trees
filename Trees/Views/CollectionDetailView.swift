@@ -1,0 +1,212 @@
+import SwiftUI
+import SwiftData
+
+struct CollectionDetailView: View {
+    @Bindable var collection: Collection
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+    @Query(sort: \Tree.createdAt, order: .reverse) private var allTrees: [Tree]
+
+    @State private var isEditing = false
+    @State private var showingExportSheet = false
+    @State private var showingAddTreesSheet = false
+    @State private var showingDeleteConfirmation = false
+    @State private var showingCaptureSheet = false
+
+    private var unassignedTrees: [Tree] {
+        allTrees.filter { $0.collection == nil }
+    }
+
+    var body: some View {
+        List {
+            Section {
+                if isEditing {
+                    TextField("Collection Name", text: $collection.name)
+                } else {
+                    LabeledContent("Name") {
+                        Text(collection.name)
+                    }
+                }
+                LabeledContent("Trees") {
+                    Text("\(collection.treeCount)")
+                }
+                LabeledContent("Created") {
+                    Text(collection.formattedDate)
+                }
+            } header: {
+                Text("Collection Info")
+            }
+
+            Section {
+                if collection.trees.isEmpty {
+                    ContentUnavailableView(
+                        "No Trees",
+                        systemImage: "tree",
+                        description: Text("Add trees to this collection")
+                    )
+                    .listRowBackground(Color.clear)
+                } else {
+                    ForEach(collection.trees.sorted { $0.createdAt > $1.createdAt }) { tree in
+                        NavigationLink(destination: TreeDetailView(tree: tree)) {
+                            TreeRowView(tree: tree)
+                        }
+                    }
+                    .onDelete(perform: removeTreesFromCollection)
+                }
+            } header: {
+                HStack {
+                    Text("Trees")
+                    Spacer()
+                    if !collection.trees.isEmpty {
+                        Button {
+                            showingAddTreesSheet = true
+                        } label: {
+                            Image(systemName: "plus.circle")
+                        }
+                    }
+                }
+            }
+
+            if collection.trees.isEmpty {
+                Section {
+                    Button {
+                        showingCaptureSheet = true
+                    } label: {
+                        Label("Capture New Tree", systemImage: "location.fill")
+                    }
+
+                    Button {
+                        showingAddTreesSheet = true
+                    } label: {
+                        Label("Add Existing Trees", systemImage: "plus.circle")
+                    }
+                    .disabled(unassignedTrees.isEmpty)
+                }
+            }
+
+            if isEditing {
+                Section {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        HStack {
+                            Spacer()
+                            Text("Delete Collection")
+                            Spacer()
+                        }
+                    }
+                } footer: {
+                    Text("Trees in this collection will not be deleted.")
+                }
+            }
+        }
+        .navigationTitle(collection.name)
+        .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Menu {
+                    Button {
+                        isEditing.toggle()
+                        if !isEditing {
+                            collection.updatedAt = Date()
+                        }
+                    } label: {
+                        Label(isEditing ? "Done Editing" : "Edit", systemImage: "pencil")
+                    }
+
+                    Button {
+                        showingExportSheet = true
+                    } label: {
+                        Label("Export", systemImage: "square.and.arrow.up")
+                    }
+                    .disabled(collection.trees.isEmpty)
+
+                    Button {
+                        showingCaptureSheet = true
+                    } label: {
+                        Label("Capture Tree", systemImage: "location.fill")
+                    }
+
+                    Button {
+                        showingAddTreesSheet = true
+                    } label: {
+                        Label("Add Existing Trees", systemImage: "plus.circle")
+                    }
+                    .disabled(unassignedTrees.isEmpty)
+                } label: {
+                    Image(systemName: "ellipsis.circle")
+                }
+            }
+        }
+        .sheet(isPresented: $showingExportSheet) {
+            ExportView(trees: collection.trees, collectionName: collection.name)
+        }
+        .sheet(isPresented: $showingAddTreesSheet) {
+            AddTreesToCollectionView(collection: collection, availableTrees: unassignedTrees)
+        }
+        .sheet(isPresented: $showingCaptureSheet) {
+            CaptureTreeView(preselectedCollection: collection)
+        }
+        .confirmationDialog("Delete Collection", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+            Button("Delete", role: .destructive) {
+                modelContext.delete(collection)
+                dismiss()
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: {
+            Text("This will delete the collection but keep all trees.")
+        }
+    }
+
+    private func removeTreesFromCollection(at offsets: IndexSet) {
+        let sortedTrees = collection.trees.sorted { $0.createdAt > $1.createdAt }
+        for index in offsets {
+            sortedTrees[index].collection = nil
+        }
+    }
+}
+
+struct AddTreesToCollectionView: View {
+    let collection: Collection
+    let availableTrees: [Tree]
+    @Environment(\.dismiss) private var dismiss
+    @State private var selectedTrees: Set<UUID> = []
+
+    var body: some View {
+        NavigationStack {
+            List(availableTrees, selection: $selectedTrees) { tree in
+                TreeRowView(tree: tree)
+            }
+            .environment(\.editMode, .constant(.active))
+            .navigationTitle("Add Trees")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Add (\(selectedTrees.count))") {
+                        addSelectedTrees()
+                    }
+                    .disabled(selectedTrees.isEmpty)
+                }
+            }
+        }
+    }
+
+    private func addSelectedTrees() {
+        for tree in availableTrees where selectedTrees.contains(tree.id) {
+            tree.collection = collection
+        }
+        dismiss()
+    }
+}
+
+#Preview {
+    NavigationStack {
+        CollectionDetailView(collection: Collection(name: "Victoria's Orchard"))
+    }
+    .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
+}
