@@ -14,6 +14,7 @@ struct TreeListView: View {
         }
         return trees.filter { tree in
             tree.species.localizedCaseInsensitiveContains(searchText) ||
+            (tree.variety ?? "").localizedCaseInsensitiveContains(searchText) ||
             tree.notes.localizedCaseInsensitiveContains(searchText)
         }
     }
