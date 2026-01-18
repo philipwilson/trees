@@ -25,6 +25,12 @@ struct TreeRowView: View {
                 Text(tree.species.isEmpty ? "Unknown Species" : tree.species)
                     .font(.headline)
 
+                if let variety = tree.variety, !variety.isEmpty {
+                    Text(variety)
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+
                 Text(tree.coordinateString)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -60,14 +66,15 @@ struct TreeRowView: View {
             latitude: 45.123456,
             longitude: -122.654321,
             horizontalAccuracy: 3.5,
-            species: "Red Maple",
+            species: "Apple",
+            variety: "Honeycrisp",
             notes: "Large tree near the parking lot"
         ))
         TreeRowView(tree: Tree(
             latitude: 45.123456,
             longitude: -122.654321,
             horizontalAccuracy: 12.0,
-            species: "",
+            species: "Red Maple",
             notes: ""
         ))
     }
