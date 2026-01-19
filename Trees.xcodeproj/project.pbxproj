@@ -9,11 +9,14 @@
 /* Begin PBXBuildFile section */
 		01DD1BC657317FC4E0A59126 /* TreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */; };
 		0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5335BA670CB205F7556844DA /* JSONExporter.swift */; };
+		13C090D4A9B9E0669F6293AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C385534E9EFC669280796C68 /* Assets.xcassets */; };
 		1C04A1E99D1EBC61354CC81D /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7FF05273647DCDC1D213C2 /* Collection.swift */; };
 		2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE000A01E50BF4C4432D684 /* ContentView.swift */; };
+		36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */; };
 		3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */; };
 		3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817793E263FCDD0C5A146B35 /* TreesApp.swift */; };
 		444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */; };
+		4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
 		54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */; };
 		6267E5503C16DEB9E26388B3 /* Tree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8DC825F3082A2B90559D7B68 /* Tree.swift */; };
@@ -21,19 +24,57 @@
 		6FC5777C8B87E14A7DAF1DA5 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */; };
 		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
 		9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */; };
+		999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A5889B04F1AA99705144D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D622F80312FFD765AB887763 /* Assets.xcassets */; };
+		9A72A2BE1D0C430A3F498396 /* CommonSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */; };
+		A871EA6EAF9A758E67D66CE6 /* WatchLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */; };
+		A893E02EB1436CD16F31FC17 /* WatchTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072D15159EDF377B08891E50 /* WatchTree.swift */; };
+		AAD62B8B49E30D2F1D3C09CA /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		AF9528309D016F7DB08770FE /* CaptureTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */; };
 		BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F08281F88024D47A957057 /* PhotoGalleryView.swift */; };
+		BE710E54AA33F84098234D35 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2E09E9737924E18950A488 /* CaptureView.swift */; };
+		C20E194CF983ABCD3090D17E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4082492E29F2EE4E73C6FEB /* ContentView.swift */; };
 		CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559396C03C40B0AA63C15D57 /* GPXExporter.swift */; };
+		D4E766862EDBFA98CB8E85D2 /* WatchTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072D15159EDF377B08891E50 /* WatchTree.swift */; };
 		DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA501EF33874C584E39F8F8F /* ImagePicker.swift */; };
 		E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 665D107F0BC118E07EC6BBF4 /* LocationManager.swift */; };
+		E8D93E973EEA26E6E0084084 /* CommonSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */; };
+		EADECBFF7F1F068114B6E7BF /* TreesWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */; };
 		F0ECD25D6291205F476B22B1 /* CSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56120BD39256244311587662 /* CSVExporter.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		58C9B45352EB7E90E738C1B8 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 07EFA101B2200D792627E7C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AC6C9BE596878D3000D25309;
+			remoteInfo = TreesWatch;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		001F21D8DBC5E11FDB2088C1 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
+		072D15159EDF377B08891E50 /* WatchTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTree.swift; sourceTree = "<group>"; };
+		141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
 		1FE000A01E50BF4C4432D684 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		2F2E09E9737924E18950A488 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
 		37F08281F88024D47A957057 /* PhotoGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoGalleryView.swift; sourceTree = "<group>"; };
 		3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
+		4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonSpecies.swift; sourceTree = "<group>"; };
 		52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureTreeView.swift; sourceTree = "<group>"; };
 		5335BA670CB205F7556844DA /* JSONExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONExporter.swift; sourceTree = "<group>"; };
 		559396C03C40B0AA63C15D57 /* GPXExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPXExporter.swift; sourceTree = "<group>"; };
@@ -47,13 +88,20 @@
 		8DC825F3082A2B90559D7B68 /* Tree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tree.swift; sourceTree = "<group>"; };
 		8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCollectionView.swift; sourceTree = "<group>"; };
 		90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeRowView.swift; sourceTree = "<group>"; };
+		918FF906634160BF4712F217 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLocationManager.swift; sourceTree = "<group>"; };
 		9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		9FC480362398E233AA910840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A4082492E29F2EE4E73C6FEB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BA501EF33874C584E39F8F8F /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
+		C385534E9EFC669280796C68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchApp.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
+		E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporter.swift; sourceTree = "<group>"; };
 		F18511CA3A2E95CB885A2B6D /* Trees.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trees.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeListView.swift; sourceTree = "<group>"; };
+		FDED0380FA1E9E8362D0D331 /* TreesWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TreesWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -75,10 +123,24 @@
 			path = Views;
 			sourceTree = "<group>";
 		};
+		223E6BCD5EC349BB6EBDC9CA /* TreesWatch */ = {
+			isa = PBXGroup;
+			children = (
+				C385534E9EFC669280796C68 /* Assets.xcassets */,
+				2F2E09E9737924E18950A488 /* CaptureView.swift */,
+				A4082492E29F2EE4E73C6FEB /* ContentView.swift */,
+				918FF906634160BF4712F217 /* Info.plist */,
+				D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */,
+				9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */,
+			);
+			path = TreesWatch;
+			sourceTree = "<group>";
+		};
 		27EC1899D99CC07AAA368609 /* Services */ = {
 			isa = PBXGroup;
 			children = (
 				665D107F0BC118E07EC6BBF4 /* LocationManager.swift */,
+				E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */,
 				D5FF190F5952B0902B19B923 /* Exporters */,
 			);
 			path = Services;
@@ -88,6 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				F18511CA3A2E95CB885A2B6D /* Trees.app */,
+				FDED0380FA1E9E8362D0D331 /* TreesWatch.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -114,9 +177,21 @@
 		A2071F570F64A0D1EDDC5CFE = {
 			isa = PBXGroup;
 			children = (
+				AF1089306B2B73F3D556A390 /* Shared */,
 				CE9A6E17D0F662A598DA1946 /* Trees */,
+				223E6BCD5EC349BB6EBDC9CA /* TreesWatch */,
 				708BE62405834D1AA81FCDEB /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		AF1089306B2B73F3D556A390 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */,
+				141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */,
+				072D15159EDF377B08891E50 /* WatchTree.swift */,
+			);
+			path = Shared;
 			sourceTree = "<group>";
 		};
 		CE9A6E17D0F662A598DA1946 /* Trees */ = {
@@ -151,16 +226,36 @@
 			buildPhases = (
 				AAD22DC8F9B3CFF54F50DD72 /* Sources */,
 				2CE5EC3D799F31017CD7F38E /* Resources */,
+				001F21D8DBC5E11FDB2088C1 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				C4EEC8BFF471175C7970DAFE /* PBXTargetDependency */,
 			);
 			name = Trees;
 			packageProductDependencies = (
 			);
 			productName = Trees;
 			productReference = F18511CA3A2E95CB885A2B6D /* Trees.app */;
+			productType = "com.apple.product-type.application";
+		};
+		AC6C9BE596878D3000D25309 /* TreesWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 6EBFEE478FEE5F2E92F4EA86 /* Build configuration list for PBXNativeTarget "TreesWatch" */;
+			buildPhases = (
+				3D7435D3450714AF586E45F7 /* Sources */,
+				666240D8E6611C3816EFB37C /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TreesWatch;
+			packageProductDependencies = (
+			);
+			productName = TreesWatch;
+			productReference = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */;
 			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
@@ -173,6 +268,9 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					8DADEBCD00920B0F4C517383 = {
+						ProvisioningStyle = Automatic;
+					};
+					AC6C9BE596878D3000D25309 = {
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -191,6 +289,7 @@
 			projectRoot = "";
 			targets = (
 				8DADEBCD00920B0F4C517383 /* Trees */,
+				AC6C9BE596878D3000D25309 /* TreesWatch */,
 			);
 		};
 /* End PBXProject section */
@@ -204,9 +303,31 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		666240D8E6611C3816EFB37C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				13C090D4A9B9E0669F6293AD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		3D7435D3450714AF586E45F7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				BE710E54AA33F84098234D35 /* CaptureView.swift in Sources */,
+				9A72A2BE1D0C430A3F498396 /* CommonSpecies.swift in Sources */,
+				C20E194CF983ABCD3090D17E /* ContentView.swift in Sources */,
+				EADECBFF7F1F068114B6E7BF /* TreesWatchApp.swift in Sources */,
+				AAD62B8B49E30D2F1D3C09CA /* WatchConnectivityManager.swift in Sources */,
+				A871EA6EAF9A758E67D66CE6 /* WatchLocationManager.swift in Sources */,
+				A893E02EB1436CD16F31FC17 /* WatchTree.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AAD22DC8F9B3CFF54F50DD72 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -217,6 +338,7 @@
 				1C04A1E99D1EBC61354CC81D /* Collection.swift in Sources */,
 				6FC5777C8B87E14A7DAF1DA5 /* CollectionDetailView.swift in Sources */,
 				7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */,
+				E8D93E973EEA26E6E0084084 /* CommonSpecies.swift in Sources */,
 				2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */,
 				54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */,
 				CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */,
@@ -231,10 +353,21 @@
 				62F379748862624975606356 /* TreeMapView.swift in Sources */,
 				444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */,
 				3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */,
+				4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */,
+				D4E766862EDBFA98CB8E85D2 /* WatchTree.swift in Sources */,
+				36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		C4EEC8BFF471175C7970DAFE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AC6C9BE596878D3000D25309 /* TreesWatch */;
+			targetProxy = 58C9B45352EB7E90E738C1B8 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		2120070B08B4D46BB31AFF57 /* Debug */ = {
@@ -334,10 +467,10 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.9;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Debug;
 		};
@@ -391,10 +524,44 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.9;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
+		FA2117F279E5F7893EC90386 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3L3ASPMXH9;
+				INFOPLIST_FILE = TreesWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.treetracker.Trees.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
+		FF265EAB45E76DF935D90A85 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 3L3ASPMXH9;
+				INFOPLIST_FILE = TreesWatch/Info.plist;
+				PRODUCT_BUNDLE_IDENTIFIER = com.treetracker.Trees.watchkitapp;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
 			};
 			name = Release;
 		};
@@ -406,6 +573,15 @@
 			buildConfigurations = (
 				2120070B08B4D46BB31AFF57 /* Debug */,
 				46E4FC4EC84456ADC75C0FFB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6EBFEE478FEE5F2E92F4EA86 /* Build configuration list for PBXNativeTarget "TreesWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA2117F279E5F7893EC90386 /* Debug */,
+				FF265EAB45E76DF935D90A85 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

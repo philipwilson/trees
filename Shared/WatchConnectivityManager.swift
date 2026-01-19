@@ -1,0 +1,134 @@
+import Foundation
+import WatchConnectivity
+
+/// Manages Watch Connectivity session between iPhone and Apple Watch
+@Observable
+final class WatchConnectivityManager: NSObject {
+    static let shared = WatchConnectivityManager()
+
+    private(set) var isReachable = false
+    private(set) var isPaired = false
+    private(set) var isWatchAppInstalled = false
+
+    /// Pending trees that failed to send (Watch side only)
+    private(set) var pendingTrees: [WatchTree] = []
+
+    /// Trees received from Watch that need to be imported (iPhone side only)
+    private(set) var receivedTrees: [WatchTree] = []
+
+    /// Callback for when new trees are received (iPhone side)
+    var onTreesReceived: (([WatchTree]) -> Void)?
+
+    private var session: WCSession?
+
+    private override init() {
+        super.init()
+    }
+
+    func activate() {
+        guard WCSession.isSupported() else { return }
+
+        session = WCSession.default
+        session?.delegate = self
+        session?.activate()
+    }
+
+    #if os(watchOS)
+    /// Send a captured tree to the iPhone
+    func sendTree(_ tree: WatchTree) {
+        guard let session = session, session.activationState == .activated else {
+            pendingTrees.append(tree)
+            savePendingTrees()
+            return
+        }
+
+        do {
+            let data = try JSONEncoder().encode(tree)
+            let context: [String: Any] = [
+                "tree": data,
+                "timestamp": Date().timeIntervalSince1970
+            ]
+
+            session.transferUserInfo(context)
+        } catch {
+            pendingTrees.append(tree)
+            savePendingTrees()
+        }
+    }
+
+    /// Retry sending any pending trees
+    func retrySendingPendingTrees() {
+        guard let session = session, session.activationState == .activated else { return }
+
+        let treesToSend = pendingTrees
+        pendingTrees.removeAll()
+
+        for tree in treesToSend {
+            sendTree(tree)
+        }
+    }
+
+    private func savePendingTrees() {
+        guard let data = try? JSONEncoder().encode(pendingTrees) else { return }
+        UserDefaults.standard.set(data, forKey: "pendingWatchTrees")
+    }
+
+    private func loadPendingTrees() {
+        guard let data = UserDefaults.standard.data(forKey: "pendingWatchTrees"),
+              let trees = try? JSONDecoder().decode([WatchTree].self, from: data) else { return }
+        pendingTrees = trees
+    }
+    #endif
+}
+
+extension WatchConnectivityManager: WCSessionDelegate {
+    func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        DispatchQueue.main.async {
+            self.isReachable = session.isReachable
+
+            #if os(iOS)
+            self.isPaired = session.isPaired
+            self.isWatchAppInstalled = session.isWatchAppInstalled
+            #endif
+
+            #if os(watchOS)
+            self.loadPendingTrees()
+            if activationState == .activated && !self.pendingTrees.isEmpty {
+                self.retrySendingPendingTrees()
+            }
+            #endif
+        }
+    }
+
+    func sessionReachabilityDidChange(_ session: WCSession) {
+        DispatchQueue.main.async {
+            self.isReachable = session.isReachable
+
+            #if os(watchOS)
+            if session.isReachable && !self.pendingTrees.isEmpty {
+                self.retrySendingPendingTrees()
+            }
+            #endif
+        }
+    }
+
+    #if os(iOS)
+    func sessionDidBecomeInactive(_ session: WCSession) {}
+
+    func sessionDidDeactivate(_ session: WCSession) {
+        session.activate()
+    }
+    #endif
+
+    func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
+        #if os(iOS)
+        guard let treeData = userInfo["tree"] as? Data,
+              let tree = try? JSONDecoder().decode(WatchTree.self, from: treeData) else { return }
+
+        DispatchQueue.main.async {
+            self.receivedTrees.append(tree)
+            self.onTreesReceived?([tree])
+        }
+        #endif
+    }
+}
