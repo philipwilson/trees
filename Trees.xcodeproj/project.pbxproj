@@ -3,7 +3,7 @@
 	archiveVersion = 1;
 	classes = {
 	};
-	objectVersion = 63;
+	objectVersion = 77;
 	objects = {
 
 /* Begin PBXBuildFile section */
@@ -15,6 +15,7 @@
 		36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */; };
 		3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */; };
 		3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817793E263FCDD0C5A146B35 /* TreesApp.swift */; };
+		402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */; };
 		4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
@@ -23,6 +24,7 @@
 		62F379748862624975606356 /* TreeMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888A735E0810BFF9906BE845 /* TreeMapView.swift */; };
 		6FC5777C8B87E14A7DAF1DA5 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */; };
 		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
+		8B46E9C5FCD41F533D26BAA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 244065D612BAD7C6916CA3C9 /* Assets.xcassets */; };
 		9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */; };
 		999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A5889B04F1AA99705144D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D622F80312FFD765AB887763 /* Assets.xcassets */; };
@@ -30,6 +32,7 @@
 		A871EA6EAF9A758E67D66CE6 /* WatchLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */; };
 		A893E02EB1436CD16F31FC17 /* WatchTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072D15159EDF377B08891E50 /* WatchTree.swift */; };
 		AAD62B8B49E30D2F1D3C09CA /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
+		AF68C3C7818DD2F4CE02D2E4 /* TreesWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA3A92D0DE14A3726217238 /* TreesWatchWidget.swift */; };
 		AF9528309D016F7DB08770FE /* CaptureTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */; };
 		BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F08281F88024D47A957057 /* PhotoGalleryView.swift */; };
 		BE710E54AA33F84098234D35 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2E09E9737924E18950A488 /* CaptureView.swift */; };
@@ -45,6 +48,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4D0F237B5C7843DFD0BC9EE3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 07EFA101B2200D792627E7C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1BBE00E072536409F40D029;
+			remoteInfo = TreesWatchWidget;
+		};
 		58C9B45352EB7E90E738C1B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 07EFA101B2200D792627E7C8 /* Project object */;
@@ -66,12 +76,24 @@
 			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		3BF7545FF3E3130526216FA3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		072D15159EDF377B08891E50 /* WatchTree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTree.swift; sourceTree = "<group>"; };
 		141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchConnectivityManager.swift; sourceTree = "<group>"; };
 		1FE000A01E50BF4C4432D684 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		244065D612BAD7C6916CA3C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2F2E09E9737924E18950A488 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
 		37F08281F88024D47A957057 /* PhotoGalleryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoGalleryView.swift; sourceTree = "<group>"; };
 		3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportView.swift; sourceTree = "<group>"; };
@@ -84,24 +106,27 @@
 		61B8886E85F005476434A363 /* TreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeDetailView.swift; sourceTree = "<group>"; };
 		665D107F0BC118E07EC6BBF4 /* LocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationManager.swift; sourceTree = "<group>"; };
 		6DDE1784DB8250757C69B763 /* CollectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionListView.swift; sourceTree = "<group>"; };
+		76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = TreesWatchWidget.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		817793E263FCDD0C5A146B35 /* TreesApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesApp.swift; sourceTree = "<group>"; };
 		888A735E0810BFF9906BE845 /* TreeMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMapView.swift; sourceTree = "<group>"; };
 		8DC825F3082A2B90559D7B68 /* Tree.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tree.swift; sourceTree = "<group>"; };
 		8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportCollectionView.swift; sourceTree = "<group>"; };
 		90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeRowView.swift; sourceTree = "<group>"; };
 		918FF906634160BF4712F217 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		9AA3A92D0DE14A3726217238 /* TreesWatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchWidget.swift; sourceTree = "<group>"; };
 		9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLocationManager.swift; sourceTree = "<group>"; };
 		9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		9FC480362398E233AA910840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A4082492E29F2EE4E73C6FEB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		BA501EF33874C584E39F8F8F /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		C385534E9EFC669280796C68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		CDA2EF7CEB36CD375AD55865 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchApp.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
 		E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporter.swift; sourceTree = "<group>"; };
 		EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesTextField.swift; sourceTree = "<group>"; };
-		F18511CA3A2E95CB885A2B6D /* Trees.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trees.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		F18511CA3A2E95CB885A2B6D /* Trees.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Trees.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeListView.swift; sourceTree = "<group>"; };
 		FDED0380FA1E9E8362D0D331 /* TreesWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TreesWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -153,6 +178,7 @@
 			children = (
 				F18511CA3A2E95CB885A2B6D /* Trees.app */,
 				FDED0380FA1E9E8362D0D331 /* TreesWatch.app */,
+				76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -177,12 +203,23 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		96FEFD06E15C05D4A31187F3 /* TreesWatchWidget */ = {
+			isa = PBXGroup;
+			children = (
+				244065D612BAD7C6916CA3C9 /* Assets.xcassets */,
+				CDA2EF7CEB36CD375AD55865 /* Info.plist */,
+				9AA3A92D0DE14A3726217238 /* TreesWatchWidget.swift */,
+			);
+			path = TreesWatchWidget;
+			sourceTree = "<group>";
+		};
 		A2071F570F64A0D1EDDC5CFE = {
 			isa = PBXGroup;
 			children = (
 				AF1089306B2B73F3D556A390 /* Shared */,
 				CE9A6E17D0F662A598DA1946 /* Trees */,
 				223E6BCD5EC349BB6EBDC9CA /* TreesWatch */,
+				96FEFD06E15C05D4A31187F3 /* TreesWatchWidget */,
 				708BE62405834D1AA81FCDEB /* Products */,
 			);
 			sourceTree = "<group>";
@@ -249,10 +286,12 @@
 			buildPhases = (
 				3D7435D3450714AF586E45F7 /* Sources */,
 				666240D8E6611C3816EFB37C /* Resources */,
+				3BF7545FF3E3130526216FA3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				47F7B5BA3614FD6222A4376D /* PBXTargetDependency */,
 			);
 			name = TreesWatch;
 			packageProductDependencies = (
@@ -260,6 +299,24 @@
 			productName = TreesWatch;
 			productReference = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */;
 			productType = "com.apple.product-type.application";
+		};
+		D1BBE00E072536409F40D029 /* TreesWatchWidget */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 92F37826E48F589D45A8D65C /* Build configuration list for PBXNativeTarget "TreesWatchWidget" */;
+			buildPhases = (
+				BCEBA1F0F1ED1EEA2198C7FE /* Sources */,
+				E3570EACA86863E8DCFD1A31 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = TreesWatchWidget;
+			packageProductDependencies = (
+			);
+			productName = TreesWatchWidget;
+			productReference = 76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -271,9 +328,15 @@
 				LastUpgradeCheck = 1500;
 				TargetAttributes = {
 					8DADEBCD00920B0F4C517383 = {
+						DevelopmentTeam = 3L3ASPMXH9;
 						ProvisioningStyle = Automatic;
 					};
 					AC6C9BE596878D3000D25309 = {
+						DevelopmentTeam = 3L3ASPMXH9;
+						ProvisioningStyle = Automatic;
+					};
+					D1BBE00E072536409F40D029 = {
+						DevelopmentTeam = 3L3ASPMXH9;
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -288,11 +351,13 @@
 			);
 			mainGroup = A2071F570F64A0D1EDDC5CFE;
 			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
 				8DADEBCD00920B0F4C517383 /* Trees */,
 				AC6C9BE596878D3000D25309 /* TreesWatch */,
+				D1BBE00E072536409F40D029 /* TreesWatchWidget */,
 			);
 		};
 /* End PBXProject section */
@@ -311,6 +376,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				13C090D4A9B9E0669F6293AD /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E3570EACA86863E8DCFD1A31 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8B46E9C5FCD41F533D26BAA2 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -363,9 +436,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		BCEBA1F0F1ED1EEA2198C7FE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF68C3C7818DD2F4CE02D2E4 /* TreesWatchWidget.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		47F7B5BA3614FD6222A4376D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1BBE00E072536409F40D029 /* TreesWatchWidget */;
+			targetProxy = 4D0F237B5C7843DFD0BC9EE3 /* PBXContainerItemProxy */;
+		};
 		C4EEC8BFF471175C7970DAFE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AC6C9BE596878D3000D25309 /* TreesWatch */;
@@ -374,6 +460,25 @@
 /* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
+		1DCF9D8AF6AA10A353D209D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3L3ASPMXH9;
+				INFOPLIST_FILE = TreesWatchWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.treetracker.Trees.watchkitapp.widget;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Debug;
+		};
 		2120070B08B4D46BB31AFF57 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -535,6 +640,25 @@
 			};
 			name = Release;
 		};
+		A9008F68DB38F26CE94E2C3E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3L3ASPMXH9;
+				INFOPLIST_FILE = TreesWatchWidget/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.treetracker.Trees.watchkitapp.widget;
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 11.0;
+			};
+			name = Release;
+		};
 		FA2117F279E5F7893EC90386 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -595,6 +719,15 @@
 			buildConfigurations = (
 				6570ECD99181BBD8378C0A32 /* Debug */,
 				999EE2A5DB965B39AEBFAD14 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		92F37826E48F589D45A8D65C /* Build configuration list for PBXNativeTarget "TreesWatchWidget" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DCF9D8AF6AA10A353D209D1 /* Debug */,
+				A9008F68DB38F26CE94E2C3E /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
