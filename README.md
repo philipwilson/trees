@@ -13,6 +13,7 @@ An iOS app for capturing precise GPS locations of trees. Built for orchardists, 
 - **Export** - Share data in CSV (spreadsheets), JSON (backup/interchange), or GPX (GPS apps).
 - **Import** - Restore collections from JSON exports.
 - **Apple Watch App** - Quick tree capture from your wrist with GPS accuracy display and species selection.
+- **Watch Complication** - Add Tree Tracker to your watch face for one-tap access to capture trees.
 - **Fully Offline** - All data stored locally. No account or internet required.
 
 ## Screenshots
@@ -53,6 +54,8 @@ See [ARCHITECTURE.md](ARCHITECTURE.md) for detailed documentation of the app's s
 - **MapKit** - Map display and annotations
 - **Core Location** - GPS capture with `kCLLocationAccuracyBest`
 - **PhotosUI** - Camera and photo library access
+- **WatchConnectivity** - iPhone ↔ Watch data sync
+- **WidgetKit** - Watch face complications
 
 ## Export Formats
 

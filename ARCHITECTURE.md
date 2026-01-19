@@ -1,10 +1,10 @@
 # Architecture
 
-This document describes the software architecture of the Tree Tracker iOS app.
+This document describes the software architecture of the Tree Tracker iOS and watchOS apps.
 
 ## Overview
 
-Tree Tracker is a SwiftUI app for capturing and managing GPS locations of trees. It follows Apple's modern app development patterns using SwiftUI for the UI layer and SwiftData for persistence.
+Tree Tracker is a SwiftUI app for capturing and managing GPS locations of trees. It follows Apple's modern app development patterns using SwiftUI for the UI layer and SwiftData for persistence. The app includes a watchOS companion app for quick tree capture and a WidgetKit complication for watch face integration.
 
 ```
 ┌─────────────────────────────────────────────────────────────┐
@@ -29,11 +29,13 @@ Tree Tracker is a SwiftUI app for capturing and managing GPS locations of trees.
 
 | Layer | Technology |
 |-------|------------|
-| UI Framework | SwiftUI (iOS 17+) |
+| UI Framework | SwiftUI (iOS 17+, watchOS 11+) |
 | Persistence | SwiftData |
 | Location | Core Location |
 | Maps | MapKit |
 | Photos | PhotosUI, UIImagePickerController |
+| Watch Sync | WatchConnectivity |
+| Complications | WidgetKit |
 | Project Generation | xcodegen |
 
 ## Data Model
@@ -55,6 +57,7 @@ class Tree {
     var rootstock: String?            // e.g., "M111" for grafted trees
     var notes: String
     @Attribute(.externalStorage) var photos: [Data]  // JPEG data
+    var photoDates: [Date]?           // Capture timestamps for each photo
     var collection: Collection?       // Optional grouping
     var createdAt: Date
     var updatedAt: Date
@@ -126,10 +129,11 @@ ContentView (TabView)
 |-----------|---------|
 | `AccuracyBadge` | Color-coded accuracy display (green/yellow/red) |
 | `LiveAccuracyView` | Real-time GPS accuracy during capture |
-| `PhotoGalleryView` | Grid display of photos with fullscreen viewer |
+| `PhotoGalleryView` | Grid display of photos with fullscreen viewer and dates |
 | `EditablePhotoGalleryView` | PhotoGalleryView with delete capability |
 | `PhotosPicker` | Camera/library photo selection |
 | `ImagePicker` | UIImagePickerController wrapper |
+| `SpeciesTextField` | Text field with autocomplete from preset + used species |
 
 ## Services
 
@@ -173,6 +177,131 @@ struct CSVExporter {
 ```
 
 Files are written to the app's cache directory with timestamped filenames.
+
+### WatchConnectivityManager
+
+Shared service (in `Shared/`) handling iPhone ↔ Watch communication via `WCSession`.
+
+```swift
+@Observable
+class WatchConnectivityManager: NSObject, WCSessionDelegate {
+    static let shared = WatchConnectivityManager()
+    var pendingTrees: [WatchTree]  // Queue for offline sync
+
+    func sendTree(_ tree: WatchTree)  // Watch → iPhone
+    func activate()                    // Called on app launch
+}
+```
+
+Uses `transferUserInfo()` for reliable background delivery of captured trees.
+
+### WatchTreeImporter
+
+iOS-only service that converts incoming `WatchTree` objects to SwiftData `Tree` entities.
+
+```swift
+struct WatchTreeImporter {
+    static func importTree(_ watchTree: WatchTree, into context: ModelContext)
+}
+```
+
+Prevents duplicates by checking for existing trees with matching UUID.
+
+## Watch App Architecture
+
+### Overview
+
+The watchOS companion app provides quick tree capture from the wrist. It's a lightweight capture tool—photos and collection assignment happen on iPhone.
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                     TreesWatchApp                           │
+│                    (Watch Entry Point)                      │
+├─────────────────────────────────────────────────────────────┤
+│                        ContentView                          │
+│                  (Capture Button + Status)                  │
+├─────────────────────────────────────────────────────────────┤
+│                       CaptureView                           │
+│          (GPS Accuracy + Species + Notes + Save)            │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                 WatchConnectivityManager                    │
+│           (Sync to iPhone via WCSession)                    │
+└─────────────────────────────────────────────────────────────┘
+```
+
+### WatchTree
+
+Lightweight Codable struct for Watch → iPhone transfer (not a SwiftData model):
+
+```swift
+struct WatchTree: Codable, Identifiable {
+    let id: UUID
+    let latitude: Double
+    let longitude: Double
+    let horizontalAccuracy: Double
+    let altitude: Double?
+    let species: String
+    let notes: String
+    let capturedAt: Date
+}
+```
+
+### Watch Views
+
+| View | Purpose |
+|------|---------|
+| `ContentView` | Large "Capture Tree" button, last capture info, pending sync count |
+| `CaptureView` | GPS capture flow with accuracy ring, species picker, notes |
+| `SpeciesPickerView` | List of 40+ species with search and voice dictation |
+| `AccuracyRingView` | Circular progress showing GPS accuracy status |
+
+### WatchLocationManager
+
+Watch-specific `@Observable` wrapper for `CLLocationManager`:
+
+```swift
+@Observable
+class WatchLocationManager: NSObject, CLLocationManagerDelegate {
+    var currentLocation: CLLocation?
+    var authorizationStatus: CLAuthorizationStatus
+    var isUpdatingLocation: Bool
+    var hasAcceptableAccuracy: Bool  // < 25 meters for Watch
+}
+```
+
+Uses higher accuracy threshold (25m vs 20m on iPhone) to account for Watch GPS limitations.
+
+## Watch Complication
+
+WidgetKit-based complication for quick app launch from watch face.
+
+### Supported Families
+
+| Family | Appearance |
+|--------|------------|
+| `accessoryCircular` | Tree icon on circular background |
+| `accessoryCorner` | Tree icon with "Capture" label |
+| `accessoryRectangular` | Tree icon with "Tree Tracker" title |
+| `accessoryInline` | "Capture Tree" text with icon |
+
+### Implementation
+
+Uses `StaticConfiguration` (no dynamic data needed—purely a launch button):
+
+```swift
+@main
+struct TreesWatchWidget: Widget {
+    var body: some WidgetConfiguration {
+        StaticConfiguration(kind: "TreesWatchWidget", provider: Provider()) { entry in
+            TreesWatchWidgetEntryView(entry: entry)
+        }
+        .supportedFamilies([.accessoryCircular, .accessoryCorner, ...])
+    }
+}
+```
 
 ## Data Flow
 
@@ -236,13 +365,14 @@ Persisted via `@AppStorage` (UserDefaults):
 ## File Structure
 
 ```
-Trees/
+Trees/                              # iOS App
 ├── TreesApp.swift                 # App entry, ModelContainer setup
 ├── Models/
 │   ├── Tree.swift                 # Tree entity + computed properties
 │   └── Collection.swift           # Collection entity
 ├── Services/
 │   ├── LocationManager.swift      # Core Location wrapper
+│   ├── WatchTreeImporter.swift    # Convert WatchTree → Tree
 │   └── Exporters/
 │       ├── CSVExporter.swift
 │       ├── JSONExporter.swift
@@ -261,10 +391,25 @@ Trees/
 │   └── Components/
 │       ├── AccuracyBadge.swift
 │       ├── ImagePicker.swift
-│       └── PhotoGalleryView.swift
+│       ├── PhotoGalleryView.swift
+│       └── SpeciesTextField.swift
 └── Assets.xcassets/
-    ├── AppIcon.appiconset/
-    └── AccentColor.colorset/
+
+Shared/                             # Shared between iOS and watchOS
+├── WatchConnectivityManager.swift  # WCSession wrapper
+├── WatchTree.swift                 # Codable transfer struct
+└── CommonSpecies.swift             # Preset species list (40+)
+
+TreesWatch/                         # watchOS App
+├── TreesWatchApp.swift             # Watch app entry
+├── ContentView.swift               # Main view with capture button
+├── CaptureView.swift               # GPS capture flow
+├── WatchLocationManager.swift      # Watch-specific location manager
+└── Assets.xcassets/
+
+TreesWatchWidget/                   # Watch Complication
+├── TreesWatchWidget.swift          # Widget configuration + views
+└── Assets.xcassets/
 ```
 
 ## Design Decisions

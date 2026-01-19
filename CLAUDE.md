@@ -48,6 +48,18 @@ Companion watchOS app for quick tree capture from the wrist.
 - Pending trees queued locally if iPhone unreachable, retried on reconnection
 - Duplicates prevented by matching on tree UUID
 
+### Watch Complication (TreesWatchWidget/)
+WidgetKit-based complication for quick app launch from watch face.
+
+**Supported Families:**
+- `accessoryCircular` - Tree icon on circular background
+- `accessoryCorner` - Tree icon with "Capture" label
+- `accessoryRectangular` - Tree icon with "Tree Tracker" text
+- `accessoryInline` - "Capture Tree" text with icon
+
+**Files:**
+- `TreesWatchWidget.swift` - Widget configuration and entry views
+
 ### View Hierarchy
 - **ContentView**: TabView with Trees, Collections, and Map tabs
 - **TreeListView**: @Query fetches trees, search filters by species/variety/notes, triggers CaptureTreeView and ExportView
