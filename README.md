@@ -6,11 +6,13 @@ An iOS app for capturing precise GPS locations of trees. Built for orchardists, 
 
 - **Precise GPS Capture** - Uses maximum iOS location accuracy with real-time accuracy display. Wait for a good signal before saving.
 - **Tree Details** - Record species, variety, rootstock, and notes for each tree.
-- **Photo Attachments** - Capture photos from camera or library to help identify trees later.
+- **Species Autocomplete** - Suggestions combine preset species with previously-used species from your database.
+- **Photo Attachments** - Capture photos with automatic date stamps. View dates in gallery and detail views.
 - **Collections** - Organize trees into named groups (e.g., "Victoria's Orchard", "Street Trees Survey").
 - **Map View** - See all trees on an interactive map with toggleable species/variety labels.
 - **Export** - Share data in CSV (spreadsheets), JSON (backup/interchange), or GPX (GPS apps).
 - **Import** - Restore collections from JSON exports.
+- **Apple Watch App** - Quick tree capture from your wrist with GPS accuracy display and species selection.
 - **Fully Offline** - All data stored locally. No account or internet required.
 
 ## Screenshots
@@ -19,9 +21,9 @@ An iOS app for capturing precise GPS locations of trees. Built for orchardists, 
 
 ## Requirements
 
-- iOS 17.0+
-- Xcode 15.0+
-- iPhone with GPS
+- iOS 17.0+ / watchOS 11.0+
+- Xcode 16.0+
+- iPhone with GPS (Apple Watch optional)
 
 ## Building
 

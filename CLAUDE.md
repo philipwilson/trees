@@ -8,8 +8,11 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 # Regenerate Xcode project from project.yml (after modifying project.yml)
 xcodegen generate
 
-# Build for simulator
+# Build iOS app for simulator
 xcodebuild -project Trees.xcodeproj -scheme Trees -destination 'platform=iOS Simulator,name=iPhone 17' build
+
+# Build Watch app for simulator
+xcodebuild -project Trees.xcodeproj -scheme TreesWatch -destination 'platform=watchOS Simulator,name=Apple Watch Ultra 3 (49mm)' build
 
 # Build for physical device (requires signing configured in Xcode)
 xcodebuild -project Trees.xcodeproj -scheme Trees -destination 'generic/platform=iOS' build
@@ -24,13 +27,26 @@ open Trees.xcodeproj
 
 ## Architecture
 
-iOS app using SwiftUI + SwiftData (iOS 17+). Project generated via xcodegen from `project.yml`.
+iOS app using SwiftUI + SwiftData (iOS 17+) with watchOS companion app (watchOS 11+). Project generated via xcodegen from `project.yml`.
 
 ### Data Flow
-- **Tree** (@Model): SwiftData entity storing GPS coordinates, accuracy, species, variety, rootstock, notes, photos (JPEG Data with external storage), and optional Collection relationship
+- **Tree** (@Model): SwiftData entity storing GPS coordinates, accuracy, species, variety, rootstock, notes, photos (JPEG Data with external storage), photoDates (optional array for capture timestamps), and optional Collection relationship
 - **Collection** (@Model): Named group of trees with one-to-many relationship (deleteRule: nullify)
 - **LocationManager** (@Observable): Wraps CLLocationManager with `kCLLocationAccuracyBest` for precise GPS capture
-- **SwiftData ModelContainer**: Configured in TreesApp.swift for both Tree and Collection models
+- **SwiftData ModelContainer**: Configured in TreesApp.swift for Tree and Collection models
+
+### Watch App (TreesWatch/)
+Companion watchOS app for quick tree capture from the wrist.
+
+**Data Flow:**
+- **WatchTree** (Codable struct in `Shared/`): Lightweight transfer object for Watch→iPhone sync
+- **WatchConnectivityManager** (@Observable in `Shared/`): WCSession wrapper handling bidirectional sync
+- **WatchTreeImporter** (iOS only): Converts WatchTree to SwiftData Tree entity
+
+**Sync Behavior:**
+- Trees sent via `WCSession.transferUserInfo()` for reliable background delivery
+- Pending trees queued locally if iPhone unreachable, retried on reconnection
+- Duplicates prevented by matching on tree UUID
 
 ### View Hierarchy
 - **ContentView**: TabView with Trees, Collections, and Map tabs
@@ -52,4 +68,5 @@ Import via **ImportCollectionView**: parses JSON exports into new or existing co
 ### UI Components
 - **AccuracyBadge**: Color-coded accuracy display (green < 5m, yellow < 15m, red > 15m)
 - **ImagePicker**: UIImagePickerController wrapper for camera/library
-- **PhotoGalleryView**: Grid display with fullscreen viewer
+- **PhotoGalleryView**: Grid display with fullscreen viewer, shows photo dates when available
+- **SpeciesTextField**: Text field with autocomplete suggestions from preset species + previously-used species
