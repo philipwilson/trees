@@ -13,6 +13,9 @@ class Tree {
     var rootstock: String?
     var notes: String
     @Attribute(.externalStorage) var photos: [Data]
+    /// Capture dates for each photo (parallel array to photos)
+    /// Optional for backward compatibility with existing trees
+    var photoDates: [Date]?
     var collection: Collection?
     var createdAt: Date
     var updatedAt: Date
@@ -28,6 +31,7 @@ class Tree {
         rootstock: String? = nil,
         notes: String = "",
         photos: [Data] = [],
+        photoDates: [Date]? = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -41,6 +45,7 @@ class Tree {
         self.rootstock = rootstock
         self.notes = notes
         self.photos = photos
+        self.photoDates = photoDates
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -57,5 +62,36 @@ extension Tree {
 
     var formattedDate: String {
         createdAt.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    /// Gets the capture date for a photo at the given index
+    /// Returns nil if no date is available (legacy photos)
+    func photoDate(at index: Int) -> Date? {
+        guard let dates = photoDates, index < dates.count else { return nil }
+        return dates[index]
+    }
+
+    /// Formatted date string for a photo at the given index
+    func formattedPhotoDate(at index: Int) -> String? {
+        guard let date = photoDate(at: index) else { return nil }
+        return date.formatted(date: .abbreviated, time: .shortened)
+    }
+
+    /// Adds a photo with its capture date
+    func addPhoto(_ data: Data, capturedAt: Date = Date()) {
+        photos.append(data)
+        if photoDates == nil {
+            photoDates = []
+        }
+        photoDates?.append(capturedAt)
+    }
+
+    /// Removes a photo and its date at the given index
+    func removePhoto(at index: Int) {
+        guard index < photos.count else { return }
+        photos.remove(at: index)
+        if let dates = photoDates, index < dates.count {
+            photoDates?.remove(at: index)
+        }
     }
 }

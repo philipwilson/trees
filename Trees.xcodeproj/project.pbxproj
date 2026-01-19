@@ -41,6 +41,7 @@
 		E8D93E973EEA26E6E0084084 /* CommonSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */; };
 		EADECBFF7F1F068114B6E7BF /* TreesWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */; };
 		F0ECD25D6291205F476B22B1 /* CSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56120BD39256244311587662 /* CSVExporter.swift */; };
+		FC486FA60042D4A57696DA06 /* SpeciesTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -99,6 +100,7 @@
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
 		E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporter.swift; sourceTree = "<group>"; };
+		EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesTextField.swift; sourceTree = "<group>"; };
 		F18511CA3A2E95CB885A2B6D /* Trees.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Trees.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeListView.swift; sourceTree = "<group>"; };
 		FDED0380FA1E9E8362D0D331 /* TreesWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TreesWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -161,6 +163,7 @@
 				E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */,
 				BA501EF33874C584E39F8F8F /* ImagePicker.swift */,
 				37F08281F88024D47A957057 /* PhotoGalleryView.swift */,
+				EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -347,6 +350,7 @@
 				0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */,
 				E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */,
 				BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */,
+				FC486FA60042D4A57696DA06 /* SpeciesTextField.swift in Sources */,
 				6267E5503C16DEB9E26388B3 /* Tree.swift in Sources */,
 				4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */,
 				01DD1BC657317FC4E0A59126 /* TreeListView.swift in Sources */,

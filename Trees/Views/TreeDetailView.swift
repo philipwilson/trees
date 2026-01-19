@@ -53,7 +53,7 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
-                    TextField("Species", text: $tree.species)
+                    SpeciesTextField(text: $tree.species)
                     TextField("Variety", text: Binding(
                         get: { tree.variety ?? "" },
                         set: { tree.variety = $0.isEmpty ? nil : $0 }
@@ -112,10 +112,10 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
-                    EditablePhotoGalleryView(photos: $tree.photos)
-                    PhotosPicker(selectedPhotos: $tree.photos)
+                    EditablePhotoGalleryView(photos: $tree.photos, photoDates: $tree.photoDates)
+                    PhotosPicker(selectedPhotos: $tree.photos, photoDates: $tree.photoDates)
                 } else {
-                    PhotoGalleryView(photos: tree.photos)
+                    PhotoGalleryView(photos: tree.photos, photoDates: tree.photoDates)
                 }
             } header: {
                 Text("Photos (\(tree.photos.count))")

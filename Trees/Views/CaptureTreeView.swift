@@ -16,6 +16,7 @@ struct CaptureTreeView: View {
     @State private var rootstock = ""
     @State private var notes = ""
     @State private var photos: [Data] = []
+    @State private var photoDates: [Date]? = []
     @State private var capturedLocation: CLLocation?
     @State private var showingPermissionAlert = false
     @State private var selectedCollection: Collection?
@@ -67,7 +68,7 @@ struct CaptureTreeView: View {
                 }
 
                 Section {
-                    TextField("Species", text: $species)
+                    SpeciesTextField(text: $species)
                     TextField("Variety (optional)", text: $variety)
                     TextField("Rootstock (optional)", text: $rootstock)
                     TextField("Notes", text: $notes, axis: .vertical)
@@ -91,9 +92,9 @@ struct CaptureTreeView: View {
 
                 Section {
                     if !photos.isEmpty {
-                        EditablePhotoGalleryView(photos: $photos)
+                        EditablePhotoGalleryView(photos: $photos, photoDates: $photoDates)
                     }
-                    PhotosPicker(selectedPhotos: $photos)
+                    PhotosPicker(selectedPhotos: $photos, photoDates: $photoDates)
                 } header: {
                     Text("Photos")
                 } footer: {
@@ -181,7 +182,8 @@ struct CaptureTreeView: View {
             variety: trimmedVariety.isEmpty ? nil : trimmedVariety,
             rootstock: trimmedRootstock.isEmpty ? nil : trimmedRootstock,
             notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
-            photos: photos
+            photos: photos,
+            photoDates: photoDates
         )
 
         tree.collection = selectedCollection
