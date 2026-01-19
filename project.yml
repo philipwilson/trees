@@ -57,6 +57,7 @@ targets:
         DEVELOPMENT_TEAM: ""
     dependencies:
       - target: TreesWatch
+        embed: true
 
   TreesWatch:
     type: application
