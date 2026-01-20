@@ -22,6 +22,10 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Tree Tracker needs your location to record GPS coordinates of trees.</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>Tree Tracker uses the microphone for voice dictation of species names.</string>
+	<key>NSSpeechRecognitionUsageDescription</key>
+	<string>Tree Tracker uses speech recognition to convert your voice to text for species names.</string>
 	<key>WKApplication</key>
 	<true/>
 	<key>WKCompanionAppBundleIdentifier</key>
