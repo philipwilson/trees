@@ -177,7 +177,7 @@ struct SpeciesPickerView: View {
     @Environment(\.dismiss) private var dismiss
     @Binding var selectedSpecies: String
     @State private var searchText = ""
-    @State private var showingDictation = false
+    @State private var dictatedSpecies = ""
 
     private var filteredSpecies: [String] {
         if searchText.isEmpty {
@@ -189,49 +189,62 @@ struct SpeciesPickerView: View {
     var body: some View {
         NavigationStack {
             List {
-                // Dictate button at top
-                Button {
-                    showingDictation = true
-                } label: {
-                    HStack {
-                        Image(systemName: "mic.fill")
-                            .foregroundStyle(.green)
-                        Text("Dictate Species")
-                        Spacer()
-                    }
-                }
+                // Dictation section at top
+                Section {
+                    TextField("Dictate or type species", text: $dictatedSpecies)
 
-                if !searchText.isEmpty && !filteredSpecies.contains(where: { $0.lowercased() == searchText.lowercased() }) {
-                    Button {
-                        selectedSpecies = searchText
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Text("Use \"\(searchText)\"")
-                            Spacer()
-                            Image(systemName: "plus.circle.fill")
-                                .foregroundStyle(.green)
+                    if !dictatedSpecies.isEmpty {
+                        Button {
+                            let formatted = dictatedSpecies.prefix(1).uppercased() + dictatedSpecies.dropFirst().lowercased()
+                            selectedSpecies = formatted
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Text("Use \"\(dictatedSpecies)\"")
+                                Spacer()
+                                Image(systemName: "checkmark.circle.fill")
+                                    .foregroundStyle(.green)
+                            }
                         }
                     }
+                } header: {
+                    Label("Voice Input", systemImage: "mic.fill")
                 }
 
-                ForEach(filteredSpecies, id: \.self) { species in
-                    Button {
-                        selectedSpecies = species
-                        dismiss()
-                    } label: {
-                        HStack {
-                            Text(species)
-                            Spacer()
-                            if species == selectedSpecies {
-                                Image(systemName: "checkmark")
+                // Common species section
+                Section("Common Species") {
+                    if !searchText.isEmpty && !filteredSpecies.contains(where: { $0.lowercased() == searchText.lowercased() }) {
+                        Button {
+                            selectedSpecies = searchText
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Text("Use \"\(searchText)\"")
+                                Spacer()
+                                Image(systemName: "plus.circle.fill")
                                     .foregroundStyle(.green)
+                            }
+                        }
+                    }
+
+                    ForEach(filteredSpecies, id: \.self) { species in
+                        Button {
+                            selectedSpecies = species
+                            dismiss()
+                        } label: {
+                            HStack {
+                                Text(species)
+                                Spacer()
+                                if species == selectedSpecies {
+                                    Image(systemName: "checkmark")
+                                        .foregroundStyle(.green)
+                                }
                             }
                         }
                     }
                 }
             }
-            .searchable(text: $searchText, prompt: "Search")
+            .searchable(text: $searchText, prompt: "Filter list")
             .navigationTitle("Species")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -241,47 +254,7 @@ struct SpeciesPickerView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingDictation) {
-                DictationView { dictatedText in
-                    if !dictatedText.isEmpty {
-                        // Capitalize first letter
-                        let formatted = dictatedText.prefix(1).uppercased() + dictatedText.dropFirst().lowercased()
-                        selectedSpecies = formatted
-                        dismiss()
-                    }
-                }
-            }
         }
-    }
-}
-
-struct DictationView: View {
-    @Environment(\.dismiss) private var dismiss
-    @State private var dictatedText = ""
-    var onComplete: (String) -> Void
-
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Say the species name")
-                .font(.headline)
-
-            TextField("Species", text: $dictatedText)
-                .multilineTextAlignment(.center)
-
-            HStack {
-                Button("Cancel") {
-                    dismiss()
-                }
-                .foregroundStyle(.secondary)
-
-                Button("Done") {
-                    onComplete(dictatedText)
-                }
-                .fontWeight(.semibold)
-                .disabled(dictatedText.isEmpty)
-            }
-        }
-        .padding()
     }
 }
 
