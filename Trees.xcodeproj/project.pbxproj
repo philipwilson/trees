@@ -15,6 +15,7 @@
 		36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */; };
 		3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */; };
 		3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817793E263FCDD0C5A146B35 /* TreesApp.swift */; };
+		402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */; };
 		4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
@@ -47,6 +48,13 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		4D0F237B5C7843DFD0BC9EE3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 07EFA101B2200D792627E7C8 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = D1BBE00E072536409F40D029;
+			remoteInfo = TreesWatchWidget;
+		};
 		58C9B45352EB7E90E738C1B8 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 07EFA101B2200D792627E7C8 /* Project object */;
@@ -66,6 +74,17 @@
 				999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */,
 			);
 			name = "Embed Watch Content";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3BF7545FF3E3130526216FA3 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -267,10 +286,12 @@
 			buildPhases = (
 				3D7435D3450714AF586E45F7 /* Sources */,
 				666240D8E6611C3816EFB37C /* Resources */,
+				3BF7545FF3E3130526216FA3 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				47F7B5BA3614FD6222A4376D /* PBXTargetDependency */,
 			);
 			name = TreesWatch;
 			packageProductDependencies = (
@@ -426,6 +447,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		47F7B5BA3614FD6222A4376D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = D1BBE00E072536409F40D029 /* TreesWatchWidget */;
+			targetProxy = 4D0F237B5C7843DFD0BC9EE3 /* PBXContainerItemProxy */;
+		};
 		C4EEC8BFF471175C7970DAFE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = AC6C9BE596878D3000D25309 /* TreesWatch */;

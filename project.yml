@@ -95,9 +95,9 @@ targets:
         WATCHOS_DEPLOYMENT_TARGET: "11.0"
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
-    # dependencies:
-    #   - target: TreesWatchWidget
-    #     embed: true
+    dependencies:
+      - target: TreesWatchWidget
+        embed: true
 
   TreesWatchWidget:
     type: app-extension
