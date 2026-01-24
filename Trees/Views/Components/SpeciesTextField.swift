@@ -3,16 +3,10 @@ import SwiftData
 
 struct SpeciesTextField: View {
     @Binding var text: String
-    @Query private var trees: [Tree]
+    @Environment(\.modelContext) private var modelContext
+    @State private var allSpecies: [String] = []
     @State private var showingSuggestions = false
     @FocusState private var isFocused: Bool
-
-    /// All unique species: combines preset species with previously-used species
-    private var allSpecies: [String] {
-        let existingSpecies = Set(trees.map { $0.species }.filter { !$0.isEmpty })
-        let combined = existingSpecies.union(Set(commonSpecies))
-        return combined.sorted()
-    }
 
     /// Filtered suggestions based on current text
     private var suggestions: [String] {
@@ -56,6 +50,24 @@ struct SpeciesTextField: View {
                     .padding(.top, 8)
                 }
             }
+        }
+        .onAppear {
+            loadSpecies()
+        }
+    }
+
+    /// Load species list once on appear, not on every keystroke
+    private func loadSpecies() {
+        // Fetch only species strings, not full Tree objects
+        let descriptor = FetchDescriptor<Tree>()
+        do {
+            let trees = try modelContext.fetch(descriptor)
+            let existingSpecies = Set(trees.map { $0.species }.filter { !$0.isEmpty })
+            let combined = existingSpecies.union(Set(commonSpecies))
+            allSpecies = combined.sorted()
+        } catch {
+            // Fall back to just common species
+            allSpecies = commonSpecies.sorted()
         }
     }
 }

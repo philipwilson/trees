@@ -10,6 +10,15 @@ struct TreeDetailView: View {
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
 
+    // Local editing state - only synced to tree on save
+    @State private var editSpecies = ""
+    @State private var editVariety = ""
+    @State private var editRootstock = ""
+    @State private var editNotes = ""
+    @State private var editCollection: Collection?
+    @State private var editPhotos: [Data] = []
+    @State private var editPhotoDates: [Date]? = []
+
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: tree.latitude, longitude: tree.longitude)
     }
@@ -53,16 +62,10 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
-                    SpeciesTextField(text: $tree.species)
-                    TextField("Variety", text: Binding(
-                        get: { tree.variety ?? "" },
-                        set: { tree.variety = $0.isEmpty ? nil : $0 }
-                    ))
-                    TextField("Rootstock", text: Binding(
-                        get: { tree.rootstock ?? "" },
-                        set: { tree.rootstock = $0.isEmpty ? nil : $0 }
-                    ))
-                    TextField("Notes", text: $tree.notes, axis: .vertical)
+                    SpeciesTextField(text: $editSpecies)
+                    TextField("Variety", text: $editVariety)
+                    TextField("Rootstock", text: $editRootstock)
+                    TextField("Notes", text: $editNotes, axis: .vertical)
                         .lineLimit(3...10)
                 } else {
                     LabeledContent("Species") {
@@ -94,7 +97,7 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
-                    Picker("Collection", selection: $tree.collection) {
+                    Picker("Collection", selection: $editCollection) {
                         Text("None").tag(nil as Collection?)
                         ForEach(collections) { collection in
                             Text(collection.name).tag(collection as Collection?)
@@ -112,13 +115,13 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
-                    EditablePhotoGalleryView(photos: $tree.photos, photoDates: $tree.photoDates)
-                    PhotosPicker(selectedPhotos: $tree.photos, photoDates: $tree.photoDates)
+                    EditablePhotoGalleryView(photos: $editPhotos, photoDates: $editPhotoDates)
+                    PhotosPicker(selectedPhotos: $editPhotos, photoDates: $editPhotoDates)
                 } else {
                     PhotoGalleryView(photos: tree.photos, photoDates: tree.photoDates)
                 }
             } header: {
-                Text("Photos (\(tree.photos.count))")
+                Text("Photos (\(isEditing ? editPhotos.count : tree.photos.count))")
             }
 
             Section {
@@ -152,7 +155,11 @@ struct TreeDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(isEditing ? "Done" : "Edit") {
                     if isEditing {
-                        tree.updatedAt = Date()
+                        // Save local state back to tree
+                        saveEdits()
+                    } else {
+                        // Load tree data into local state
+                        loadEditState()
                     }
                     isEditing.toggle()
                 }
@@ -167,6 +174,27 @@ struct TreeDetailView: View {
         } message: {
             Text("This action cannot be undone.")
         }
+    }
+
+    private func loadEditState() {
+        editSpecies = tree.species
+        editVariety = tree.variety ?? ""
+        editRootstock = tree.rootstock ?? ""
+        editNotes = tree.notes
+        editCollection = tree.collection
+        editPhotos = tree.photos
+        editPhotoDates = tree.photoDates
+    }
+
+    private func saveEdits() {
+        tree.species = editSpecies
+        tree.variety = editVariety.isEmpty ? nil : editVariety
+        tree.rootstock = editRootstock.isEmpty ? nil : editRootstock
+        tree.notes = editNotes
+        tree.collection = editCollection
+        tree.photos = editPhotos
+        tree.photoDates = editPhotoDates
+        tree.updatedAt = Date()
     }
 }
 
