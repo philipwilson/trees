@@ -97,6 +97,8 @@ struct CollectionRowView: View {
             }
         }
         .padding(.vertical, 4)
+        .contentShape(Rectangle())
+        .hoverEffect(.highlight)
     }
 }
 

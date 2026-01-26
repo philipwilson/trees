@@ -4,12 +4,14 @@ struct PhotoGalleryView: View {
     let photos: [Data]
     var photoDates: [Date]? = nil
     @State private var selectedPhotoIndex: Int?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var dates: [Date] { photoDates ?? [] }
 
-    private let columns = [
-        GridItem(.adaptive(minimum: 100), spacing: 8)
-    ]
+    private var columns: [GridItem] {
+        let count = horizontalSizeClass == .regular ? 5 : 3
+        return Array(repeating: GridItem(.flexible(), spacing: 8), count: count)
+    }
 
     var body: some View {
         if photos.isEmpty {
@@ -115,12 +117,14 @@ struct PhotoDetailView: View {
 struct EditablePhotoGalleryView: View {
     @Binding var photos: [Data]
     @Binding var photoDates: [Date]?
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var dates: [Date] { photoDates ?? [] }
 
-    private let columns = [
-        GridItem(.adaptive(minimum: 80), spacing: 8)
-    ]
+    private var columns: [GridItem] {
+        let count = horizontalSizeClass == .regular ? 6 : 4
+        return Array(repeating: GridItem(.flexible(), spacing: 8), count: count)
+    }
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {

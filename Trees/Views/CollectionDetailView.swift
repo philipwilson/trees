@@ -13,6 +13,9 @@ struct CollectionDetailView: View {
     @State private var showingDeleteConfirmation = false
     @State private var showingCaptureSheet = false
 
+    // Local editing state to avoid lag from SwiftData updates on every keystroke
+    @State private var editName = ""
+
     private var unassignedTrees: [Tree] {
         allTrees.filter { $0.collection == nil }
     }
@@ -21,7 +24,7 @@ struct CollectionDetailView: View {
         List {
             Section {
                 if isEditing {
-                    TextField("Collection Name", text: $collection.name)
+                    TextField("Collection Name", text: $editName)
                 } else {
                     LabeledContent("Name") {
                         Text(collection.name)
@@ -106,10 +109,15 @@ struct CollectionDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Menu {
                     Button {
-                        isEditing.toggle()
-                        if !isEditing {
+                        if isEditing {
+                            // Save local state back to collection
+                            collection.name = editName
                             collection.updatedAt = Date()
+                        } else {
+                            // Load collection data into local state
+                            editName = collection.name
                         }
+                        isEditing.toggle()
                     } label: {
                         Label(isEditing ? "Done Editing" : "Edit", systemImage: "pencil")
                     }

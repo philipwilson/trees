@@ -1,6 +1,18 @@
 import SwiftUI
 
 struct ContentView: View {
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+
+    var body: some View {
+        if horizontalSizeClass == .regular {
+            iPadContentView()
+        } else {
+            iPhoneContentView()
+        }
+    }
+}
+
+struct iPhoneContentView: View {
     @State private var selectedTab = 0
 
     var body: some View {

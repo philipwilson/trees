@@ -82,3 +82,48 @@ Import via **ImportCollectionView**: parses JSON exports into new or existing co
 - **ImagePicker**: UIImagePickerController wrapper for camera/library
 - **PhotoGalleryView**: Grid display with fullscreen viewer, shows photo dates when available
 - **SpeciesTextField**: Text field with autocomplete suggestions from preset species + previously-used species
+
+### iPad Support (Trees/Views/iPad/)
+Adaptive layout using `horizontalSizeClass` environment value:
+- **iPhone (compact)**: TabView with Trees, Collections, Map tabs
+- **iPad (regular)**: NavigationSplitView with sidebar, list, and detail columns
+
+**iPad-specific views:**
+- `iPadContentView` - Main split view layout with keyboard shortcuts (⌘N, ⌘E, ⌘1/2/3)
+- `iPadSidebarView` - Sidebar navigation with badge counts
+- `iPadTreeListView` / `iPadCollectionListView` - Selection-bound lists with context menus
+- `iPadMapView` - Full-width map with collapsible floating tree list panel
+
+## iCloud Sync (Currently Disabled)
+
+iCloud sync via CloudKit is implemented but disabled pending Apple Developer Program enrollment approval.
+
+### To Enable iCloud Sync
+
+Once your Apple Developer Program enrollment is approved:
+
+**1. Update `Trees/TreesApp.swift` (line 9):**
+```swift
+private static let enableCloudKit = true  // change false → true
+```
+
+**2. Update `project.yml` (around line 58) - uncomment the entitlements line:**
+```yaml
+CODE_SIGN_ENTITLEMENTS: Trees/Trees.entitlements
+```
+
+**3. Regenerate and rebuild:**
+```bash
+xcodegen generate
+xcodebuild -project Trees.xcodeproj -scheme Trees -destination 'generic/platform=iOS' build
+```
+
+**4. Refresh your Apple ID in Xcode if needed:**
+- Xcode → Settings → Accounts → Select Apple ID → Click refresh (↻)
+
+### How iCloud Sync Works
+- Uses SwiftData with CloudKit private database
+- Container: `iCloud.com.treetracker.Trees`
+- Syncs Trees and Collections automatically between devices
+- Photos sync via external storage attribute
+- Requires user to be signed into iCloud on all devices

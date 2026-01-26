@@ -5,9 +5,24 @@ import SwiftData
 struct TreesApp: App {
     let modelContainer: ModelContainer
 
+    // Set to true once Apple Developer Program enrollment is approved
+    private static let enableCloudKit = false
+
     init() {
         do {
-            modelContainer = try ModelContainer(for: Tree.self, Collection.self)
+            let schema = Schema([Tree.self, Collection.self])
+            let configuration: ModelConfiguration
+
+            if Self.enableCloudKit {
+                configuration = ModelConfiguration(
+                    schema: schema,
+                    cloudKitDatabase: .private("iCloud.com.treetracker.Trees")
+                )
+            } else {
+                configuration = ModelConfiguration(schema: schema)
+            }
+
+            modelContainer = try ModelContainer(for: schema, configurations: [configuration])
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")
         }
