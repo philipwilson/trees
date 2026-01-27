@@ -11,7 +11,9 @@ struct CSVExporter {
             let speciesEscaped = escapeCSV(tree.species)
             let varietyEscaped = escapeCSV(tree.variety ?? "")
             let rootstockEscaped = escapeCSV(tree.rootstock ?? "")
-            let notesEscaped = escapeCSV(tree.notes)
+            // Combine all notes into a single string for CSV export
+            let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
+            let notesEscaped = escapeCSV(allNotesText)
 
             let row = [
                 tree.id.uuidString,

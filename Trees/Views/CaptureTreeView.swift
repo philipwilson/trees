@@ -14,9 +14,9 @@ struct CaptureTreeView: View {
     @State private var species = ""
     @State private var variety = ""
     @State private var rootstock = ""
-    @State private var notes = ""
+    @State private var initialNote = ""
     @State private var photos: [Data] = []
-    @State private var photoDates: [Date]? = []
+    @State private var photoDates: [Date?] = []
     @State private var capturedLocation: CLLocation?
     @State private var showingPermissionAlert = false
     @State private var selectedCollection: Collection?
@@ -71,8 +71,6 @@ struct CaptureTreeView: View {
                     SpeciesTextField(text: $species)
                     TextField("Variety (optional)", text: $variety)
                     TextField("Rootstock (optional)", text: $rootstock)
-                    TextField("Notes", text: $notes, axis: .vertical)
-                        .lineLimit(3...6)
                 } header: {
                     Text("Details")
                 }
@@ -88,6 +86,13 @@ struct CaptureTreeView: View {
                     Text("Collection")
                 } footer: {
                     Text("Optionally add this tree to a collection")
+                }
+
+                Section {
+                    TextField("Initial notes (optional)", text: $initialNote, axis: .vertical)
+                        .lineLimit(3...6)
+                } header: {
+                    Text("Notes")
                 }
 
                 Section {
@@ -172,6 +177,7 @@ struct CaptureTreeView: View {
 
         let trimmedVariety = variety.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedRootstock = rootstock.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedNote = initialNote.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let tree = Tree(
             latitude: location.coordinate.latitude,
@@ -180,20 +186,29 @@ struct CaptureTreeView: View {
             altitude: location.altitude,
             species: species.trimmingCharacters(in: .whitespacesAndNewlines),
             variety: trimmedVariety.isEmpty ? nil : trimmedVariety,
-            rootstock: trimmedRootstock.isEmpty ? nil : trimmedRootstock,
-            notes: notes.trimmingCharacters(in: .whitespacesAndNewlines),
-            photos: photos,
-            photoDates: photoDates
+            rootstock: trimmedRootstock.isEmpty ? nil : trimmedRootstock
         )
 
         tree.collection = selectedCollection
         lastUsedCollectionID = selectedCollection?.id.uuidString
         modelContext.insert(tree)
+
+        // Add photos as Photo entities
+        for (index, photoData) in photos.enumerated() {
+            let captureDate = index < photoDates.count ? photoDates[index] : Date()
+            tree.addPhoto(photoData, capturedAt: captureDate)
+        }
+
+        // Add initial note if provided
+        if !trimmedNote.isEmpty {
+            _ = tree.addNote(text: trimmedNote)
+        }
+
         dismiss()
     }
 }
 
 #Preview {
     CaptureTreeView()
-        .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
+        .modelContainer(for: [Tree.self, Collection.self, Photo.self, Note.self], inMemory: true)
 }

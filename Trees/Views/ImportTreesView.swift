@@ -2,52 +2,51 @@ import SwiftUI
 import SwiftData
 import UniformTypeIdentifiers
 
-struct ImportCollectionView: View {
+struct ImportTreesView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Collection.name) private var collections: [Collection]
 
     @State private var showingFilePicker = false
-    @State private var collectionName = ""
-    @State private var selectedCollection: Collection?
-    @State private var createNewCollection = true
     @State private var importResult: ImportResult?
     @State private var showingResult = false
+    @State private var photoImportMode: PhotoImportMode = .withDelay
+
+    enum PhotoImportMode: String, CaseIterable {
+        case none = "No Photos"
+        case withDelay = "With Photos (Delayed)"
+        case immediate = "With Photos (Immediate)"
+
+        var description: String {
+            switch self {
+            case .none: return "Import tree data only, no photos"
+            case .withDelay: return "Import photos one at a time for reliable sync"
+            case .immediate: return "Import all photos at once (may not sync)"
+            }
+        }
+    }
 
     var body: some View {
         NavigationStack {
             Form {
-                Section {
-                    Toggle("Create New Collection", isOn: $createNewCollection)
-
-                    if createNewCollection {
-                        TextField("Collection Name", text: $collectionName)
-                    } else {
-                        Picker("Add to Collection", selection: $selectedCollection) {
-                            Text("Select...").tag(nil as Collection?)
-                            ForEach(collections) { collection in
-                                Text(collection.name).tag(collection as Collection?)
-                            }
-                        }
-                    }
-                } header: {
-                    Text("Destination")
-                }
-
                 Section {
                     Button {
                         showingFilePicker = true
                     } label: {
                         Label("Select JSON File", systemImage: "doc.badge.plus")
                     }
-                    .disabled(!canImport)
+
+                    Picker("Photo Import", selection: $photoImportMode) {
+                        ForEach(PhotoImportMode.allCases, id: \.self) { mode in
+                            Text(mode.rawValue).tag(mode)
+                        }
+                    }
                 } header: {
                     Text("Import")
                 } footer: {
-                    Text("Import trees from a JSON file exported by Tree Tracker.")
+                    Text(photoImportMode.description)
                 }
             }
-            .navigationTitle("Import Collection")
+            .navigationTitle("Import Trees")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -77,14 +76,6 @@ struct ImportCollectionView: View {
         }
     }
 
-    private var canImport: Bool {
-        if createNewCollection {
-            return !collectionName.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
-        } else {
-            return selectedCollection != nil
-        }
-    }
-
     private func handleFileImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
@@ -106,20 +97,12 @@ struct ImportCollectionView: View {
 
         do {
             let data = try Data(contentsOf: url)
-            let trees = try JSONDecoder().decode([ImportedTree].self, from: data)
-
-            let collection: Collection
-            if createNewCollection {
-                let name = collectionName.trimmingCharacters(in: .whitespacesAndNewlines)
-                collection = Collection(name: name)
-                modelContext.insert(collection)
-            } else {
-                guard let selected = selectedCollection else { return }
-                collection = selected
-            }
+            let trees = try JSONDecoder().decode([ImportedTreeData].self, from: data)
 
             var importedCount = 0
             var photoCount = 0
+            var treesWithPhotos: [(Tree, [(Data, Date?)])] = []
+
             for importedTree in trees {
                 let tree = Tree(
                     latitude: importedTree.latitude,
@@ -130,7 +113,7 @@ struct ImportCollectionView: View {
                     variety: importedTree.variety,
                     rootstock: importedTree.rootstock
                 )
-                tree.collection = collection
+
                 modelContext.insert(tree)
 
                 // Add notes as a Note entity if provided
@@ -138,27 +121,65 @@ struct ImportCollectionView: View {
                     _ = tree.addNote(text: importedTree.notes)
                 }
 
-                // Add photos if present
-                if let photosBase64 = importedTree.photos {
+                // Collect photos for delayed import
+                if photoImportMode != .none, let photosBase64 = importedTree.photos {
+                    var photos: [(Data, Date?)] = []
                     for (index, photoString) in photosBase64.enumerated() {
                         if let photoData = Data(base64Encoded: photoString) {
                             let captureDate = importedTree.photoDates?.indices.contains(index) == true
                                 ? importedTree.photoDates?[index]
                                 : nil
-                            tree.addPhoto(photoData, capturedAt: captureDate)
+                            if photoImportMode == .immediate {
+                                tree.addPhoto(photoData, capturedAt: captureDate)
+                            } else {
+                                photos.append((photoData, captureDate))
+                            }
                             photoCount += 1
                         }
+                    }
+                    if !photos.isEmpty {
+                        treesWithPhotos.append((tree, photos))
                     }
                 }
 
                 importedCount += 1
             }
 
-            importResult = ImportResult(
-                success: true,
-                message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(photoCount > 0 ? " with \(photoCount) photos" : "") into \"\(collection.name)\"."
-            )
-            showingResult = true
+            // Save trees first (without photos if delayed mode)
+            try modelContext.save()
+            print("🌐 Import: Saved \(importedCount) trees")
+
+            // For delayed mode, add photos one tree at a time with delays
+            if photoImportMode == .withDelay && !treesWithPhotos.isEmpty {
+                importResult = ImportResult(
+                    success: true,
+                    message: "Imported \(importedCount) trees. Adding \(photoCount) photos in background..."
+                )
+                showingResult = true
+
+                // Add photos with delays in background
+                Task {
+                    for (index, (tree, photos)) in treesWithPhotos.enumerated() {
+                        // Wait before adding each tree's photos
+                        try? await Task.sleep(for: .seconds(2))
+
+                        await MainActor.run {
+                            for (photoData, captureDate) in photos {
+                                tree.addPhoto(photoData, capturedAt: captureDate)
+                            }
+                            try? modelContext.save()
+                            print("🌐 Import: Added \(photos.count) photos to tree \(index + 1)/\(treesWithPhotos.count)")
+                        }
+                    }
+                    print("🌐 Import: Finished adding all photos")
+                }
+            } else {
+                importResult = ImportResult(
+                    success: true,
+                    message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(photoCount > 0 ? " with \(photoCount) photos" : "")."
+                )
+                showingResult = true
+            }
 
         } catch {
             importResult = ImportResult(success: false, message: "Failed to parse file: \(error.localizedDescription)")
@@ -167,12 +188,8 @@ struct ImportCollectionView: View {
     }
 }
 
-struct ImportResult {
-    let success: Bool
-    let message: String
-}
-
-struct ImportedTree: Codable {
+// Extended import structure that supports photos
+private struct ImportedTreeData: Codable {
     let latitude: Double
     let longitude: Double
     let horizontalAccuracy: Double
@@ -205,6 +222,6 @@ struct ImportedTree: Codable {
 }
 
 #Preview {
-    ImportCollectionView()
+    ImportTreesView()
         .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
 }

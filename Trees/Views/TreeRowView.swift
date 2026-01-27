@@ -5,8 +5,8 @@ struct TreeRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            if let firstPhoto = tree.photos.first,
-               let uiImage = UIImage(data: firstPhoto) {
+            if let firstPhoto = tree.treePhotos.first,
+               let uiImage = UIImage(data: firstPhoto.imageData) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -45,11 +45,11 @@ struct TreeRowView: View {
             VStack(alignment: .trailing, spacing: 4) {
                 AccuracyBadge(accuracy: tree.horizontalAccuracy)
 
-                if tree.photos.count > 0 {
+                if !tree.treePhotos.isEmpty {
                     HStack(spacing: 2) {
                         Image(systemName: "photo")
                             .font(.caption2)
-                        Text("\(tree.photos.count)")
+                        Text("\(tree.treePhotos.count)")
                             .font(.caption2)
                     }
                     .foregroundStyle(.secondary)
@@ -69,15 +69,13 @@ struct TreeRowView: View {
             longitude: -122.654321,
             horizontalAccuracy: 3.5,
             species: "Apple",
-            variety: "Honeycrisp",
-            notes: "Large tree near the parking lot"
+            variety: "Honeycrisp"
         ))
         TreeRowView(tree: Tree(
             latitude: 45.123456,
             longitude: -122.654321,
             horizontalAccuracy: 12.0,
-            species: "Red Maple",
-            notes: ""
+            species: "Red Maple"
         ))
     }
 }

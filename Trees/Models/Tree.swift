@@ -3,22 +3,25 @@ import SwiftData
 
 @Model
 class Tree {
-    var id: UUID
-    var latitude: Double
-    var longitude: Double
-    var horizontalAccuracy: Double
+    var id: UUID = UUID()
+    var latitude: Double = 0
+    var longitude: Double = 0
+    var horizontalAccuracy: Double = 0
     var altitude: Double?
-    var species: String
+    var species: String = ""
     var variety: String?
     var rootstock: String?
-    var notes: String
-    @Attribute(.externalStorage) var photos: [Data]
-    /// Capture dates for each photo (parallel array to photos)
-    /// Optional for backward compatibility with existing trees
-    var photoDates: [Date]?
     var collection: Collection?
-    var createdAt: Date
-    var updatedAt: Date
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
+
+    // Photos directly attached to this tree
+    @Relationship(deleteRule: .cascade, inverse: \Photo.tree)
+    var photos: [Photo]?
+
+    // Notes/observations about this tree
+    @Relationship(deleteRule: .cascade, inverse: \Note.tree)
+    var notes: [Note]?
 
     init(
         id: UUID = UUID(),
@@ -29,9 +32,6 @@ class Tree {
         species: String = "",
         variety: String? = nil,
         rootstock: String? = nil,
-        notes: String = "",
-        photos: [Data] = [],
-        photoDates: [Date]? = [],
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -43,9 +43,6 @@ class Tree {
         self.species = species
         self.variety = variety
         self.rootstock = rootstock
-        self.notes = notes
-        self.photos = photos
-        self.photoDates = photoDates
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -64,34 +61,60 @@ extension Tree {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    /// Gets the capture date for a photo at the given index
-    /// Returns nil if no date is available (legacy photos)
-    func photoDate(at index: Int) -> Date? {
-        guard let dates = photoDates, index < dates.count else { return nil }
-        return dates[index]
+    /// Safe accessor for photos array
+    var treePhotos: [Photo] {
+        photos ?? []
     }
 
-    /// Formatted date string for a photo at the given index
-    func formattedPhotoDate(at index: Int) -> String? {
-        guard let date = photoDate(at: index) else { return nil }
-        return date.formatted(date: .abbreviated, time: .shortened)
+    /// Safe accessor for notes array
+    var treeNotes: [Note] {
+        notes ?? []
     }
 
-    /// Adds a photo with its capture date
-    func addPhoto(_ data: Data, capturedAt: Date = Date()) {
-        photos.append(data)
-        if photoDates == nil {
-            photoDates = []
+    /// All photos including those attached to notes
+    var allPhotos: [Photo] {
+        var result = treePhotos
+        for note in treeNotes {
+            result.append(contentsOf: note.notePhotos)
         }
-        photoDates?.append(capturedAt)
+        return result
     }
 
-    /// Removes a photo and its date at the given index
-    func removePhoto(at index: Int) {
-        guard index < photos.count else { return }
-        photos.remove(at: index)
-        if let dates = photoDates, index < dates.count {
-            photoDates?.remove(at: index)
+    /// Adds a photo directly to this tree
+    func addPhoto(_ data: Data, capturedAt: Date? = Date()) {
+        let photo = Photo(imageData: data, captureDate: capturedAt)
+        photo.tree = self
+        if photos == nil {
+            photos = []
         }
+        photos?.append(photo)
+        updatedAt = Date()
+    }
+
+    /// Removes a photo from this tree
+    func removePhoto(_ photo: Photo) {
+        photos?.removeAll { $0.id == photo.id }
+        updatedAt = Date()
+    }
+
+    /// Adds a new note to this tree
+    func addNote(text: String, photos: [Data] = []) -> Note {
+        let note = Note(text: text)
+        note.tree = self
+        for photoData in photos {
+            note.addPhoto(photoData)
+        }
+        if self.notes == nil {
+            self.notes = []
+        }
+        self.notes?.append(note)
+        updatedAt = Date()
+        return note
+    }
+
+    /// Removes a note from this tree
+    func removeNote(_ note: Note) {
+        notes?.removeAll { $0.id == note.id }
+        updatedAt = Date()
     }
 }

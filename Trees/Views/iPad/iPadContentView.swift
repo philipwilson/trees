@@ -8,7 +8,8 @@ struct iPadContentView: View {
     @State private var columnVisibility: NavigationSplitViewVisibility = .all
     @State private var showingCaptureSheet = false
     @State private var showingExportSheet = false
-    @State private var showingImportSheet = false
+    @State private var showingImportCollectionSheet = false
+    @State private var showingImportTreesSheet = false
     @State private var showingNewCollectionSheet = false
     @State private var newCollectionName = ""
 
@@ -25,7 +26,7 @@ struct iPadContentView: View {
     var body: some View {
         Group {
             if selectedSection == .map {
-                iPadMapView()
+                iPadMapView(onBack: { selectedSection = .trees })
             } else {
                 NavigationSplitView(columnVisibility: $columnVisibility) {
                     iPadSidebarView(
@@ -46,8 +47,11 @@ struct iPadContentView: View {
         .sheet(isPresented: $showingExportSheet) {
             ExportView(trees: trees)
         }
-        .sheet(isPresented: $showingImportSheet) {
+        .sheet(isPresented: $showingImportCollectionSheet) {
             ImportCollectionView()
+        }
+        .sheet(isPresented: $showingImportTreesSheet) {
+            ImportTreesView()
         }
         .alert("New Collection", isPresented: $showingNewCollectionSheet) {
             TextField("Collection Name", text: $newCollectionName)
@@ -73,12 +77,13 @@ struct iPadContentView: View {
             iPadTreeListView(
                 selectedTree: $selectedTree,
                 onCapture: { showingCaptureSheet = true },
-                onExport: { showingExportSheet = true }
+                onExport: { showingExportSheet = true },
+                onImport: { showingImportTreesSheet = true }
             )
         case .collections:
             iPadCollectionListView(
                 selectedCollection: $selectedCollection,
-                onImport: { showingImportSheet = true },
+                onImport: { showingImportCollectionSheet = true },
                 onCreate: {
                     newCollectionName = ""
                     showingNewCollectionSheet = true

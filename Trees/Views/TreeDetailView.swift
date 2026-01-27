@@ -9,15 +9,17 @@ struct TreeDetailView: View {
     @Query(sort: \Collection.name) private var collections: [Collection]
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
+    @State private var showingAddNote = false
 
     // Local editing state - only synced to tree on save
     @State private var editSpecies = ""
     @State private var editVariety = ""
     @State private var editRootstock = ""
-    @State private var editNotes = ""
     @State private var editCollection: Collection?
-    @State private var editPhotos: [Data] = []
-    @State private var editPhotoDates: [Date]? = []
+
+    // For adding photos during editing
+    @State private var newPhotos: [Data] = []
+    @State private var newPhotoDates: [Date?] = []
 
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: tree.latitude, longitude: tree.longitude)
@@ -65,29 +67,19 @@ struct TreeDetailView: View {
                     SpeciesTextField(text: $editSpecies)
                     TextField("Variety", text: $editVariety)
                     TextField("Rootstock", text: $editRootstock)
-                    TextField("Notes", text: $editNotes, axis: .vertical)
-                        .lineLimit(3...10)
                 } else {
                     LabeledContent("Species") {
                         Text(tree.species.isEmpty ? "Not specified" : tree.species)
                             .foregroundStyle(tree.species.isEmpty ? .secondary : .primary)
                     }
-                    if let variety = tree.variety {
+                    if let variety = tree.variety, !variety.isEmpty {
                         LabeledContent("Variety") {
                             Text(variety)
                         }
                     }
-                    if let rootstock = tree.rootstock {
+                    if let rootstock = tree.rootstock, !rootstock.isEmpty {
                         LabeledContent("Rootstock") {
                             Text(rootstock)
-                        }
-                    }
-                    if !tree.notes.isEmpty {
-                        VStack(alignment: .leading, spacing: 4) {
-                            Text("Notes")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text(tree.notes)
                         }
                     }
                 }
@@ -115,13 +107,36 @@ struct TreeDetailView: View {
 
             Section {
                 if isEditing {
-                    EditablePhotoGalleryView(photos: $editPhotos, photoDates: $editPhotoDates)
-                    PhotosPicker(selectedPhotos: $editPhotos, photoDates: $editPhotoDates)
+                    EditablePhotoGalleryView(photos: $newPhotos, photoDates: $newPhotoDates)
+                    PhotosPicker(selectedPhotos: $newPhotos, photoDates: $newPhotoDates)
                 } else {
-                    PhotoGalleryView(photos: tree.photos, photoDates: tree.photoDates)
+                    PhotoGalleryView(photos: tree.treePhotos)
                 }
             } header: {
-                Text("Photos (\(isEditing ? editPhotos.count : tree.photos.count))")
+                Text("Photos (\(isEditing ? newPhotos.count + tree.treePhotos.count : tree.treePhotos.count))")
+            }
+
+            Section {
+                if tree.treeNotes.isEmpty && !isEditing {
+                    ContentUnavailableView(
+                        "No Notes",
+                        systemImage: "note.text",
+                        description: Text("Tap Add Note to record observations")
+                    )
+                } else {
+                    ForEach(tree.treeNotes.sorted { $0.createdAt > $1.createdAt }) { note in
+                        NoteRowView(note: note)
+                    }
+                    .onDelete(perform: deleteNotes)
+                }
+
+                Button {
+                    showingAddNote = true
+                } label: {
+                    Label("Add Note", systemImage: "plus.circle")
+                }
+            } header: {
+                Text("Notes (\(tree.treeNotes.count))")
             }
 
             Section {
@@ -155,10 +170,8 @@ struct TreeDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(isEditing ? "Done" : "Edit") {
                     if isEditing {
-                        // Save local state back to tree
                         saveEdits()
                     } else {
-                        // Load tree data into local state
                         loadEditState()
                     }
                     isEditing.toggle()
@@ -174,27 +187,146 @@ struct TreeDetailView: View {
         } message: {
             Text("This action cannot be undone.")
         }
+        .sheet(isPresented: $showingAddNote) {
+            AddNoteView(tree: tree)
+        }
     }
 
     private func loadEditState() {
         editSpecies = tree.species
         editVariety = tree.variety ?? ""
         editRootstock = tree.rootstock ?? ""
-        editNotes = tree.notes
         editCollection = tree.collection
-        editPhotos = tree.photos
-        editPhotoDates = tree.photoDates
+        newPhotos = []
+        newPhotoDates = []
     }
 
     private func saveEdits() {
         tree.species = editSpecies
         tree.variety = editVariety.isEmpty ? nil : editVariety
         tree.rootstock = editRootstock.isEmpty ? nil : editRootstock
-        tree.notes = editNotes
         tree.collection = editCollection
-        tree.photos = editPhotos
-        tree.photoDates = editPhotoDates
+
+        // Add new photos as Photo entities
+        for (index, photoData) in newPhotos.enumerated() {
+            let captureDate = index < newPhotoDates.count ? newPhotoDates[index] : Date()
+            tree.addPhoto(photoData, capturedAt: captureDate)
+        }
+
         tree.updatedAt = Date()
+        newPhotos = []
+        newPhotoDates = []
+    }
+
+    private func deleteNotes(at offsets: IndexSet) {
+        let sortedNotes = tree.treeNotes.sorted { $0.createdAt > $1.createdAt }
+        for index in offsets {
+            let note = sortedNotes[index]
+            tree.removeNote(note)
+            modelContext.delete(note)
+        }
+    }
+}
+
+struct NoteRowView: View {
+    let note: Note
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text(note.formattedDate)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                Spacer()
+                if !note.notePhotos.isEmpty {
+                    Label("\(note.notePhotos.count)", systemImage: "photo")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            if !note.text.isEmpty {
+                Text(note.text)
+                    .font(.body)
+            }
+
+            if !note.notePhotos.isEmpty {
+                ScrollView(.horizontal, showsIndicators: false) {
+                    HStack(spacing: 8) {
+                        ForEach(note.notePhotos) { photo in
+                            if let uiImage = UIImage(data: photo.imageData) {
+                                Image(uiImage: uiImage)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 60, height: 60)
+                                    .clipped()
+                                    .clipShape(RoundedRectangle(cornerRadius: 6))
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        .padding(.vertical, 4)
+    }
+}
+
+struct AddNoteView: View {
+    let tree: Tree
+    @Environment(\.modelContext) private var modelContext
+    @Environment(\.dismiss) private var dismiss
+
+    @State private var text = ""
+    @State private var photos: [Data] = []
+    @State private var photoDates: [Date?] = []
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    TextField("What did you observe?", text: $text, axis: .vertical)
+                        .lineLimit(3...10)
+                } header: {
+                    Text("Note")
+                }
+
+                Section {
+                    if !photos.isEmpty {
+                        EditablePhotoGalleryView(photos: $photos, photoDates: $photoDates)
+                    }
+                    PhotosPicker(selectedPhotos: $photos, photoDates: $photoDates)
+                } header: {
+                    Text("Photos")
+                }
+            }
+            .navigationTitle("Add Note")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        dismiss()
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        saveNote()
+                    }
+                    .disabled(text.isEmpty && photos.isEmpty)
+                    .fontWeight(.semibold)
+                }
+            }
+        }
+    }
+
+    private func saveNote() {
+        let note = tree.addNote(text: text.trimmingCharacters(in: .whitespacesAndNewlines))
+
+        for (index, photoData) in photos.enumerated() {
+            let captureDate = index < photoDates.count ? photoDates[index] : Date()
+            note.addPhoto(photoData, capturedAt: captureDate)
+        }
+
+        dismiss()
     }
 }
 
@@ -205,9 +337,8 @@ struct TreeDetailView: View {
             longitude: -122.654321,
             horizontalAccuracy: 4.5,
             altitude: 150.0,
-            species: "Red Maple",
-            notes: "Large tree near the parking lot. Has distinctive red leaves in autumn."
+            species: "Red Maple"
         ))
     }
-    .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
+    .modelContainer(for: [Tree.self, Collection.self, Photo.self, Note.self], inMemory: true)
 }

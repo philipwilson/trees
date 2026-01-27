@@ -12,7 +12,7 @@ Tree Tracker is a SwiftUI app for capturing and managing GPS locations of trees.
 │                    (App Entry Point)                        │
 ├─────────────────────────────────────────────────────────────┤
 │                        ContentView                          │
-│                    (Tab Navigation)                         │
+│            (Tab Navigation / Split View)                    │
 ├───────────────┬───────────────────────┬─────────────────────┤
 │  TreeListView │  CollectionListView   │    TreeMapView      │
 │   (Tab 1)     │       (Tab 2)         │      (Tab 3)        │
@@ -21,7 +21,13 @@ Tree Tracker is a SwiftUI app for capturing and managing GPS locations of trees.
          ▼                  ▼                     ▼
 ┌─────────────────────────────────────────────────────────────┐
 │                      SwiftData Layer                        │
-│              ModelContainer (Tree, Collection)              │
+│         ModelContainer (Tree, Collection, Photo, Note)      │
+└─────────────────────────────────────────────────────────────┘
+                              │
+                              ▼
+┌─────────────────────────────────────────────────────────────┐
+│                     CloudKit Sync                           │
+│              iCloud.com.treetracker.Trees                   │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -30,7 +36,8 @@ Tree Tracker is a SwiftUI app for capturing and managing GPS locations of trees.
 | Layer | Technology |
 |-------|------------|
 | UI Framework | SwiftUI (iOS 17+, watchOS 11+) |
-| Persistence | SwiftData |
+| Persistence | SwiftData with CloudKit |
+| Cloud Sync | CloudKit (private database) |
 | Location | Core Location |
 | Maps | MapKit |
 | Photos | PhotosUI, UIImagePickerController |
@@ -55,16 +62,58 @@ class Tree {
     var species: String
     var variety: String?              // e.g., "Honeycrisp" for Apple
     var rootstock: String?            // e.g., "M111" for grafted trees
-    var notes: String
-    @Attribute(.externalStorage) var photos: [Data]  // JPEG data
-    var photoDates: [Date]?           // Capture timestamps for each photo
     var collection: Collection?       // Optional grouping
     var createdAt: Date
     var updatedAt: Date
+
+    // Relationships
+    @Relationship(deleteRule: .cascade, inverse: \Photo.tree)
+    var photos: [Photo]?              // Photos directly attached to tree
+
+    @Relationship(deleteRule: .cascade, inverse: \Note.tree)
+    var notes: [Note]?                // Dated observations/notes
 }
 ```
 
-Photos use `.externalStorage` to store large binary data outside the main database file.
+Helper computed properties: `treePhotos`, `treeNotes`, `allPhotos` (includes note photos).
+
+### Photo
+
+Individual photo entity for CloudKit-compatible sync.
+
+```swift
+@Model
+class Photo {
+    var id: UUID
+    @Attribute(.externalStorage) var imageData: Data  // Single JPEG asset
+    var captureDate: Date?
+    var createdAt: Date
+
+    // A photo belongs to either a Tree directly OR a Note (not both)
+    var tree: Tree?
+    var note: Note?
+}
+```
+
+Photos use `.externalStorage` to store as CKAsset in CloudKit, enabling reliable sync of large binary data.
+
+### Note
+
+Dated observation or note about a tree, with optional attached photos.
+
+```swift
+@Model
+class Note {
+    var id: UUID
+    var text: String
+    var createdAt: Date
+    var updatedAt: Date
+    var tree: Tree?                   // Which tree this note belongs to
+
+    @Relationship(deleteRule: .cascade, inverse: \Photo.note)
+    var photos: [Photo]?              // Photos attached to this note
+}
+```
 
 ### Collection
 
@@ -76,7 +125,7 @@ class Collection {
     var id: UUID
     var name: String
     @Relationship(deleteRule: .nullify, inverse: \Tree.collection)
-    var trees: [Tree]
+    var trees: [Tree]?
     var createdAt: Date
     var updatedAt: Date
 }
@@ -88,13 +137,17 @@ The relationship uses `.nullify` delete rule: when a collection is deleted, its 
 
 ### Navigation Structure
 
+**iPhone (compact width):**
 ```
 ContentView (TabView)
 ├── Tab 1: TreeListView
 │   ├── TreeRowView (list item)
 │   ├── → TreeDetailView (navigation destination)
+│   │   ├── NoteRowView (note items)
+│   │   └── → AddNoteView (sheet)
 │   ├── → CaptureTreeView (sheet)
-│   └── → ExportView (sheet)
+│   ├── → ExportView (sheet)
+│   └── → ImportTreesView (sheet)
 │
 ├── Tab 2: CollectionListView
 │   ├── → CollectionDetailView (navigation destination)
@@ -109,19 +162,32 @@ ContentView (TabView)
     └── → CaptureTreeView (sheet)
 ```
 
+**iPad (regular width):**
+```
+ContentView (NavigationSplitView)
+├── Sidebar: iPadSidebarView
+│   ├── Trees
+│   ├── Collections
+│   └── Map
+├── Content: iPadTreeListView / iPadCollectionListView
+└── Detail: TreeDetailView / CollectionDetailView
+```
+
 ### Key Views
 
 | View | Purpose |
 |------|---------|
 | `TreeListView` | Main list of all trees with search and swipe-to-delete |
 | `TreeRowView` | Compact row showing photo thumbnail, species, variety, accuracy badge |
-| `TreeDetailView` | Full tree details with embedded map, edit mode, photo gallery |
+| `TreeDetailView` | Full tree details with embedded map, edit mode, photo gallery, notes list |
 | `TreeMapView` | MapKit view with all trees as pins, toggle species/variety labels |
-| `CaptureTreeView` | New tree entry with live GPS accuracy, collection picker, photo capture |
+| `CaptureTreeView` | New tree entry with live GPS accuracy, collection picker, photo capture, initial note |
 | `CollectionListView` | List of collections with tree counts |
 | `CollectionDetailView` | Collection contents, add/remove trees, export |
 | `ExportView` | Format selection (CSV/JSON/GPX) and share sheet |
+| `ImportTreesView` | Import trees from JSON with photo import options |
 | `ImportCollectionView` | Parse JSON export into new collection |
+| `AddNoteView` | Add new note with optional photos to a tree |
 
 ### Reusable Components
 
@@ -129,11 +195,12 @@ ContentView (TabView)
 |-----------|---------|
 | `AccuracyBadge` | Color-coded accuracy display (green/yellow/red) |
 | `LiveAccuracyView` | Real-time GPS accuracy during capture |
-| `PhotoGalleryView` | Grid display of photos with fullscreen viewer and dates |
-| `EditablePhotoGalleryView` | PhotoGalleryView with delete capability |
+| `PhotoGalleryView` | Grid display of Photo entities with fullscreen viewer and dates |
+| `EditablePhotoGalleryView` | Photo grid with delete capability (works with raw Data) |
 | `PhotosPicker` | Camera/library photo selection |
 | `ImagePicker` | UIImagePickerController wrapper |
 | `SpeciesTextField` | Text field with autocomplete from preset + used species |
+| `NoteRowView` | Displays a Note with date, text, and thumbnail photos |
 
 ## Services
 
@@ -168,12 +235,9 @@ Three exporters in `Services/Exporters/` convert tree data to different formats:
 | `JSONExporter` | JSON array | Data interchange, backup (optional base64 photos) |
 | `GPXExporter` | GPX 1.1 XML | GPS apps (Google Earth, Gaia GPS, etc.) |
 
-All exporters follow the same pattern:
+All exporters combine multiple notes into a single text field for compatibility:
 ```swift
-struct CSVExporter {
-    static func export(trees: [Tree]) -> String
-    static func exportToFile(trees: [Tree], filePrefix: String) -> URL?
-}
+let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
 ```
 
 Files are written to the app's cache directory with timestamped filenames.
@@ -201,11 +265,12 @@ iOS-only service that converts incoming `WatchTree` objects to SwiftData `Tree` 
 
 ```swift
 struct WatchTreeImporter {
-    static func importTree(_ watchTree: WatchTree, into context: ModelContext)
+    func importTree(_ watchTree: WatchTree) -> Tree?
 }
 ```
 
-Prevents duplicates by checking for existing trees with matching UUID.
+- Prevents duplicates by checking for existing trees with matching UUID
+- Creates a Note entity from watch notes if provided
 
 ## Watch App Architecture
 
@@ -323,7 +388,7 @@ User taps "+" → CaptureTreeView presented
          User taps → location frozen
                       │
                       ▼
-         User enters species, notes, selects collection
+         User enters species, notes, selects collection, adds photos
                       │
                       ▼
          User taps "Save"
@@ -332,7 +397,16 @@ User taps "+" → CaptureTreeView presented
          Tree inserted into ModelContext
                       │
                       ▼
+         Photo entities created for each photo
+                      │
+                      ▼
+         Note entity created if initial note provided
+                      │
+                      ▼
          lastUsedCollectionID saved to @AppStorage
+                      │
+                      ▼
+         CloudKit syncs to other devices
                       │
                       ▼
          View dismissed, list auto-updates via @Query
@@ -366,32 +440,42 @@ Persisted via `@AppStorage` (UserDefaults):
 
 ```
 Trees/                              # iOS App
-├── TreesApp.swift                 # App entry, ModelContainer setup
+├── TreesApp.swift                 # App entry, ModelContainer setup, CloudKit config
+├── Trees.entitlements             # iCloud/CloudKit entitlements
 ├── Models/
 │   ├── Tree.swift                 # Tree entity + computed properties
+│   ├── Photo.swift                # Photo entity (single asset)
+│   ├── Note.swift                 # Note entity with photos
 │   └── Collection.swift           # Collection entity
 ├── Services/
 │   ├── LocationManager.swift      # Core Location wrapper
-│   ├── WatchTreeImporter.swift    # Convert WatchTree → Tree
+│   ├── WatchTreeImporter.swift    # Convert WatchTree → Tree + Note
 │   └── Exporters/
 │       ├── CSVExporter.swift
 │       ├── JSONExporter.swift
 │       └── GPXExporter.swift
 ├── Views/
-│   ├── ContentView.swift          # TabView root
+│   ├── ContentView.swift          # TabView/SplitView root
 │   ├── TreeListView.swift
 │   ├── TreeRowView.swift
 │   ├── TreeMapView.swift
-│   ├── TreeDetailView.swift
+│   ├── TreeDetailView.swift       # Includes NoteRowView, AddNoteView
 │   ├── CaptureTreeView.swift
 │   ├── ExportView.swift
 │   ├── CollectionListView.swift
 │   ├── CollectionDetailView.swift
 │   ├── ImportCollectionView.swift
+│   ├── ImportTreesView.swift
+│   ├── iPad/                      # iPad-specific views
+│   │   ├── iPadContentView.swift
+│   │   ├── iPadSidebarView.swift
+│   │   ├── iPadTreeListView.swift
+│   │   ├── iPadCollectionListView.swift
+│   │   └── iPadMapView.swift
 │   └── Components/
 │       ├── AccuracyBadge.swift
-│       ├── ImagePicker.swift
-│       ├── PhotoGalleryView.swift
+│       ├── ImagePicker.swift      # Includes PhotosPicker
+│       ├── PhotoGalleryView.swift # Includes EditablePhotoGalleryView, PhotoDetailView
 │       └── SpeciesTextField.swift
 └── Assets.xcassets/
 
@@ -419,6 +503,7 @@ TreesWatchWidget/                   # Watch Complication
 - Simpler API with `@Model` macro
 - Native SwiftUI integration with `@Query`
 - Automatic schema migrations for simple changes
+- Built-in CloudKit integration
 - iOS 17+ only, but acceptable for new app
 
 ### Why @Observable over ObservableObject?
@@ -429,10 +514,19 @@ TreesWatchWidget/                   # Watch Complication
 
 ### Photo Storage Strategy
 
-Photos stored as `[Data]` with `.externalStorage`:
-- Keeps main database file small
-- SwiftData handles file management
-- Trade-off: No lazy loading, all photo data loads with tree
+Photos stored as individual `Photo` entities with single `Data` asset:
+- Each photo is its own CloudKit record with CKAsset
+- Enables reliable sync of photos between devices
+- Previous approach (array of Data) didn't sync reliably
+- Trade-off: More records, but better CloudKit compatibility
+
+### Notes as Entities
+
+Notes stored as individual `Note` entities instead of single String field:
+- Enables multiple dated observations per tree
+- Each note can have its own attached photos
+- Notes sync reliably via CloudKit
+- Export combines notes for backward compatibility
 
 ### GPS Accuracy Thresholds
 
@@ -454,19 +548,38 @@ Examples:
 - `trees_2024-03-15_143022.csv` (all trees)
 - `victorias_orchard_2024-03-15_143022.gpx` (collection export)
 
+## iCloud Sync
+
+### Configuration
+
+CloudKit sync enabled via SwiftData's `cloudKitDatabase` configuration:
+```swift
+ModelConfiguration(
+    schema: schema,
+    cloudKitDatabase: .private("iCloud.com.treetracker.Trees")
+)
+```
+
+### CloudKit Record Types
+
+SwiftData automatically creates CloudKit record types:
+- `CD_Tree` - Tree records
+- `CD_Photo` - Photo records with CKAsset for imageData
+- `CD_Note` - Note records
+- `CD_Collection` - Collection records
+
+### Sync Behavior
+
+- Automatic sync when device is online
+- Photos sync as CKAsset (reliable for large data)
+- Conflicts resolved automatically by SwiftData
+- Requires user signed into iCloud
+
 ## Offline Capability
 
 The app is fully offline-capable:
 - SwiftData persists all data locally
 - Photos stored as binary data, not URLs
-- No network requests required
+- No network requests required for core functionality
 - Export files saved locally before sharing
-
-## Future Considerations
-
-Potential enhancements the architecture could support:
-- iCloud sync via SwiftData CloudKit integration
-- Background location updates for automatic capture
-- Custom tree icons based on species
-- Photo thumbnails for faster list scrolling
-- Batch import from GPX files
+- CloudKit syncs when connectivity restored

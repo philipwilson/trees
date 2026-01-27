@@ -28,6 +28,10 @@
 	<string>Tree Tracker needs your location to record precise GPS coordinates of trees you capture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Tree Tracker needs access to your photos to attach existing images to tree records.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchScreen</key>
 	<dict>
 		<key>UIColorName</key>

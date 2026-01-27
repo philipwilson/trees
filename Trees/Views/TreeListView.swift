@@ -7,6 +7,7 @@ struct TreeListView: View {
     @State private var searchText = ""
     @State private var showingCaptureSheet = false
     @State private var showingExportSheet = false
+    @State private var showingImportSheet = false
 
     var filteredTrees: [Tree] {
         if searchText.isEmpty {
@@ -15,7 +16,7 @@ struct TreeListView: View {
         return trees.filter { tree in
             tree.species.localizedCaseInsensitiveContains(searchText) ||
             (tree.variety ?? "").localizedCaseInsensitiveContains(searchText) ||
-            tree.notes.localizedCaseInsensitiveContains(searchText)
+            tree.treeNotes.contains { $0.text.localizedCaseInsensitiveContains(searchText) }
         }
     }
 
@@ -43,12 +44,21 @@ struct TreeListView: View {
             .navigationTitle("Trees")
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    if !trees.isEmpty {
+                    Menu {
                         Button {
-                            showingExportSheet = true
+                            showingImportSheet = true
                         } label: {
-                            Image(systemName: "square.and.arrow.up")
+                            Label("Import", systemImage: "square.and.arrow.down")
                         }
+                        if !trees.isEmpty {
+                            Button {
+                                showingExportSheet = true
+                            } label: {
+                                Label("Export", systemImage: "square.and.arrow.up")
+                            }
+                        }
+                    } label: {
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -64,6 +74,9 @@ struct TreeListView: View {
             }
             .sheet(isPresented: $showingExportSheet) {
                 ExportView(trees: trees)
+            }
+            .sheet(isPresented: $showingImportSheet) {
+                ImportTreesView()
             }
         }
     }

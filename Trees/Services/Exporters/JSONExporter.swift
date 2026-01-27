@@ -21,7 +21,13 @@ struct JSONExporter {
         let dateFormatter = ISO8601DateFormatter()
 
         let exportedTrees = trees.map { tree in
-            ExportedTree(
+            // Combine all notes into a single string
+            let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
+
+            // Get all photos from tree (direct photos only for export)
+            let treePhotos = tree.treePhotos
+
+            return ExportedTree(
                 id: tree.id.uuidString,
                 latitude: tree.latitude,
                 longitude: tree.longitude,
@@ -30,9 +36,9 @@ struct JSONExporter {
                 species: tree.species,
                 variety: tree.variety,
                 rootstock: tree.rootstock,
-                notes: tree.notes,
-                photoCount: tree.photos.count,
-                photos: includePhotos ? tree.photos.map { $0.base64EncodedString() } : nil,
+                notes: allNotesText,
+                photoCount: treePhotos.count,
+                photos: includePhotos ? treePhotos.map { $0.imageData.base64EncodedString() } : nil,
                 createdAt: dateFormatter.string(from: tree.createdAt),
                 updatedAt: dateFormatter.string(from: tree.updatedAt)
             )

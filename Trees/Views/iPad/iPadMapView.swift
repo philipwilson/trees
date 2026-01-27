@@ -3,6 +3,8 @@ import SwiftData
 import MapKit
 
 struct iPadMapView: View {
+    var onBack: (() -> Void)?
+
     @Environment(\.modelContext) private var modelContext
     @Query private var trees: [Tree]
     @AppStorage("mapShowVariety") private var showVariety = false
@@ -20,7 +22,7 @@ struct iPadMapView: View {
         return trees.filter { tree in
             tree.species.localizedCaseInsensitiveContains(searchText) ||
             (tree.variety ?? "").localizedCaseInsensitiveContains(searchText) ||
-            tree.notes.localizedCaseInsensitiveContains(searchText)
+            tree.treeNotes.contains { $0.text.localizedCaseInsensitiveContains(searchText) }
         }
     }
 
@@ -102,10 +104,12 @@ struct iPadMapView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Button {
-                        // This will trigger going back to split view through parent
-                    } label: {
-                        Label("Back", systemImage: "chevron.left")
+                    if let onBack {
+                        Button {
+                            onBack()
+                        } label: {
+                            Label("Back", systemImage: "chevron.left")
+                        }
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -169,8 +173,8 @@ struct iPadMapView: View {
                             ))
                         } label: {
                             HStack(spacing: 12) {
-                                if let firstPhoto = tree.photos.first,
-                                   let uiImage = UIImage(data: firstPhoto) {
+                                if let firstPhoto = tree.treePhotos.first,
+                                   let uiImage = UIImage(data: firstPhoto.imageData) {
                                     Image(uiImage: uiImage)
                                         .resizable()
                                         .aspectRatio(contentMode: .fill)

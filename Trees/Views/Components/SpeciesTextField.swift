@@ -5,33 +5,30 @@ struct SpeciesTextField: View {
     @Binding var text: String
     @Environment(\.modelContext) private var modelContext
     @State private var allSpecies: [String] = []
+    @State private var suggestions: [String] = []
     @State private var showingSuggestions = false
     @FocusState private var isFocused: Bool
-
-    /// Filtered suggestions based on current text
-    private var suggestions: [String] {
-        guard !text.isEmpty else { return [] }
-        let lowercasedText = text.lowercased()
-        return allSpecies.filter { species in
-            species.lowercased().contains(lowercasedText) && species.lowercased() != lowercasedText
-        }
-    }
+    @State private var filterTask: Task<Void, Never>?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             TextField("Species", text: $text)
                 .focused($isFocused)
                 .onChange(of: isFocused) { _, focused in
-                    showingSuggestions = focused && !suggestions.isEmpty
+                    if focused {
+                        updateSuggestions()
+                    } else {
+                        showingSuggestions = false
+                    }
                 }
                 .onChange(of: text) { _, _ in
-                    showingSuggestions = isFocused && !suggestions.isEmpty
+                    updateSuggestionsDebounced()
                 }
 
             if showingSuggestions && !suggestions.isEmpty {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
-                        ForEach(suggestions.prefix(5), id: \.self) { suggestion in
+                        ForEach(suggestions, id: \.self) { suggestion in
                             Button {
                                 text = suggestion
                                 showingSuggestions = false
@@ -56,18 +53,57 @@ struct SpeciesTextField: View {
         }
     }
 
-    /// Load species list once on appear, not on every keystroke
+    /// Debounce filtering to avoid lag on every keystroke
+    private func updateSuggestionsDebounced() {
+        filterTask?.cancel()
+        filterTask = Task {
+            try? await Task.sleep(for: .milliseconds(100))
+            if !Task.isCancelled {
+                await MainActor.run {
+                    updateSuggestions()
+                }
+            }
+        }
+    }
+
+    /// Filter suggestions based on current text
+    private func updateSuggestions() {
+        guard isFocused, !text.isEmpty else {
+            suggestions = []
+            showingSuggestions = false
+            return
+        }
+        let lowercasedText = text.lowercased()
+        let filtered = allSpecies.filter { species in
+            species.lowercased().contains(lowercasedText) && species.lowercased() != lowercasedText
+        }
+        suggestions = Array(filtered.prefix(5))
+        showingSuggestions = !suggestions.isEmpty
+    }
+
+    /// Load species list once on appear in background
     private func loadSpecies() {
-        // Fetch only species strings, not full Tree objects
-        let descriptor = FetchDescriptor<Tree>()
-        do {
-            let trees = try modelContext.fetch(descriptor)
-            let existingSpecies = Set(trees.map { $0.species }.filter { !$0.isEmpty })
-            let combined = existingSpecies.union(Set(commonSpecies))
-            allSpecies = combined.sorted()
-        } catch {
-            // Fall back to just common species
-            allSpecies = commonSpecies.sorted()
+        // Start with common species immediately
+        allSpecies = commonSpecies.sorted()
+
+        // Fetch existing species in background to avoid blocking UI
+        Task.detached(priority: .background) {
+            var descriptor = FetchDescriptor<Tree>()
+            // Only fetch the properties we need, not relationships
+            descriptor.propertiesToFetch = [\.species]
+
+            do {
+                let trees = try modelContext.fetch(descriptor)
+                let existingSpecies = Set(trees.map { $0.species }.filter { !$0.isEmpty })
+                let combined = existingSpecies.union(Set(commonSpecies))
+                let sorted = combined.sorted()
+
+                await MainActor.run {
+                    allSpecies = sorted
+                }
+            } catch {
+                // Keep using common species on error
+            }
         }
     }
 }

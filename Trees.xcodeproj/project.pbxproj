@@ -10,6 +10,7 @@
 		01DD1BC657317FC4E0A59126 /* TreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */; };
 		0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5335BA670CB205F7556844DA /* JSONExporter.swift */; };
 		13C090D4A9B9E0669F6293AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C385534E9EFC669280796C68 /* Assets.xcassets */; };
+		199474C6ABD94964118D7D5F /* ImportTreesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53CCDC475F15A0A70F6993B5 /* ImportTreesView.swift */; };
 		1C04A1E99D1EBC61354CC81D /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7FF05273647DCDC1D213C2 /* Collection.swift */; };
 		2054BD516F84B6FF0A7A2CCD /* iPadMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3FB447157EC6C8F325BF071 /* iPadMapView.swift */; };
 		2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE000A01E50BF4C4432D684 /* ContentView.swift */; };
@@ -17,6 +18,7 @@
 		3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */; };
 		3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817793E263FCDD0C5A146B35 /* TreesApp.swift */; };
 		402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		4351B836B3A19F5CFAB79BE9 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA89460FC189E7CEBC3771C /* Photo.swift */; };
 		444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */; };
 		4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
@@ -30,6 +32,7 @@
 		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
 		8B46E9C5FCD41F533D26BAA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 244065D612BAD7C6916CA3C9 /* Assets.xcassets */; };
 		9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */; };
+		92F9612A51CFACAE093B2A75 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3346EB3009C6E848F543F4F /* Note.swift */; };
 		999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A5889B04F1AA99705144D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D622F80312FFD765AB887763 /* Assets.xcassets */; };
 		9A72A2BE1D0C430A3F498396 /* CommonSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */; };
@@ -105,6 +108,7 @@
 		4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CommonSpecies.swift; sourceTree = "<group>"; };
 		52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureTreeView.swift; sourceTree = "<group>"; };
 		5335BA670CB205F7556844DA /* JSONExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONExporter.swift; sourceTree = "<group>"; };
+		53CCDC475F15A0A70F6993B5 /* ImportTreesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportTreesView.swift; sourceTree = "<group>"; };
 		559396C03C40B0AA63C15D57 /* GPXExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPXExporter.swift; sourceTree = "<group>"; };
 		56120BD39256244311587662 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
 		5A8ECEB4FA8C019AA20B7CA8 /* iPadCollectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadCollectionListView.swift; sourceTree = "<group>"; };
@@ -133,6 +137,8 @@
 		D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchApp.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE76365F8AFD79DA86E9B50B /* iPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSidebarView.swift; sourceTree = "<group>"; };
+		DEA89460FC189E7CEBC3771C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		E3346EB3009C6E848F543F4F /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
 		E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporter.swift; sourceTree = "<group>"; };
 		EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesTextField.swift; sourceTree = "<group>"; };
@@ -152,6 +158,7 @@
 				1FE000A01E50BF4C4432D684 /* ContentView.swift */,
 				3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */,
 				8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */,
+				53CCDC475F15A0A70F6993B5 /* ImportTreesView.swift */,
 				61B8886E85F005476434A363 /* TreeDetailView.swift */,
 				F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */,
 				888A735E0810BFF9906BE845 /* TreeMapView.swift */,
@@ -222,6 +229,8 @@
 			isa = PBXGroup;
 			children = (
 				5F7FF05273647DCDC1D213C2 /* Collection.swift */,
+				E3346EB3009C6E848F543F4F /* Note.swift */,
+				DEA89460FC189E7CEBC3771C /* Photo.swift */,
 				8DC825F3082A2B90559D7B68 /* Tree.swift */,
 			);
 			path = Models;
@@ -445,8 +454,11 @@
 				CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */,
 				DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */,
 				3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */,
+				199474C6ABD94964118D7D5F /* ImportTreesView.swift in Sources */,
 				0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */,
 				E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */,
+				92F9612A51CFACAE093B2A75 /* Note.swift in Sources */,
+				4351B836B3A19F5CFAB79BE9 /* Photo.swift in Sources */,
 				BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */,
 				FC486FA60042D4A57696DA06 /* SpeciesTextField.swift in Sources */,
 				6267E5503C16DEB9E26388B3 /* Tree.swift in Sources */,
@@ -514,6 +526,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Trees/Trees.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -537,6 +550,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Trees/Trees.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;

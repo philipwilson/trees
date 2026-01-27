@@ -3,12 +3,12 @@ import SwiftData
 
 @Model
 class Collection {
-    var id: UUID
-    var name: String
+    var id: UUID = UUID()
+    var name: String = ""
     @Relationship(deleteRule: .nullify, inverse: \Tree.collection)
-    var trees: [Tree]
-    var createdAt: Date
-    var updatedAt: Date
+    var trees: [Tree]?
+    var createdAt: Date = Date()
+    var updatedAt: Date = Date()
 
     init(
         id: UUID = UUID(),
@@ -27,7 +27,7 @@ class Collection {
 
 extension Collection {
     var treeCount: Int {
-        trees.count
+        trees?.count ?? 0
     }
 
     var formattedDate: String {

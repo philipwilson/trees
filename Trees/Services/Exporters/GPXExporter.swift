@@ -28,8 +28,10 @@ struct GPXExporter {
             if let rootstock = tree.rootstock {
                 descParts.append("Rootstock: \(rootstock)")
             }
-            if !tree.notes.isEmpty {
-                descParts.append(tree.notes)
+            // Combine all notes into description
+            let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: "\n")
+            if !allNotesText.isEmpty {
+                descParts.append(allNotesText)
             }
             let desc = escapeXML(descParts.joined(separator: "\n"))
 

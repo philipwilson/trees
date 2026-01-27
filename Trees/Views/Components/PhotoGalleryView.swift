@@ -1,12 +1,9 @@
 import SwiftUI
 
 struct PhotoGalleryView: View {
-    let photos: [Data]
-    var photoDates: [Date]? = nil
+    let photos: [Photo]
     @State private var selectedPhotoIndex: Int?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    private var dates: [Date] { photoDates ?? [] }
 
     private var columns: [GridItem] {
         let count = horizontalSizeClass == .regular ? 5 : 3
@@ -22,8 +19,8 @@ struct PhotoGalleryView: View {
             )
         } else {
             LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(photos.indices, id: \.self) { index in
-                    if let uiImage = UIImage(data: photos[index]) {
+                ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
+                    if let uiImage = UIImage(data: photo.imageData) {
                         VStack(spacing: 4) {
                             Image(uiImage: uiImage)
                                 .resizable()
@@ -35,8 +32,8 @@ struct PhotoGalleryView: View {
                                     selectedPhotoIndex = index
                                 }
 
-                            if index < dates.count {
-                                Text(dates[index].formatted(date: .abbreviated, time: .omitted))
+                            if let captureDate = photo.captureDate {
+                                Text(captureDate.formatted(date: .abbreviated, time: .omitted))
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             }
@@ -45,7 +42,7 @@ struct PhotoGalleryView: View {
                 }
             }
             .fullScreenCover(item: $selectedPhotoIndex) { index in
-                PhotoDetailView(photos: photos, photoDates: dates, initialIndex: index)
+                PhotoDetailView(photos: photos, initialIndex: index)
             }
         }
     }
@@ -56,29 +53,28 @@ extension Int: @retroactive Identifiable {
 }
 
 struct PhotoDetailView: View {
-    let photos: [Data]
-    var photoDates: [Date] = []
+    let photos: [Photo]
     let initialIndex: Int
     @State private var currentIndex: Int
     @Environment(\.dismiss) private var dismiss
 
-    init(photos: [Data], photoDates: [Date] = [], initialIndex: Int) {
+    init(photos: [Photo], initialIndex: Int) {
         self.photos = photos
-        self.photoDates = photoDates
         self.initialIndex = initialIndex
         _currentIndex = State(initialValue: initialIndex)
     }
 
     private var currentDateString: String? {
-        guard currentIndex < photoDates.count else { return nil }
-        return photoDates[currentIndex].formatted(date: .abbreviated, time: .shortened)
+        guard currentIndex < photos.count,
+              let date = photos[currentIndex].captureDate else { return nil }
+        return date.formatted(date: .abbreviated, time: .shortened)
     }
 
     var body: some View {
         NavigationStack {
             TabView(selection: $currentIndex) {
-                ForEach(photos.indices, id: \.self) { index in
-                    if let uiImage = UIImage(data: photos[index]) {
+                ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
+                    if let uiImage = UIImage(data: photo.imageData) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
@@ -114,12 +110,12 @@ struct PhotoDetailView: View {
     }
 }
 
+/// Editable gallery for use during tree capture/editing
+/// Works with raw Data since Photo entities aren't created yet
 struct EditablePhotoGalleryView: View {
     @Binding var photos: [Data]
-    @Binding var photoDates: [Date]?
+    @Binding var photoDates: [Date?]
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
-
-    private var dates: [Date] { photoDates ?? [] }
 
     private var columns: [GridItem] {
         let count = horizontalSizeClass == .regular ? 6 : 4
@@ -141,8 +137,8 @@ struct EditablePhotoGalleryView: View {
 
                             Button {
                                 photos.remove(at: index)
-                                if index < dates.count {
-                                    photoDates?.remove(at: index)
+                                if index < photoDates.count {
+                                    photoDates.remove(at: index)
                                 }
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
@@ -152,8 +148,8 @@ struct EditablePhotoGalleryView: View {
                             .offset(x: 6, y: -6)
                         }
 
-                        if index < dates.count {
-                            Text(dates[index].formatted(date: .abbreviated, time: .omitted))
+                        if index < photoDates.count, let date = photoDates[index] {
+                            Text(date.formatted(date: .abbreviated, time: .omitted))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)
                         }

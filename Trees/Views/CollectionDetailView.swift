@@ -20,6 +20,10 @@ struct CollectionDetailView: View {
         allTrees.filter { $0.collection == nil }
     }
 
+    private var collectionTrees: [Tree] {
+        collectionTrees ?? []
+    }
+
     var body: some View {
         List {
             Section {
@@ -41,7 +45,7 @@ struct CollectionDetailView: View {
             }
 
             Section {
-                if collection.trees.isEmpty {
+                if collectionTrees.isEmpty {
                     ContentUnavailableView(
                         "No Trees",
                         systemImage: "tree",
@@ -49,7 +53,7 @@ struct CollectionDetailView: View {
                     )
                     .listRowBackground(Color.clear)
                 } else {
-                    ForEach(collection.trees.sorted { $0.createdAt > $1.createdAt }) { tree in
+                    ForEach(collectionTrees.sorted { $0.createdAt > $1.createdAt }) { tree in
                         NavigationLink(destination: TreeDetailView(tree: tree)) {
                             TreeRowView(tree: tree)
                         }
@@ -60,7 +64,7 @@ struct CollectionDetailView: View {
                 HStack {
                     Text("Trees")
                     Spacer()
-                    if !collection.trees.isEmpty {
+                    if !collectionTrees.isEmpty {
                         Button {
                             showingAddTreesSheet = true
                         } label: {
@@ -70,7 +74,7 @@ struct CollectionDetailView: View {
                 }
             }
 
-            if collection.trees.isEmpty {
+            if collectionTrees.isEmpty {
                 Section {
                     Button {
                         showingCaptureSheet = true
@@ -127,7 +131,7 @@ struct CollectionDetailView: View {
                     } label: {
                         Label("Export", systemImage: "square.and.arrow.up")
                     }
-                    .disabled(collection.trees.isEmpty)
+                    .disabled(collectionTrees.isEmpty)
 
                     Button {
                         showingCaptureSheet = true
@@ -147,7 +151,7 @@ struct CollectionDetailView: View {
             }
         }
         .sheet(isPresented: $showingExportSheet) {
-            ExportView(trees: collection.trees, collectionName: collection.name)
+            ExportView(trees: collectionTrees, collectionName: collection.name)
         }
         .sheet(isPresented: $showingAddTreesSheet) {
             AddTreesToCollectionView(collection: collection, availableTrees: unassignedTrees)
@@ -167,7 +171,7 @@ struct CollectionDetailView: View {
     }
 
     private func removeTreesFromCollection(at offsets: IndexSet) {
-        let sortedTrees = collection.trees.sorted { $0.createdAt > $1.createdAt }
+        let sortedTrees = collectionTrees.sorted { $0.createdAt > $1.createdAt }
         for index in offsets {
             sortedTrees[index].collection = nil
         }

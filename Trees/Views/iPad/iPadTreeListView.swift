@@ -9,6 +9,7 @@ struct iPadTreeListView: View {
 
     var onCapture: () -> Void
     var onExport: () -> Void
+    var onImport: () -> Void
 
     var filteredTrees: [Tree] {
         if searchText.isEmpty {
@@ -17,7 +18,7 @@ struct iPadTreeListView: View {
         return trees.filter { tree in
             tree.species.localizedCaseInsensitiveContains(searchText) ||
             (tree.variety ?? "").localizedCaseInsensitiveContains(searchText) ||
-            tree.notes.localizedCaseInsensitiveContains(searchText)
+            tree.treeNotes.contains { $0.text.localizedCaseInsensitiveContains(searchText) }
         }
     }
 
@@ -70,12 +71,21 @@ struct iPadTreeListView: View {
         .navigationTitle("Trees")
         .toolbar {
             ToolbarItem(placement: .topBarLeading) {
-                if !trees.isEmpty {
+                Menu {
                     Button {
-                        onExport()
+                        onImport()
                     } label: {
-                        Label("Export", systemImage: "square.and.arrow.up")
+                        Label("Import", systemImage: "square.and.arrow.down")
                     }
+                    if !trees.isEmpty {
+                        Button {
+                            onExport()
+                        } label: {
+                            Label("Export", systemImage: "square.and.arrow.up")
+                        }
+                    }
+                } label: {
+                    Image(systemName: "ellipsis.circle")
                 }
             }
             ToolbarItem(placement: .topBarTrailing) {
@@ -106,7 +116,8 @@ struct iPadTreeListView: View {
         iPadTreeListView(
             selectedTree: .constant(nil),
             onCapture: {},
-            onExport: {}
+            onExport: {},
+            onImport: {}
         )
     } detail: {
         Text("Detail")

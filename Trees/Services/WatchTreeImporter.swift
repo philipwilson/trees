@@ -26,12 +26,16 @@ struct WatchTreeImporter {
             horizontalAccuracy: watchTree.horizontalAccuracy,
             altitude: watchTree.altitude,
             species: watchTree.species,
-            notes: watchTree.notes,
             createdAt: watchTree.capturedAt,
             updatedAt: Date()
         )
 
         modelContext.insert(tree)
+
+        // Add notes as a Note entity if provided
+        if !watchTree.notes.isEmpty {
+            _ = tree.addNote(text: watchTree.notes)
+        }
 
         do {
             try modelContext.save()
