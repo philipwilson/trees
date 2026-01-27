@@ -1,6 +1,13 @@
 import Foundation
 
 struct JSONExporter {
+    struct ExportedCollection: Codable {
+        let id: String
+        let name: String
+        let createdAt: String
+        let updatedAt: String
+    }
+
     struct ExportedTree: Codable {
         let id: String
         let latitude: Double
@@ -13,12 +20,28 @@ struct JSONExporter {
         let notes: String
         let photoCount: Int
         let photos: [String]?
+        let photoDates: [String]?
+        let collectionId: String?
         let createdAt: String
         let updatedAt: String
     }
 
-    static func export(trees: [Tree], includePhotos: Bool = false) -> String {
+    struct ExportedData: Codable {
+        let collections: [ExportedCollection]
+        let trees: [ExportedTree]
+    }
+
+    static func export(trees: [Tree], collections: [Collection] = [], includePhotos: Bool = false) -> String {
         let dateFormatter = ISO8601DateFormatter()
+
+        let exportedCollections = collections.map { collection in
+            ExportedCollection(
+                id: collection.id.uuidString,
+                name: collection.name,
+                createdAt: dateFormatter.string(from: collection.createdAt),
+                updatedAt: dateFormatter.string(from: collection.updatedAt)
+            )
+        }
 
         let exportedTrees = trees.map { tree in
             // Combine all notes into a single string
@@ -39,24 +62,30 @@ struct JSONExporter {
                 notes: allNotesText,
                 photoCount: treePhotos.count,
                 photos: includePhotos ? treePhotos.map { $0.imageData.base64EncodedString() } : nil,
+                photoDates: includePhotos ? treePhotos.map { photo in
+                    photo.captureDate.map { dateFormatter.string(from: $0) } ?? ""
+                } : nil,
+                collectionId: tree.collection?.id.uuidString,
                 createdAt: dateFormatter.string(from: tree.createdAt),
                 updatedAt: dateFormatter.string(from: tree.updatedAt)
             )
         }
 
+        let exportedData = ExportedData(collections: exportedCollections, trees: exportedTrees)
+
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
-        guard let data = try? encoder.encode(exportedTrees),
+        guard let data = try? encoder.encode(exportedData),
               let jsonString = String(data: data, encoding: .utf8) else {
-            return "[]"
+            return "{}"
         }
 
         return jsonString
     }
 
-    static func exportToFile(trees: [Tree], includePhotos: Bool = false, filePrefix: String = "trees") -> URL? {
-        let content = export(trees: trees, includePhotos: includePhotos)
+    static func exportToFile(trees: [Tree], collections: [Collection] = [], includePhotos: Bool = false, filePrefix: String = "trees") -> URL? {
+        let content = export(trees: trees, collections: collections, includePhotos: includePhotos)
         let filename = "\(filePrefix)_\(formattedDate()).json"
 
         guard let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) else {

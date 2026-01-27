@@ -10,6 +10,7 @@ struct iPadContentView: View {
     @State private var showingExportSheet = false
     @State private var showingImportCollectionSheet = false
     @State private var showingImportTreesSheet = false
+    @State private var showingDuplicatesSheet = false
     @State private var showingNewCollectionSheet = false
     @State private var newCollectionName = ""
 
@@ -45,13 +46,16 @@ struct iPadContentView: View {
             CaptureTreeView()
         }
         .sheet(isPresented: $showingExportSheet) {
-            ExportView(trees: trees)
+            ExportView(trees: trees, collections: collections)
         }
         .sheet(isPresented: $showingImportCollectionSheet) {
             ImportCollectionView()
         }
         .sheet(isPresented: $showingImportTreesSheet) {
             ImportTreesView()
+        }
+        .sheet(isPresented: $showingDuplicatesSheet) {
+            DuplicateTreesView()
         }
         .alert("New Collection", isPresented: $showingNewCollectionSheet) {
             TextField("Collection Name", text: $newCollectionName)
@@ -78,7 +82,8 @@ struct iPadContentView: View {
                 selectedTree: $selectedTree,
                 onCapture: { showingCaptureSheet = true },
                 onExport: { showingExportSheet = true },
-                onImport: { showingImportTreesSheet = true }
+                onImport: { showingImportTreesSheet = true },
+                onFindDuplicates: { showingDuplicatesSheet = true }
             )
         case .collections:
             iPadCollectionListView(

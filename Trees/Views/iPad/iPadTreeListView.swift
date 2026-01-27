@@ -10,6 +10,7 @@ struct iPadTreeListView: View {
     var onCapture: () -> Void
     var onExport: () -> Void
     var onImport: () -> Void
+    var onFindDuplicates: () -> Void
 
     var filteredTrees: [Tree] {
         if searchText.isEmpty {
@@ -83,6 +84,12 @@ struct iPadTreeListView: View {
                         } label: {
                             Label("Export", systemImage: "square.and.arrow.up")
                         }
+                        Divider()
+                        Button {
+                            onFindDuplicates()
+                        } label: {
+                            Label("Find Duplicates", systemImage: "doc.on.doc")
+                        }
                     }
                 } label: {
                     Image(systemName: "ellipsis.circle")
@@ -117,7 +124,8 @@ struct iPadTreeListView: View {
             selectedTree: .constant(nil),
             onCapture: {},
             onExport: {},
-            onImport: {}
+            onImport: {},
+            onFindDuplicates: {}
         )
     } detail: {
         Text("Detail")

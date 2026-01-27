@@ -33,7 +33,7 @@
 		8B46E9C5FCD41F533D26BAA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 244065D612BAD7C6916CA3C9 /* Assets.xcassets */; };
 		9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */; };
 		92F9612A51CFACAE093B2A75 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3346EB3009C6E848F543F4F /* Note.swift */; };
-		999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		999E8ABAF33F3B491E01C5E0 /* TreesWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FDED0380FA1E9E8362D0D331 /* TreesWatch.app */; platformFilter = ios; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		9A5889B04F1AA99705144D3A /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = D622F80312FFD765AB887763 /* Assets.xcassets */; };
 		9A72A2BE1D0C430A3F498396 /* CommonSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */; };
 		A871EA6EAF9A758E67D66CE6 /* WatchLocationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */; };
@@ -42,6 +42,7 @@
 		AF68C3C7818DD2F4CE02D2E4 /* TreesWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA3A92D0DE14A3726217238 /* TreesWatchWidget.swift */; };
 		AF9528309D016F7DB08770FE /* CaptureTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */; };
 		BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F08281F88024D47A957057 /* PhotoGalleryView.swift */; };
+		BCDB5BA7F162ADB75C8CA651 /* DuplicateTreesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3330119D689D0F19F2C6F6B /* DuplicateTreesView.swift */; };
 		BD38C4B50C76E7081D067F0A /* iPadCollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8ECEB4FA8C019AA20B7CA8 /* iPadCollectionListView.swift */; };
 		BE710E54AA33F84098234D35 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2E09E9737924E18950A488 /* CaptureView.swift */; };
 		C20E194CF983ABCD3090D17E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4082492E29F2EE4E73C6FEB /* ContentView.swift */; };
@@ -134,6 +135,7 @@
 		C385534E9EFC669280796C68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C3FB447157EC6C8F325BF071 /* iPadMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadMapView.swift; sourceTree = "<group>"; };
 		CDA2EF7CEB36CD375AD55865 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D3330119D689D0F19F2C6F6B /* DuplicateTreesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateTreesView.swift; sourceTree = "<group>"; };
 		D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchApp.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE76365F8AFD79DA86E9B50B /* iPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSidebarView.swift; sourceTree = "<group>"; };
@@ -156,6 +158,7 @@
 				9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */,
 				6DDE1784DB8250757C69B763 /* CollectionListView.swift */,
 				1FE000A01E50BF4C4432D684 /* ContentView.swift */,
+				D3330119D689D0F19F2C6F6B /* DuplicateTreesView.swift */,
 				3E5E70EBAC3EB8796F68ACE6 /* ExportView.swift */,
 				8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */,
 				53CCDC475F15A0A70F6993B5 /* ImportTreesView.swift */,
@@ -450,6 +453,7 @@
 				7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */,
 				E8D93E973EEA26E6E0084084 /* CommonSpecies.swift in Sources */,
 				2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */,
+				BCDB5BA7F162ADB75C8CA651 /* DuplicateTreesView.swift in Sources */,
 				54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */,
 				CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */,
 				DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */,
@@ -496,6 +500,7 @@
 		};
 		C4EEC8BFF471175C7970DAFE /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = AC6C9BE596878D3000D25309 /* TreesWatch */;
 			targetProxy = 58C9B45352EB7E90E738C1B8 /* PBXContainerItemProxy */;
 		};
@@ -530,6 +535,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = 3L3ASPMXH9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Trees/Info.plist;
@@ -540,8 +546,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.treetracker.Trees;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Debug;
 		};
@@ -554,6 +564,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DERIVE_MACCATALYST_PRODUCT_BUNDLE_IDENTIFIER = NO;
 				DEVELOPMENT_TEAM = 3L3ASPMXH9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Trees/Info.plist;
@@ -564,8 +575,12 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.treetracker.Trees;
 				SDKROOT = iphoneos;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = YES;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = "1,2,6";
 			};
 			name = Release;
 		};
@@ -622,6 +637,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -680,6 +696,7 @@
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";

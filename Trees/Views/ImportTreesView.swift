@@ -97,88 +97,14 @@ struct ImportTreesView: View {
 
         do {
             let data = try Data(contentsOf: url)
-            let trees = try JSONDecoder().decode([ImportedTreeData].self, from: data)
 
-            var importedCount = 0
-            var photoCount = 0
-            var treesWithPhotos: [(Tree, [(Data, Date?)])] = []
-
-            for importedTree in trees {
-                let tree = Tree(
-                    latitude: importedTree.latitude,
-                    longitude: importedTree.longitude,
-                    horizontalAccuracy: importedTree.horizontalAccuracy,
-                    altitude: importedTree.altitude,
-                    species: importedTree.species,
-                    variety: importedTree.variety,
-                    rootstock: importedTree.rootstock
-                )
-
-                modelContext.insert(tree)
-
-                // Add notes as a Note entity if provided
-                if !importedTree.notes.isEmpty {
-                    _ = tree.addNote(text: importedTree.notes)
-                }
-
-                // Collect photos for delayed import
-                if photoImportMode != .none, let photosBase64 = importedTree.photos {
-                    var photos: [(Data, Date?)] = []
-                    for (index, photoString) in photosBase64.enumerated() {
-                        if let photoData = Data(base64Encoded: photoString) {
-                            let captureDate = importedTree.photoDates?.indices.contains(index) == true
-                                ? importedTree.photoDates?[index]
-                                : nil
-                            if photoImportMode == .immediate {
-                                tree.addPhoto(photoData, capturedAt: captureDate)
-                            } else {
-                                photos.append((photoData, captureDate))
-                            }
-                            photoCount += 1
-                        }
-                    }
-                    if !photos.isEmpty {
-                        treesWithPhotos.append((tree, photos))
-                    }
-                }
-
-                importedCount += 1
-            }
-
-            // Save trees first (without photos if delayed mode)
-            try modelContext.save()
-            print("🌐 Import: Saved \(importedCount) trees")
-
-            // For delayed mode, add photos one tree at a time with delays
-            if photoImportMode == .withDelay && !treesWithPhotos.isEmpty {
-                importResult = ImportResult(
-                    success: true,
-                    message: "Imported \(importedCount) trees. Adding \(photoCount) photos in background..."
-                )
-                showingResult = true
-
-                // Add photos with delays in background
-                Task {
-                    for (index, (tree, photos)) in treesWithPhotos.enumerated() {
-                        // Wait before adding each tree's photos
-                        try? await Task.sleep(for: .seconds(2))
-
-                        await MainActor.run {
-                            for (photoData, captureDate) in photos {
-                                tree.addPhoto(photoData, capturedAt: captureDate)
-                            }
-                            try? modelContext.save()
-                            print("🌐 Import: Added \(photos.count) photos to tree \(index + 1)/\(treesWithPhotos.count)")
-                        }
-                    }
-                    print("🌐 Import: Finished adding all photos")
-                }
+            // Try new format first (object with collections and trees)
+            if let importedData = try? JSONDecoder().decode(ImportedData.self, from: data) {
+                importNewFormat(importedData)
             } else {
-                importResult = ImportResult(
-                    success: true,
-                    message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(photoCount > 0 ? " with \(photoCount) photos" : "")."
-                )
-                showingResult = true
+                // Fall back to old format (array of trees)
+                let trees = try JSONDecoder().decode([ImportedTreeData].self, from: data)
+                importTrees(trees, collectionMap: [:])
             }
 
         } catch {
@@ -186,6 +112,139 @@ struct ImportTreesView: View {
             showingResult = true
         }
     }
+
+    private func importNewFormat(_ importedData: ImportedData) {
+        // Create collections first and build a mapping from old ID to new Collection
+        var collectionMap: [String: Collection] = [:]
+        var collectionCount = 0
+
+        for importedCollection in importedData.collections {
+            let collection = Collection(name: importedCollection.name)
+            modelContext.insert(collection)
+            collectionMap[importedCollection.id] = collection
+            collectionCount += 1
+        }
+
+        print("🌐 Import: Created \(collectionCount) collections")
+
+        // Import trees with collection mapping
+        importTrees(importedData.trees, collectionMap: collectionMap, collectionCount: collectionCount)
+    }
+
+    private func importTrees(_ trees: [ImportedTreeData], collectionMap: [String: Collection], collectionCount: Int = 0) {
+        var importedCount = 0
+        var photoCount = 0
+        var treesWithPhotos: [(Tree, [(Data, Date?)])] = []
+
+        for importedTree in trees {
+            let tree = Tree(
+                latitude: importedTree.latitude,
+                longitude: importedTree.longitude,
+                horizontalAccuracy: importedTree.horizontalAccuracy,
+                altitude: importedTree.altitude,
+                species: importedTree.species,
+                variety: importedTree.variety,
+                rootstock: importedTree.rootstock
+            )
+
+            modelContext.insert(tree)
+
+            // Link to collection if specified
+            if let collectionId = importedTree.collectionId,
+               let collection = collectionMap[collectionId] {
+                tree.collection = collection
+            }
+
+            // Add notes as a Note entity if provided
+            if !importedTree.notes.isEmpty {
+                _ = tree.addNote(text: importedTree.notes)
+            }
+
+            // Collect photos for delayed import
+            if photoImportMode != .none, let photosBase64 = importedTree.photos {
+                var photos: [(Data, Date?)] = []
+                for (index, photoString) in photosBase64.enumerated() {
+                    if let photoData = Data(base64Encoded: photoString) {
+                        let captureDate = importedTree.captureDate(at: index)
+                        if photoImportMode == .immediate {
+                            tree.addPhoto(photoData, capturedAt: captureDate)
+                        } else {
+                            photos.append((photoData, captureDate))
+                        }
+                        photoCount += 1
+                    }
+                }
+                if !photos.isEmpty {
+                    treesWithPhotos.append((tree, photos))
+                }
+            }
+
+            importedCount += 1
+        }
+
+        // Save trees first (without photos if delayed mode)
+        do {
+            try modelContext.save()
+            print("🌐 Import: Saved \(importedCount) trees")
+        } catch {
+            print("🌐 Import: Failed to save: \(error)")
+        }
+
+        // Build result message
+        var messageParts: [String] = []
+        if collectionCount > 0 {
+            messageParts.append("\(collectionCount) collection\(collectionCount == 1 ? "" : "s")")
+        }
+        messageParts.append("\(importedCount) tree\(importedCount == 1 ? "" : "s")")
+
+        // For delayed mode, add photos one tree at a time with delays
+        if photoImportMode == .withDelay && !treesWithPhotos.isEmpty {
+            importResult = ImportResult(
+                success: true,
+                message: "Imported \(messageParts.joined(separator: " and ")). Adding \(photoCount) photos in background..."
+            )
+            showingResult = true
+
+            // Add photos with delays in background
+            Task {
+                for (index, (tree, photos)) in treesWithPhotos.enumerated() {
+                    // Wait before adding each tree's photos
+                    try? await Task.sleep(for: .seconds(2))
+
+                    await MainActor.run {
+                        for (photoData, captureDate) in photos {
+                            tree.addPhoto(photoData, capturedAt: captureDate)
+                        }
+                        try? modelContext.save()
+                        print("🌐 Import: Added \(photos.count) photos to tree \(index + 1)/\(treesWithPhotos.count)")
+                    }
+                }
+                print("🌐 Import: Finished adding all photos")
+            }
+        } else {
+            if photoCount > 0 {
+                messageParts.append("\(photoCount) photo\(photoCount == 1 ? "" : "s")")
+            }
+            importResult = ImportResult(
+                success: true,
+                message: "Successfully imported \(messageParts.joined(separator: ", "))."
+            )
+            showingResult = true
+        }
+    }
+}
+
+// New format with collections
+private struct ImportedData: Codable {
+    let collections: [ImportedCollection]
+    let trees: [ImportedTreeData]
+}
+
+private struct ImportedCollection: Codable {
+    let id: String
+    let name: String
+    let createdAt: String?
+    let updatedAt: String?
 }
 
 // Extended import structure that supports photos
@@ -199,11 +258,13 @@ private struct ImportedTreeData: Codable {
     let rootstock: String?
     let notes: String
     let photos: [String]?  // Base64 encoded photo data
-    let photoDates: [Date]?  // Capture dates from old format
+    let photoDates: [Date]?  // Capture dates from old format (as Date)
+    let photoDateStrings: [String]?  // Capture dates from new format (as ISO8601 strings)
+    let collectionId: String?  // Reference to collection
 
     enum CodingKeys: String, CodingKey {
         case latitude, longitude, horizontalAccuracy, altitude
-        case species, variety, rootstock, notes, photos, photoDates
+        case species, variety, rootstock, notes, photos, photoDates, collectionId
     }
 
     init(from decoder: Decoder) throws {
@@ -217,7 +278,30 @@ private struct ImportedTreeData: Codable {
         rootstock = try container.decodeIfPresent(String.self, forKey: .rootstock)
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         photos = try container.decodeIfPresent([String].self, forKey: .photos)
-        photoDates = try container.decodeIfPresent([Date].self, forKey: .photoDates)
+        collectionId = try container.decodeIfPresent(String.self, forKey: .collectionId)
+
+        // Try to decode photoDates as Date array first, then as String array
+        if let dates = try? container.decodeIfPresent([Date].self, forKey: .photoDates) {
+            photoDates = dates
+            photoDateStrings = nil
+        } else if let dateStrings = try? container.decodeIfPresent([String].self, forKey: .photoDates) {
+            photoDateStrings = dateStrings
+            photoDates = nil
+        } else {
+            photoDates = nil
+            photoDateStrings = nil
+        }
+    }
+
+    func captureDate(at index: Int) -> Date? {
+        if let dates = photoDates, dates.indices.contains(index) {
+            return dates[index]
+        }
+        if let dateStrings = photoDateStrings, dateStrings.indices.contains(index) {
+            let formatter = ISO8601DateFormatter()
+            return formatter.date(from: dateStrings[index])
+        }
+        return nil
     }
 }
 

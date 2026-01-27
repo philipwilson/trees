@@ -36,10 +36,12 @@ enum ExportFormat: String, CaseIterable, Identifiable {
 
 struct ExportView: View {
     let trees: [Tree]
+    var collections: [Collection] = []
     var collectionName: String? = nil
     @Environment(\.dismiss) private var dismiss
     @State private var selectedFormat: ExportFormat = .csv
     @State private var includePhotosInJSON = false
+    @State private var includeCollections = true
     @State private var exportURL: URL?
     @State private var showingShareSheet = false
     @State private var isExporting = false
@@ -65,7 +67,14 @@ struct ExportView: View {
                     HStack {
                         Image(systemName: "tree.fill")
                             .foregroundStyle(.green)
-                        Text("\(trees.count) trees to export")
+                        Text("\(trees.count) tree\(trees.count == 1 ? "" : "s") to export")
+                    }
+                    if !collections.isEmpty {
+                        HStack {
+                            Image(systemName: "folder.fill")
+                                .foregroundStyle(.orange)
+                            Text("\(collections.count) collection\(collections.count == 1 ? "" : "s") to export")
+                        }
                     }
                 } header: {
                     Text("Summary")
@@ -101,6 +110,9 @@ struct ExportView: View {
 
                 if selectedFormat == .json {
                     Section {
+                        if !collections.isEmpty {
+                            Toggle("Include Collections", isOn: $includeCollections)
+                        }
                         Toggle("Include Photos (Base64)", isOn: $includePhotosInJSON)
                     } footer: {
                         Text("Including photos will significantly increase file size.")
@@ -145,6 +157,7 @@ struct ExportView: View {
     private func exportData() {
         isExporting = true
         let prefix = filePrefix
+        let collectionsToExport = includeCollections ? collections : []
 
         DispatchQueue.global(qos: .userInitiated).async {
             let url: URL?
@@ -153,7 +166,7 @@ struct ExportView: View {
             case .csv:
                 url = CSVExporter.exportToFile(trees: trees, filePrefix: prefix)
             case .json:
-                url = JSONExporter.exportToFile(trees: trees, includePhotos: includePhotosInJSON, filePrefix: prefix)
+                url = JSONExporter.exportToFile(trees: trees, collections: collectionsToExport, includePhotos: includePhotosInJSON, filePrefix: prefix)
             case .gpx:
                 url = GPXExporter.exportToFile(trees: trees, filePrefix: prefix)
             }

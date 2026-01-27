@@ -4,10 +4,12 @@ import SwiftData
 struct TreeListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
+    @Query(sort: \Collection.name) private var collections: [Collection]
     @State private var searchText = ""
     @State private var showingCaptureSheet = false
     @State private var showingExportSheet = false
     @State private var showingImportSheet = false
+    @State private var showingDuplicatesSheet = false
 
     var filteredTrees: [Tree] {
         if searchText.isEmpty {
@@ -56,6 +58,12 @@ struct TreeListView: View {
                             } label: {
                                 Label("Export", systemImage: "square.and.arrow.up")
                             }
+                            Divider()
+                            Button {
+                                showingDuplicatesSheet = true
+                            } label: {
+                                Label("Find Duplicates", systemImage: "doc.on.doc")
+                            }
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -73,10 +81,13 @@ struct TreeListView: View {
                 CaptureTreeView()
             }
             .sheet(isPresented: $showingExportSheet) {
-                ExportView(trees: trees)
+                ExportView(trees: trees, collections: collections)
             }
             .sheet(isPresented: $showingImportSheet) {
                 ImportTreesView()
+            }
+            .sheet(isPresented: $showingDuplicatesSheet) {
+                DuplicateTreesView()
             }
         }
     }
