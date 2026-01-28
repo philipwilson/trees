@@ -53,6 +53,7 @@
 		E8D93E973EEA26E6E0084084 /* CommonSpecies.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4507BDB8791C728BAD7DE67A /* CommonSpecies.swift */; };
 		EADECBFF7F1F068114B6E7BF /* TreesWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */; };
 		F0ECD25D6291205F476B22B1 /* CSVExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 56120BD39256244311587662 /* CSVExporter.swift */; };
+		F0F47F8A854B1ED894283B7A /* ImageDownsampler.swift in Sources */ = {isa = PBXBuildFile; fileRef = D55967246F76EEBC3747DEB7 /* ImageDownsampler.swift */; };
 		FC486FA60042D4A57696DA06 /* SpeciesTextField.swift in Sources */ = {isa = PBXBuildFile; fileRef = EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */; };
 /* End PBXBuildFile section */
 
@@ -137,6 +138,7 @@
 		CDA2EF7CEB36CD375AD55865 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D3330119D689D0F19F2C6F6B /* DuplicateTreesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateTreesView.swift; sourceTree = "<group>"; };
 		D54AC03E8041647A3A2374C8 /* TreesWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchApp.swift; sourceTree = "<group>"; };
+		D55967246F76EEBC3747DEB7 /* ImageDownsampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDownsampler.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE76365F8AFD79DA86E9B50B /* iPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSidebarView.swift; sourceTree = "<group>"; };
 		DEA89460FC189E7CEBC3771C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
@@ -279,6 +281,7 @@
 				817793E263FCDD0C5A146B35 /* TreesApp.swift */,
 				9470E5D03EFB573F9F965EB6 /* Models */,
 				27EC1899D99CC07AAA368609 /* Services */,
+				F64293943B214290B3A6778E /* Utilities */,
 				0665D2684998AB7EC0A8E32E /* Views */,
 			);
 			path = Trees;
@@ -292,6 +295,14 @@
 				5335BA670CB205F7556844DA /* JSONExporter.swift */,
 			);
 			path = Exporters;
+			sourceTree = "<group>";
+		};
+		F64293943B214290B3A6778E /* Utilities */ = {
+			isa = PBXGroup;
+			children = (
+				D55967246F76EEBC3747DEB7 /* ImageDownsampler.swift */,
+			);
+			path = Utilities;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -456,6 +467,7 @@
 				BCDB5BA7F162ADB75C8CA651 /* DuplicateTreesView.swift in Sources */,
 				54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */,
 				CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */,
+				F0F47F8A854B1ED894283B7A /* ImageDownsampler.swift in Sources */,
 				DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */,
 				3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */,
 				199474C6ABD94964118D7D5F /* ImportTreesView.swift in Sources */,

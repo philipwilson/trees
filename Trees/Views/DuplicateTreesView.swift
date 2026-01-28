@@ -124,7 +124,7 @@ struct DuplicateTreesView: View {
                     Spacer()
 
                     if let photo = tree.treePhotos.first,
-                       let uiImage = UIImage(data: photo.imageData) {
+                       let uiImage = ImageDownsampler.downsample(data: photo.imageData, maxDimension: 50) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .aspectRatio(contentMode: .fill)

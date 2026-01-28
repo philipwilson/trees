@@ -20,7 +20,7 @@ struct PhotoGalleryView: View {
         } else {
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
-                    if let uiImage = UIImage(data: photo.imageData) {
+                    if let uiImage = ImageDownsampler.downsample(data: photo.imageData, maxDimension: 120) {
                         VStack(spacing: 4) {
                             Image(uiImage: uiImage)
                                 .resizable()
@@ -125,7 +125,7 @@ struct EditablePhotoGalleryView: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
             ForEach(photos.indices, id: \.self) { index in
-                if let uiImage = UIImage(data: photos[index]) {
+                if let uiImage = ImageDownsampler.downsample(data: photos[index], maxDimension: 80) {
                     VStack(spacing: 4) {
                         ZStack(alignment: .topTrailing) {
                             Image(uiImage: uiImage)

@@ -254,7 +254,7 @@ struct NoteRowView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(note.notePhotos) { photo in
-                            if let uiImage = UIImage(data: photo.imageData) {
+                            if let uiImage = ImageDownsampler.downsample(data: photo.imageData, maxDimension: 60) {
                                 Image(uiImage: uiImage)
                                     .resizable()
                                     .aspectRatio(contentMode: .fill)

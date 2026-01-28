@@ -6,7 +6,7 @@ struct TreeRowView: View {
     var body: some View {
         HStack(spacing: 12) {
             if let firstPhoto = tree.treePhotos.first,
-               let uiImage = UIImage(data: firstPhoto.imageData) {
+               let uiImage = ImageDownsampler.downsample(data: firstPhoto.imageData, maxDimension: 50) {
                 Image(uiImage: uiImage)
                     .resizable()
                     .aspectRatio(contentMode: .fill)
