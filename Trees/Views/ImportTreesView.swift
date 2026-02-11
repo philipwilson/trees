@@ -138,13 +138,16 @@ struct ImportTreesView: View {
 
         for importedTree in trees {
             let tree = Tree(
+                id: importedTree.parsedId ?? UUID(),
                 latitude: importedTree.latitude,
                 longitude: importedTree.longitude,
                 horizontalAccuracy: importedTree.horizontalAccuracy,
                 altitude: importedTree.altitude,
                 species: importedTree.species,
                 variety: importedTree.variety,
-                rootstock: importedTree.rootstock
+                rootstock: importedTree.rootstock,
+                createdAt: importedTree.parsedCreatedAt ?? Date(),
+                updatedAt: importedTree.parsedUpdatedAt ?? Date()
             )
 
             modelContext.insert(tree)
@@ -249,6 +252,7 @@ private struct ImportedCollection: Codable {
 
 // Extended import structure that supports photos
 private struct ImportedTreeData: Codable {
+    let id: String?
     let latitude: Double
     let longitude: Double
     let horizontalAccuracy: Double
@@ -261,14 +265,18 @@ private struct ImportedTreeData: Codable {
     let photoDates: [Date]?  // Capture dates from old format (as Date)
     let photoDateStrings: [String]?  // Capture dates from new format (as ISO8601 strings)
     let collectionId: String?  // Reference to collection
+    let createdAt: String?
+    let updatedAt: String?
 
     enum CodingKeys: String, CodingKey {
-        case latitude, longitude, horizontalAccuracy, altitude
+        case id, latitude, longitude, horizontalAccuracy, altitude
         case species, variety, rootstock, notes, photos, photoDates, collectionId
+        case createdAt, updatedAt
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
         latitude = try container.decode(Double.self, forKey: .latitude)
         longitude = try container.decode(Double.self, forKey: .longitude)
         horizontalAccuracy = try container.decode(Double.self, forKey: .horizontalAccuracy)
@@ -279,6 +287,8 @@ private struct ImportedTreeData: Codable {
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         photos = try container.decodeIfPresent([String].self, forKey: .photos)
         collectionId = try container.decodeIfPresent(String.self, forKey: .collectionId)
+        createdAt = try container.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
 
         // Try to decode photoDates as Date array first, then as String array
         if let dates = try? container.decodeIfPresent([Date].self, forKey: .photoDates) {
@@ -302,6 +312,18 @@ private struct ImportedTreeData: Codable {
             return formatter.date(from: dateStrings[index])
         }
         return nil
+    }
+
+    var parsedCreatedAt: Date? {
+        createdAt.flatMap { ISO8601DateFormatter().date(from: $0) }
+    }
+
+    var parsedUpdatedAt: Date? {
+        updatedAt.flatMap { ISO8601DateFormatter().date(from: $0) }
+    }
+
+    var parsedId: UUID? {
+        id.flatMap { UUID(uuidString: $0) }
     }
 }
 

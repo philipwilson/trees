@@ -136,6 +136,11 @@ struct CaptureTreeView: View {
                     }
                 }
             }
+            .onChange(of: locationManager.authorizationStatus) { _, newStatus in
+                if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
+                    locationManager.startUpdatingLocation()
+                }
+            }
             .onDisappear {
                 locationManager.stopUpdatingLocation()
             }

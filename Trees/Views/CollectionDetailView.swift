@@ -21,7 +21,7 @@ struct CollectionDetailView: View {
     }
 
     private var collectionTrees: [Tree] {
-        collectionTrees ?? []
+        collection.trees ?? []
     }
 
     var body: some View {
@@ -174,13 +174,17 @@ struct CollectionDetailView: View {
         let sortedTrees = collectionTrees.sorted { $0.createdAt > $1.createdAt }
         for index in offsets {
             sortedTrees[index].collection = nil
+            sortedTrees[index].updatedAt = Date()
         }
+        collection.updatedAt = Date()
+        try? modelContext.save()
     }
 }
 
 struct AddTreesToCollectionView: View {
     let collection: Collection
     let availableTrees: [Tree]
+    @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTrees: Set<UUID> = []
 
@@ -211,7 +215,10 @@ struct AddTreesToCollectionView: View {
     private func addSelectedTrees() {
         for tree in availableTrees where selectedTrees.contains(tree.id) {
             tree.collection = collection
+            tree.updatedAt = Date()
         }
+        collection.updatedAt = Date()
+        try? modelContext.save()
         dismiss()
     }
 }

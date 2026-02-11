@@ -46,7 +46,10 @@ struct iPadTreeListView: View {
 
                                 if tree.collection != nil {
                                     Button {
+                                        tree.collection?.updatedAt = Date()
                                         tree.collection = nil
+                                        tree.updatedAt = Date()
+                                        try? modelContext.save()
                                     } label: {
                                         Label("Remove from Collection", systemImage: "folder.badge.minus")
                                     }

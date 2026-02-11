@@ -106,7 +106,15 @@ struct ImportCollectionView: View {
 
         do {
             let data = try Data(contentsOf: url)
-            let trees = try JSONDecoder().decode([ImportedTree].self, from: data)
+
+            // Try new format first (object with collections and trees keys)
+            let trees: [ImportedTree]
+            if let importedData = try? JSONDecoder().decode(ImportedCollectionData.self, from: data) {
+                trees = importedData.trees
+            } else {
+                // Fall back to old format (bare array of trees)
+                trees = try JSONDecoder().decode([ImportedTree].self, from: data)
+            }
 
             let collection: Collection
             if createNewCollection {
@@ -122,13 +130,16 @@ struct ImportCollectionView: View {
             var photoCount = 0
             for importedTree in trees {
                 let tree = Tree(
+                    id: importedTree.parsedId ?? UUID(),
                     latitude: importedTree.latitude,
                     longitude: importedTree.longitude,
                     horizontalAccuracy: importedTree.horizontalAccuracy,
                     altitude: importedTree.altitude,
                     species: importedTree.species,
                     variety: importedTree.variety,
-                    rootstock: importedTree.rootstock
+                    rootstock: importedTree.rootstock,
+                    createdAt: importedTree.parsedCreatedAt ?? Date(),
+                    updatedAt: importedTree.parsedUpdatedAt ?? Date()
                 )
                 tree.collection = collection
                 modelContext.insert(tree)
@@ -142,9 +153,7 @@ struct ImportCollectionView: View {
                 if let photosBase64 = importedTree.photos {
                     for (index, photoString) in photosBase64.enumerated() {
                         if let photoData = Data(base64Encoded: photoString) {
-                            let captureDate = importedTree.photoDates?.indices.contains(index) == true
-                                ? importedTree.photoDates?[index]
-                                : nil
+                            let captureDate = importedTree.captureDate(at: index)
                             tree.addPhoto(photoData, capturedAt: captureDate)
                             photoCount += 1
                         }
@@ -172,7 +181,19 @@ struct ImportResult {
     let message: String
 }
 
+// New format: top-level object with collections and trees
+struct ImportedCollectionData: Codable {
+    let collections: [ImportedCollectionInfo]
+    let trees: [ImportedTree]
+}
+
+struct ImportedCollectionInfo: Codable {
+    let id: String
+    let name: String
+}
+
 struct ImportedTree: Codable {
+    let id: String?
     let latitude: Double
     let longitude: Double
     let horizontalAccuracy: Double
@@ -182,15 +203,20 @@ struct ImportedTree: Codable {
     let rootstock: String?
     let notes: String
     let photos: [String]?  // Base64 encoded photo data
-    let photoDates: [Date]?  // Capture dates from old format
+    let photoDates: [Date]?  // Capture dates (Date format)
+    let photoDateStrings: [String]?  // Capture dates (ISO8601 string format)
+    let createdAt: String?
+    let updatedAt: String?
 
     enum CodingKeys: String, CodingKey {
-        case latitude, longitude, horizontalAccuracy, altitude
+        case id, latitude, longitude, horizontalAccuracy, altitude
         case species, variety, rootstock, notes, photos, photoDates
+        case createdAt, updatedAt
     }
 
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
+        id = try container.decodeIfPresent(String.self, forKey: .id)
         latitude = try container.decode(Double.self, forKey: .latitude)
         longitude = try container.decode(Double.self, forKey: .longitude)
         horizontalAccuracy = try container.decode(Double.self, forKey: .horizontalAccuracy)
@@ -200,7 +226,46 @@ struct ImportedTree: Codable {
         rootstock = try container.decodeIfPresent(String.self, forKey: .rootstock)
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         photos = try container.decodeIfPresent([String].self, forKey: .photos)
-        photoDates = try container.decodeIfPresent([Date].self, forKey: .photoDates)
+        createdAt = try container.decodeIfPresent(String.self, forKey: .createdAt)
+        updatedAt = try container.decodeIfPresent(String.self, forKey: .updatedAt)
+
+        // Try to decode photoDates as Date array first, then as String array
+        if let dates = try? container.decodeIfPresent([Date].self, forKey: .photoDates) {
+            photoDates = dates
+            photoDateStrings = nil
+        } else if let dateStrings = try? container.decodeIfPresent([String].self, forKey: .photoDates) {
+            photoDateStrings = dateStrings
+            photoDates = nil
+        } else {
+            photoDates = nil
+            photoDateStrings = nil
+        }
+    }
+
+    func captureDate(at index: Int) -> Date? {
+        if let dates = photoDates, dates.indices.contains(index) {
+            return dates[index]
+        }
+        if let dateStrings = photoDateStrings, dateStrings.indices.contains(index) {
+            let formatter = ISO8601DateFormatter()
+            return formatter.date(from: dateStrings[index])
+        }
+        return nil
+    }
+
+    /// Parse the ISO8601 createdAt string into a Date
+    var parsedCreatedAt: Date? {
+        createdAt.flatMap { ISO8601DateFormatter().date(from: $0) }
+    }
+
+    /// Parse the ISO8601 updatedAt string into a Date
+    var parsedUpdatedAt: Date? {
+        updatedAt.flatMap { ISO8601DateFormatter().date(from: $0) }
+    }
+
+    /// Parse the id string into a UUID
+    var parsedId: UUID? {
+        id.flatMap { UUID(uuidString: $0) }
     }
 }
 

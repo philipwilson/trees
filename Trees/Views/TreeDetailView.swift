@@ -205,6 +205,12 @@ struct TreeDetailView: View {
         tree.species = editSpecies
         tree.variety = editVariety.isEmpty ? nil : editVariety
         tree.rootstock = editRootstock.isEmpty ? nil : editRootstock
+
+        // Update collection timestamps if collection changed
+        if tree.collection?.id != editCollection?.id {
+            tree.collection?.updatedAt = Date()
+            editCollection?.updatedAt = Date()
+        }
         tree.collection = editCollection
 
         // Add new photos as Photo entities
@@ -214,6 +220,7 @@ struct TreeDetailView: View {
         }
 
         tree.updatedAt = Date()
+        try? modelContext.save()
         newPhotos = []
         newPhotoDates = []
     }

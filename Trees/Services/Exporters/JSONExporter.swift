@@ -47,8 +47,8 @@ struct JSONExporter {
             // Combine all notes into a single string
             let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
 
-            // Get all photos from tree (direct photos only for export)
-            let treePhotos = tree.treePhotos
+            // Get all photos from tree (including note photos)
+            let treePhotos = tree.allPhotos
 
             return ExportedTree(
                 id: tree.id.uuidString,

@@ -81,26 +81,21 @@ struct SpeciesTextField: View {
         showingSuggestions = !suggestions.isEmpty
     }
 
-    /// Load species list once on appear in background
+    /// Load species list once on appear
     private func loadSpecies() {
         // Start with common species immediately
         allSpecies = commonSpecies.sorted()
 
-        // Fetch existing species in background to avoid blocking UI
-        Task.detached(priority: .background) {
+        // Fetch existing species on the main actor where modelContext is valid
+        Task { @MainActor in
             var descriptor = FetchDescriptor<Tree>()
-            // Only fetch the properties we need, not relationships
             descriptor.propertiesToFetch = [\.species]
 
             do {
                 let trees = try modelContext.fetch(descriptor)
                 let existingSpecies = Set(trees.map { $0.species }.filter { !$0.isEmpty })
                 let combined = existingSpecies.union(Set(commonSpecies))
-                let sorted = combined.sorted()
-
-                await MainActor.run {
-                    allSpecies = sorted
-                }
+                allSpecies = combined.sorted()
             } catch {
                 // Keep using common species on error
             }

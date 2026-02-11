@@ -11,6 +11,7 @@ class Tree {
     var species: String = ""
     var variety: String?
     var rootstock: String?
+    @Relationship
     var collection: Collection?
     var createdAt: Date = Date()
     var updatedAt: Date = Date()
