@@ -12,6 +12,8 @@ settings:
   base:
     SWIFT_VERSION: "5.9"
     GENERATE_INFOPLIST_FILE: true
+    MARKETING_VERSION: "1.0.0"
+    CURRENT_PROJECT_VERSION: "1"
 
 targets:
   Trees:
@@ -64,8 +66,12 @@ targets:
         CODE_SIGN_STYLE: Automatic
         CODE_SIGN_ENTITLEMENTS: Trees/Trees.entitlements
         DEVELOPMENT_TEAM: 3L3ASPMXH9
-        MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "1"
+    postBuildScripts:
+      - script: |
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER}" "${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
+        name: Set Build Number from Git
+        basedOnDependencyAnalysis: false
     dependencies:
       - target: TreesWatch
         embed: true
@@ -104,8 +110,12 @@ targets:
         CODE_SIGN_STYLE: Automatic
         DEVELOPMENT_TEAM: 3L3ASPMXH9
         WATCHOS_DEPLOYMENT_TARGET: "11.0"
-        MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "1"
+    postBuildScripts:
+      - script: |
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER}" "${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
+        name: Set Build Number from Git
+        basedOnDependencyAnalysis: false
     dependencies:
       - target: TreesWatchWidget
         embed: true
@@ -136,8 +146,12 @@ targets:
         WATCHOS_DEPLOYMENT_TARGET: "11.0"
         SKIP_INSTALL: true
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
-        MARKETING_VERSION: "1.0"
-        CURRENT_PROJECT_VERSION: "1"
+    postBuildScripts:
+      - script: |
+          BUILD_NUMBER=$(git rev-list --count HEAD)
+          /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER}" "${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
+        name: Set Build Number from Git
+        basedOnDependencyAnalysis: false
 
 schemes:
   Trees:
