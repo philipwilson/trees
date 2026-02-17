@@ -209,6 +209,12 @@ struct CaptureTreeView: View {
             _ = tree.addNote(text: trimmedNote)
         }
 
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save new tree: \(error)")
+        }
+
         dismiss()
     }
 }
