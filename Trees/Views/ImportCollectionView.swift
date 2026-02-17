@@ -104,6 +104,9 @@ struct ImportCollectionView: View {
         }
         defer { url.stopAccessingSecurityScopedResource() }
 
+        var insertedTrees: [Tree] = []
+        var newCollection: Collection?
+
         do {
             let data = try Data(contentsOf: url)
 
@@ -121,6 +124,7 @@ struct ImportCollectionView: View {
                 let name = collectionName.trimmingCharacters(in: .whitespacesAndNewlines)
                 collection = Collection(name: name)
                 modelContext.insert(collection)
+                newCollection = collection
             } else {
                 guard let selected = selectedCollection else { return }
                 collection = selected
@@ -171,6 +175,7 @@ struct ImportCollectionView: View {
                 )
                 tree.collection = collection
                 modelContext.insert(tree)
+                insertedTrees.append(tree)
 
                 // Add notes as a Note entity if provided
                 if !importedTree.notes.isEmpty {
@@ -212,6 +217,13 @@ struct ImportCollectionView: View {
             showingResult = true
 
         } catch {
+            // Roll back inserted objects so they don't persist via a later autosave
+            for tree in insertedTrees {
+                modelContext.delete(tree)
+            }
+            if let collection = newCollection {
+                modelContext.delete(collection)
+            }
             importResult = ImportResult(success: false, message: "Import failed: \(error.localizedDescription)")
             showingResult = true
         }

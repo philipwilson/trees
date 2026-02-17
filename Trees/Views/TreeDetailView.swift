@@ -168,13 +168,25 @@ struct TreeDetailView: View {
         .navigationTitle(tree.species.isEmpty ? "Tree Details" : tree.species)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(isEditing ? "Done" : "Edit") {
-                    if isEditing {
+            if isEditing {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") {
+                        isEditing = false
+                        newPhotos = []
+                        newPhotoDates = []
+                    }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Done") {
                         if saveEdits() {
                             isEditing = false
                         }
-                    } else {
+                    }
+                    .fontWeight(.semibold)
+                }
+            } else {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button("Edit") {
                         loadEditState()
                         isEditing = true
                     }

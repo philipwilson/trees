@@ -51,6 +51,9 @@ struct SpeciesTextField: View {
         .onAppear {
             loadSpecies()
         }
+        .onDisappear {
+            filterTask?.cancel()
+        }
     }
 
     /// Debounce filtering to avoid lag on every keystroke

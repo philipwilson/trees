@@ -2,7 +2,7 @@ import SwiftUI
 
 struct PhotoGalleryView: View {
     let photos: [Photo]
-    @State private var selectedPhotoIndex: Int?
+    @State private var selectedPhoto: Photo?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var columns: [GridItem] {
@@ -19,7 +19,7 @@ struct PhotoGalleryView: View {
             )
         } else {
             LazyVGrid(columns: columns, spacing: 8) {
-                ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
+                ForEach(photos) { photo in
                     if let uiImage = ImageDownsampler.downsample(data: photo.imageData, maxDimension: 120) {
                         VStack(spacing: 4) {
                             Image(uiImage: uiImage)
@@ -29,7 +29,7 @@ struct PhotoGalleryView: View {
                                 .clipped()
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
                                 .onTapGesture {
-                                    selectedPhotoIndex = index
+                                    selectedPhoto = photo
                                 }
 
                             if let captureDate = photo.captureDate {
@@ -41,44 +41,42 @@ struct PhotoGalleryView: View {
                     }
                 }
             }
-            .fullScreenCover(item: $selectedPhotoIndex) { index in
-                PhotoDetailView(photos: photos, initialIndex: index)
+            .fullScreenCover(item: $selectedPhoto) { photo in
+                PhotoDetailView(photos: photos, initialPhoto: photo)
             }
         }
     }
 }
 
-extension Int: @retroactive Identifiable {
-    public var id: Int { self }
-}
-
 struct PhotoDetailView: View {
     let photos: [Photo]
-    let initialIndex: Int
-    @State private var currentIndex: Int
+    @State private var currentPhotoID: UUID
     @Environment(\.dismiss) private var dismiss
 
-    init(photos: [Photo], initialIndex: Int) {
+    init(photos: [Photo], initialPhoto: Photo) {
         self.photos = photos
-        self.initialIndex = initialIndex
-        _currentIndex = State(initialValue: initialIndex)
+        _currentPhotoID = State(initialValue: initialPhoto.id)
+    }
+
+    private var currentIndex: Int {
+        photos.firstIndex(where: { $0.id == currentPhotoID }) ?? 0
     }
 
     private var currentDateString: String? {
-        guard currentIndex < photos.count,
-              let date = photos[currentIndex].captureDate else { return nil }
+        guard let photo = photos.first(where: { $0.id == currentPhotoID }),
+              let date = photo.captureDate else { return nil }
         return date.formatted(date: .abbreviated, time: .shortened)
     }
 
     var body: some View {
         NavigationStack {
-            TabView(selection: $currentIndex) {
-                ForEach(Array(photos.enumerated()), id: \.element.id) { index, photo in
+            TabView(selection: $currentPhotoID) {
+                ForEach(photos) { photo in
                     if let uiImage = UIImage(data: photo.imageData) {
                         Image(uiImage: uiImage)
                             .resizable()
                             .aspectRatio(contentMode: .fit)
-                            .tag(index)
+                            .tag(photo.id)
                     }
                 }
             }

@@ -158,20 +158,23 @@ struct ExportView: View {
         isExporting = true
         let prefix = filePrefix
         let collectionsToExport = includeCollections ? collections : []
+        let format = selectedFormat
+        let treesToExport = trees
+        let includePhotos = includePhotosInJSON
 
-        DispatchQueue.global(qos: .userInitiated).async {
+        Task.detached {
             let url: URL?
 
-            switch selectedFormat {
+            switch format {
             case .csv:
-                url = CSVExporter.exportToFile(trees: trees, filePrefix: prefix)
+                url = CSVExporter.exportToFile(trees: treesToExport, filePrefix: prefix)
             case .json:
-                url = JSONExporter.exportToFile(trees: trees, collections: collectionsToExport, includePhotos: includePhotosInJSON, filePrefix: prefix)
+                url = JSONExporter.exportToFile(trees: treesToExport, collections: collectionsToExport, includePhotos: includePhotos, filePrefix: prefix)
             case .gpx:
-                url = GPXExporter.exportToFile(trees: trees, filePrefix: prefix)
+                url = GPXExporter.exportToFile(trees: treesToExport, filePrefix: prefix)
             }
 
-            DispatchQueue.main.async {
+            await MainActor.run {
                 isExporting = false
                 if let url = url {
                     exportURL = url

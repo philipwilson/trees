@@ -189,11 +189,11 @@ struct DuplicateTreesView: View {
 
     private func findDuplicates() {
         // Group trees by rounded coordinates + species
-        // Using 5 decimal places (~1 meter precision)
+        // Using 4 decimal places (~11 meter precision) to account for GPS accuracy
         var groups: [String: [Tree]] = [:]
 
         for tree in trees {
-            let key = String(format: "%.5f,%.5f,%@",
+            let key = String(format: "%.4f,%.4f,%@",
                            tree.latitude,
                            tree.longitude,
                            tree.species.lowercased().trimmingCharacters(in: .whitespaces))
