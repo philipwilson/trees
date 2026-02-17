@@ -147,7 +147,8 @@ ContentView (TabView)
 │   │   └── → AddNoteView (sheet)
 │   ├── → CaptureTreeView (sheet)
 │   ├── → ExportView (sheet)
-│   └── → ImportTreesView (sheet)
+│   ├── → ImportTreesView (sheet)
+│   └── → DuplicateTreesView (sheet)
 │
 ├── Tab 2: CollectionListView
 │   ├── → CollectionDetailView (navigation destination)
@@ -187,6 +188,7 @@ ContentView (NavigationSplitView)
 | `ExportView` | Format selection (CSV/JSON/GPX) and share sheet |
 | `ImportTreesView` | Import trees from JSON with photo import options |
 | `ImportCollectionView` | Parse JSON export into new collection |
+| `DuplicateTreesView` | Find and delete duplicate trees by location + species |
 | `AddNoteView` | Add new note with optional photos to a tree |
 
 ### Reusable Components
@@ -201,6 +203,7 @@ ContentView (NavigationSplitView)
 | `ImagePicker` | UIImagePickerController wrapper |
 | `SpeciesTextField` | Text field with autocomplete from preset + used species |
 | `NoteRowView` | Displays a Note with date, text, and thumbnail photos |
+| `ImageDownsampler` | Memory-efficient thumbnail creation with NSCache |
 
 ## Services
 
@@ -240,7 +243,7 @@ All exporters combine multiple notes into a single text field for compatibility:
 let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
 ```
 
-Files are written to the app's cache directory with timestamped filenames.
+Files are written to the app's temporary directory with timestamped filenames.
 
 ### WatchConnectivityManager
 
@@ -250,9 +253,9 @@ Shared service (in `Shared/`) handling iPhone ↔ Watch communication via `WCSes
 @Observable
 class WatchConnectivityManager: NSObject, WCSessionDelegate {
     static let shared = WatchConnectivityManager()
-    var pendingTrees: [WatchTree]  // Queue for offline sync
+    var pendingTrees: [WatchTree]  // Queue for offline sync (capped at 100)
 
-    func sendTree(_ tree: WatchTree)  // Watch → iPhone
+    func sendTree(_ tree: WatchTree)  // Watch → iPhone (main thread only)
     func activate()                    // Called on app launch
 }
 ```
@@ -320,7 +323,7 @@ struct WatchTree: Codable, Identifiable {
 |------|---------|
 | `ContentView` | Large "Capture Tree" button, last capture info, pending sync count |
 | `CaptureView` | GPS capture flow with accuracy ring, species picker, notes |
-| `SpeciesPickerView` | List of 40+ species with search and voice dictation |
+| `SpeciesPickerView` | List of 50+ species with search and voice dictation |
 | `AccuracyRingView` | Circular progress showing GPS accuracy status |
 
 ### WatchLocationManager
@@ -446,7 +449,8 @@ Trees/                              # iOS App
 │   ├── Tree.swift                 # Tree entity + computed properties
 │   ├── Photo.swift                # Photo entity (single asset)
 │   ├── Note.swift                 # Note entity with photos
-│   └── Collection.swift           # Collection entity
+│   ├── Collection.swift           # Collection entity
+│   └── TreesSchema.swift          # Versioned schema + migration plan
 ├── Services/
 │   ├── LocationManager.swift      # Core Location wrapper
 │   ├── WatchTreeImporter.swift    # Convert WatchTree → Tree + Note
@@ -454,6 +458,8 @@ Trees/                              # iOS App
 │       ├── CSVExporter.swift
 │       ├── JSONExporter.swift
 │       └── GPXExporter.swift
+├── Utilities/
+│   └── ImageDownsampler.swift     # Thumbnail creation with NSCache
 ├── Views/
 │   ├── ContentView.swift          # TabView/SplitView root
 │   ├── TreeListView.swift
@@ -466,6 +472,7 @@ Trees/                              # iOS App
 │   ├── CollectionDetailView.swift
 │   ├── ImportCollectionView.swift
 │   ├── ImportTreesView.swift
+│   ├── DuplicateTreesView.swift   # Find and delete duplicate trees
 │   ├── iPad/                      # iPad-specific views
 │   │   ├── iPadContentView.swift
 │   │   ├── iPadSidebarView.swift
@@ -482,7 +489,7 @@ Trees/                              # iOS App
 Shared/                             # Shared between iOS and watchOS
 ├── WatchConnectivityManager.swift  # WCSession wrapper
 ├── WatchTree.swift                 # Codable transfer struct
-└── CommonSpecies.swift             # Preset species list (40+)
+└── CommonSpecies.swift             # Preset species list (50+)
 
 TreesWatch/                         # watchOS App
 ├── TreesWatchApp.swift             # Watch app entry
@@ -552,12 +559,16 @@ Examples:
 
 ### Configuration
 
-CloudKit sync enabled via SwiftData's `cloudKitDatabase` configuration:
+CloudKit sync enabled via SwiftData's `cloudKitDatabase` configuration. If CloudKit initialization fails, the app falls back to local-only storage automatically:
 ```swift
+// Primary: CloudKit-backed
 ModelConfiguration(
     schema: schema,
     cloudKitDatabase: .private("iCloud.com.treetracker.Trees")
 )
+
+// Fallback: local-only (if CloudKit fails)
+ModelConfiguration(schema: schema)
 ```
 
 ### CloudKit Record Types
@@ -581,5 +592,5 @@ The app is fully offline-capable:
 - SwiftData persists all data locally
 - Photos stored as binary data, not URLs
 - No network requests required for core functionality
-- Export files saved locally before sharing
+- Export files written to temporary directory before sharing
 - CloudKit syncs when connectivity restored
