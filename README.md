@@ -18,7 +18,13 @@ An iOS app for capturing precise GPS locations of trees. Built for orchardists, 
 
 ## Screenshots
 
-*Coming soon*
+| Tree List | Tree Detail | Map View |
+|:-:|:-:|:-:|
+| ![Tree List](Screenshots/tree-list.png) | ![Tree Detail](Screenshots/tree-detail.png) | ![Map View](Screenshots/map.png) |
+
+| Collections | Capture Tree |
+|:-:|:-:|
+| ![Collections](Screenshots/collections.png) | ![Capture Tree](Screenshots/capture.png) |
 
 ## Requirements
 
