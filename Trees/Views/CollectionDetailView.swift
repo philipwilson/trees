@@ -12,6 +12,7 @@ struct CollectionDetailView: View {
     @State private var showingAddTreesSheet = false
     @State private var showingDeleteConfirmation = false
     @State private var showingCaptureSheet = false
+    @State private var saveErrorMessage: String?
 
     // Local editing state to avoid lag from SwiftData updates on every keystroke
     @State private var editName = ""
@@ -159,6 +160,11 @@ struct CollectionDetailView: View {
         .sheet(isPresented: $showingCaptureSheet) {
             CaptureTreeView(preselectedCollection: collection)
         }
+        .alert("Save Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
+            Button("OK") { saveErrorMessage = nil }
+        } message: {
+            if let msg = saveErrorMessage { Text(msg) }
+        }
         .confirmationDialog("Delete Collection", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
                 modelContext.delete(collection)
@@ -180,6 +186,7 @@ struct CollectionDetailView: View {
         do {
             try modelContext.save()
         } catch {
+            saveErrorMessage = "Could not save changes. Please try again."
             print("Failed to remove trees from collection \(collection.id): \(error)")
         }
     }
@@ -191,6 +198,7 @@ struct AddTreesToCollectionView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @State private var selectedTrees: Set<UUID> = []
+    @State private var saveErrorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -213,6 +221,11 @@ struct AddTreesToCollectionView: View {
                     .disabled(selectedTrees.isEmpty)
                 }
             }
+            .alert("Save Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
+                Button("OK") { saveErrorMessage = nil }
+            } message: {
+                if let msg = saveErrorMessage { Text(msg) }
+            }
         }
     }
 
@@ -224,10 +237,11 @@ struct AddTreesToCollectionView: View {
         collection.updatedAt = Date()
         do {
             try modelContext.save()
+            dismiss()
         } catch {
+            saveErrorMessage = "Could not add trees to collection. Please try again."
             print("Failed to add trees to collection \(collection.id): \(error)")
         }
-        dismiss()
     }
 }
 

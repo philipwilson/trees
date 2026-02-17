@@ -10,6 +10,7 @@ struct TreeDetailView: View {
     @State private var isEditing = false
     @State private var showingDeleteConfirmation = false
     @State private var showingAddNote = false
+    @State private var saveErrorMessage: String?
 
     // Local editing state - only synced to tree on save
     @State private var editSpecies = ""
@@ -170,13 +171,20 @@ struct TreeDetailView: View {
             ToolbarItem(placement: .topBarTrailing) {
                 Button(isEditing ? "Done" : "Edit") {
                     if isEditing {
-                        saveEdits()
+                        if saveEdits() {
+                            isEditing = false
+                        }
                     } else {
                         loadEditState()
+                        isEditing = true
                     }
-                    isEditing.toggle()
                 }
             }
+        }
+        .alert("Save Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
+            Button("OK") { saveErrorMessage = nil }
+        } message: {
+            if let msg = saveErrorMessage { Text(msg) }
         }
         .confirmationDialog("Delete Tree", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
@@ -201,7 +209,8 @@ struct TreeDetailView: View {
         newPhotoDates = []
     }
 
-    private func saveEdits() {
+    @discardableResult
+    private func saveEdits() -> Bool {
         tree.species = editSpecies
         tree.variety = editVariety.isEmpty ? nil : editVariety
         tree.rootstock = editRootstock.isEmpty ? nil : editRootstock
@@ -222,11 +231,14 @@ struct TreeDetailView: View {
         tree.updatedAt = Date()
         do {
             try modelContext.save()
+            newPhotos = []
+            newPhotoDates = []
+            return true
         } catch {
+            saveErrorMessage = "Could not save changes. Please try again."
             print("Failed to save tree edits for \(tree.id): \(error)")
+            return false
         }
-        newPhotos = []
-        newPhotoDates = []
     }
 
     private func deleteNotes(at offsets: IndexSet) {

@@ -127,13 +127,26 @@ struct ImportCollectionView: View {
             }
 
             var importedCount = 0
+            var skippedCount = 0
             var photoCount = 0
             var remappedIDCount = 0
             var seenImportedIDs = Set<UUID>()
+
+            // Batch-fetch all existing tree IDs to avoid N+1 queries
+            let existingIDs = fetchAllTreeIDs()
+
             for importedTree in trees {
+                // Validate GPS coordinates
+                guard importedTree.latitude >= -90 && importedTree.latitude <= 90 &&
+                      importedTree.longitude >= -180 && importedTree.longitude <= 180 &&
+                      importedTree.horizontalAccuracy >= 0 else {
+                    skippedCount += 1
+                    continue
+                }
+
                 let resolvedID: UUID
                 if let parsedID = importedTree.parsedId {
-                    if seenImportedIDs.contains(parsedID) || treeIDExists(parsedID) {
+                    if seenImportedIDs.contains(parsedID) || existingIDs.contains(parsedID) {
                         resolvedID = UUID()
                         remappedIDCount += 1
                     } else {
@@ -180,9 +193,21 @@ struct ImportCollectionView: View {
 
             try modelContext.save()
 
+            var details: [String] = []
+            if photoCount > 0 {
+                details.append("with \(photoCount) photos")
+            }
+            if remappedIDCount > 0 {
+                details.append("\(remappedIDCount) ID\(remappedIDCount == 1 ? "" : "s") regenerated")
+            }
+            if skippedCount > 0 {
+                details.append("\(skippedCount) skipped (invalid coordinates)")
+            }
+            let detailSuffix = details.isEmpty ? "" : " (\(details.joined(separator: ", ")))"
+
             importResult = ImportResult(
                 success: true,
-                message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(photoCount > 0 ? " with \(photoCount) photos" : "")\(remappedIDCount > 0 ? " (\(remappedIDCount) ID\(remappedIDCount == 1 ? "" : "s") regenerated)" : "") into \"\(collection.name)\"."
+                message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(detailSuffix) into \"\(collection.name)\"."
             )
             showingResult = true
 
@@ -192,16 +217,15 @@ struct ImportCollectionView: View {
         }
     }
 
-    private func treeIDExists(_ id: UUID) -> Bool {
-        let descriptor = FetchDescriptor<Tree>(
-            predicate: #Predicate { $0.id == id }
-        )
+    private func fetchAllTreeIDs() -> Set<UUID> {
+        var descriptor = FetchDescriptor<Tree>()
+        descriptor.propertiesToFetch = [\.id]
         do {
-            return !(try modelContext.fetch(descriptor)).isEmpty
+            let trees = try modelContext.fetch(descriptor)
+            return Set(trees.map(\.id))
         } catch {
-            print("Collection import ID check failed for \(id): \(error)")
-            // Fail-safe: treat as existing so we regenerate an ID instead of risking conflict.
-            return true
+            print("Collection import: Failed to fetch existing tree IDs: \(error)")
+            return []
         }
     }
 }

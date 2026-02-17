@@ -34,8 +34,9 @@ final class WatchConnectivityManager: NSObject {
     }
 
     #if os(watchOS)
-    /// Send a captured tree to the iPhone
+    /// Send a captured tree to the iPhone. Must be called on the main thread.
     func sendTree(_ tree: WatchTree) {
+        assert(Thread.isMainThread, "sendTree must be called on the main thread")
         guard let session = session, session.activationState == .activated else {
             enqueuePendingTree(tree)
             return
@@ -54,8 +55,9 @@ final class WatchConnectivityManager: NSObject {
         }
     }
 
-    /// Retry sending any pending trees
+    /// Retry sending any pending trees. Must be called on the main thread.
     func retrySendingPendingTrees() {
+        assert(Thread.isMainThread, "retrySendingPendingTrees must be called on the main thread")
         guard let session = session, session.activationState == .activated else { return }
 
         let treesToSend = pendingTrees

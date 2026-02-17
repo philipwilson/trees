@@ -6,6 +6,7 @@ struct iPadTreeListView: View {
     @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
     @Binding var selectedTree: Tree?
     @State private var searchText = ""
+    @State private var saveErrorMessage: String?
 
     var onCapture: () -> Void
     var onExport: () -> Void
@@ -52,6 +53,7 @@ struct iPadTreeListView: View {
                                         do {
                                             try modelContext.save()
                                         } catch {
+                                            saveErrorMessage = "Could not save changes. Please try again."
                                             print("Failed to remove tree \(tree.id) from collection: \(error)")
                                         }
                                     } label: {
@@ -75,6 +77,11 @@ struct iPadTreeListView: View {
                 }
                 .searchable(text: $searchText, prompt: "Search species or notes")
             }
+        }
+        .alert("Save Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
+            Button("OK") { saveErrorMessage = nil }
+        } message: {
+            if let msg = saveErrorMessage { Text(msg) }
         }
         .navigationTitle("Trees")
         .toolbar {

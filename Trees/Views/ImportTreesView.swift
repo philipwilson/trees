@@ -137,15 +137,27 @@ struct ImportTreesView: View {
 
     private func importTrees(_ trees: [ImportedTreeData], collectionMap: [String: Collection], collectionCount: Int = 0) {
         var importedCount = 0
+        var skippedCount = 0
         var photoCount = 0
         var remappedIDCount = 0
         var seenImportedIDs = Set<UUID>()
         var treesWithPhotos: [(Tree, [(Data, Date?)])] = []
 
+        // Batch-fetch all existing tree IDs to avoid N+1 queries
+        let existingIDs = fetchAllTreeIDs()
+
         for importedTree in trees {
+            // Validate GPS coordinates
+            guard importedTree.latitude >= -90 && importedTree.latitude <= 90 &&
+                  importedTree.longitude >= -180 && importedTree.longitude <= 180 &&
+                  importedTree.horizontalAccuracy >= 0 else {
+                skippedCount += 1
+                continue
+            }
+
             let resolvedID: UUID
             if let parsedID = importedTree.parsedId {
-                if seenImportedIDs.contains(parsedID) || treeIDExists(parsedID) {
+                if seenImportedIDs.contains(parsedID) || existingIDs.contains(parsedID) {
                     resolvedID = UUID()
                     remappedIDCount += 1
                 } else {
@@ -227,6 +239,9 @@ struct ImportTreesView: View {
         if remappedIDCount > 0 {
             messageParts.append("\(remappedIDCount) ID\(remappedIDCount == 1 ? "" : "s") regenerated")
         }
+        if skippedCount > 0 {
+            messageParts.append("\(skippedCount) skipped (invalid coordinates)")
+        }
 
         // For delayed mode, add photos one tree at a time with delays
         if photoImportMode == .withDelay && !treesWithPhotos.isEmpty {
@@ -287,16 +302,15 @@ struct ImportTreesView: View {
         }
     }
 
-    private func treeIDExists(_ id: UUID) -> Bool {
-        let descriptor = FetchDescriptor<Tree>(
-            predicate: #Predicate { $0.id == id }
-        )
+    private func fetchAllTreeIDs() -> Set<UUID> {
+        var descriptor = FetchDescriptor<Tree>()
+        descriptor.propertiesToFetch = [\.id]
         do {
-            return !(try modelContext.fetch(descriptor)).isEmpty
+            let trees = try modelContext.fetch(descriptor)
+            return Set(trees.map(\.id))
         } catch {
-            print("🌐 Import: Failed to check existing ID \(id): \(error)")
-            // Fail-safe: treat as existing so we regenerate an ID instead of risking conflict.
-            return true
+            print("🌐 Import: Failed to fetch existing tree IDs: \(error)")
+            return []
         }
     }
 }
