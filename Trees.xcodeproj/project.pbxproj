@@ -15,6 +15,7 @@
 		2054BD516F84B6FF0A7A2CCD /* iPadMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3FB447157EC6C8F325BF071 /* iPadMapView.swift */; };
 		2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE000A01E50BF4C4432D684 /* ContentView.swift */; };
 		36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */; };
+		39CF7080C979530B2D72DEA7 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = B08E631A415E008E5BEF5AA0 /* Settings.bundle */; };
 		3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FA182424DEA3343BD6C1ACF /* ImportCollectionView.swift */; };
 		3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 817793E263FCDD0C5A146B35 /* TreesApp.swift */; };
 		402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -132,6 +133,7 @@
 		9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
 		9FC480362398E233AA910840 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		A4082492E29F2EE4E73C6FEB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		B08E631A415E008E5BEF5AA0 /* Settings.bundle */ = {isa = PBXFileReference; lastKnownFileType = wrapper.cfbundle; path = Settings.bundle; sourceTree = "<group>"; };
 		B4D06A53E5F7477F6B192AB9 /* iPadTreeListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadTreeListView.swift; sourceTree = "<group>"; };
 		BA501EF33874C584E39F8F8F /* ImagePicker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImagePicker.swift; sourceTree = "<group>"; };
 		C385534E9EFC669280796C68 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -280,6 +282,7 @@
 			children = (
 				D622F80312FFD765AB887763 /* Assets.xcassets */,
 				9FC480362398E233AA910840 /* Info.plist */,
+				B08E631A415E008E5BEF5AA0 /* Settings.bundle */,
 				90BB573F33485C488B3F53E5 /* Trees.entitlements */,
 				817793E263FCDD0C5A146B35 /* TreesApp.swift */,
 				9470E5D03EFB573F9F965EB6 /* Models */,
@@ -422,6 +425,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				9A5889B04F1AA99705144D3A /* Assets.xcassets in Resources */,
+				39CF7080C979530B2D72DEA7 /* Settings.bundle in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -461,7 +465,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "BUILD_NUMBER=$(git rev-list --count HEAD)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${BUILD_NUMBER}\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n";
+			shellScript = "BUILD_NUMBER=$(git rev-list --count HEAD)\n/usr/libexec/PlistBuddy -c \"Set :CFBundleVersion ${BUILD_NUMBER}\" \"${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}\"\n# Stamp version into Settings.bundle\nSETTINGS_PLIST=\"${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Settings.bundle/Root.plist\"\nif [ -f \"${SETTINGS_PLIST}\" ]; then\n  /usr/libexec/PlistBuddy -c \"Set :PreferenceSpecifiers:1:DefaultValue ${MARKETING_VERSION} (${BUILD_NUMBER})\" \"${SETTINGS_PLIST}\"\nfi\n";
 		};
 		6A7624A206EAEE4911B147C8 /* Set Build Number from Git */ = {
 			isa = PBXShellScriptBuildPhase;

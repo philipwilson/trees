@@ -70,6 +70,11 @@ targets:
       - script: |
           BUILD_NUMBER=$(git rev-list --count HEAD)
           /usr/libexec/PlistBuddy -c "Set :CFBundleVersion ${BUILD_NUMBER}" "${BUILT_PRODUCTS_DIR}/${INFOPLIST_PATH}"
+          # Stamp version into Settings.bundle
+          SETTINGS_PLIST="${BUILT_PRODUCTS_DIR}/${PRODUCT_NAME}.app/Settings.bundle/Root.plist"
+          if [ -f "${SETTINGS_PLIST}" ]; then
+            /usr/libexec/PlistBuddy -c "Set :PreferenceSpecifiers:1:DefaultValue ${MARKETING_VERSION} (${BUILD_NUMBER})" "${SETTINGS_PLIST}"
+          fi
         name: Set Build Number from Git
         basedOnDependencyAnalysis: false
     dependencies:
