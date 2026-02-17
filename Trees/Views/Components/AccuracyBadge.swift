@@ -17,6 +17,16 @@ struct AccuracyBadge: View {
         String(format: "%.1fm", accuracy)
     }
 
+    private var qualityDescription: String {
+        if accuracy < 5 {
+            return "excellent"
+        } else if accuracy < 15 {
+            return "moderate"
+        } else {
+            return "poor"
+        }
+    }
+
     var body: some View {
         Text(label)
             .font(.caption)
@@ -26,6 +36,7 @@ struct AccuracyBadge: View {
             .background(color.opacity(0.2))
             .foregroundStyle(color)
             .clipShape(Capsule())
+            .accessibilityLabel("Accuracy \(label), \(qualityDescription)")
     }
 }
 
@@ -85,6 +96,8 @@ struct LiveAccuracyView: View {
         .padding()
         .background(Color(.systemGray6))
         .clipShape(RoundedRectangle(cornerRadius: 12))
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("\(statusText), \(displayAccuracy)")
     }
 }
 

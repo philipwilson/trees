@@ -175,6 +175,21 @@ struct AccuracyRingView: View {
             }
         }
         .frame(width: 100, height: 100)
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("GPS accuracy")
+        .accessibilityValue(accuracyAccessibilityValue)
+    }
+
+    private var accuracyAccessibilityValue: String {
+        guard let accuracy = accuracy, accuracy > 0 else {
+            return isUpdating ? "Acquiring signal" : "No signal"
+        }
+        let quality: String
+        if accuracy < 5 { quality = "excellent" }
+        else if accuracy < 15 { quality = "good" }
+        else if accuracy < 25 { quality = "moderate" }
+        else { quality = "poor" }
+        return String(format: "%.0f meters, %@", accuracy, quality)
     }
 }
 

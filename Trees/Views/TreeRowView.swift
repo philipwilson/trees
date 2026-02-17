@@ -12,6 +12,7 @@ struct TreeRowView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: 50, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .accessibilityLabel("Photo of \(tree.species.isEmpty ? "tree" : tree.species)")
             } else {
                 Image(systemName: "tree.fill")
                     .font(.title2)
@@ -19,6 +20,7 @@ struct TreeRowView: View {
                     .frame(width: 50, height: 50)
                     .background(Color.green.opacity(0.1))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
+                    .accessibilityLabel("No photo")
             }
 
             VStack(alignment: .leading, spacing: 4) {
