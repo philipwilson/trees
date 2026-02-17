@@ -30,6 +30,13 @@ Pods/
 .LSOverride
 ._*
 
+# Build output
+build/
+build-*/
+
+# Data exports
+*.json
+
 # Temporary files
 *.swp
 *~.nib

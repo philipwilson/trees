@@ -10,6 +10,7 @@ struct ImportTreesView: View {
     @State private var importResult: ImportResult?
     @State private var showingResult = false
     @State private var photoImportMode: PhotoImportMode = .withDelay
+    @State private var photoImportTask: Task<Void, Never>?
 
     enum PhotoImportMode: String, CaseIterable {
         case none = "No Photos"
@@ -54,6 +55,9 @@ struct ImportTreesView: View {
                         dismiss()
                     }
                 }
+            }
+            .onDisappear {
+                photoImportTask?.cancel()
             }
             .fileImporter(
                 isPresented: $showingFilePicker,
@@ -233,11 +237,21 @@ struct ImportTreesView: View {
             showingResult = true
 
             // Add photos with delays in background
-            Task { @MainActor in
+            photoImportTask = Task { @MainActor in
                 var failedPhotoBatchSaves = 0
                 for (index, (tree, photos)) in treesWithPhotos.enumerated() {
+                    guard !Task.isCancelled else {
+                        print("🌐 Import: Photo import cancelled at tree \(index + 1)/\(treesWithPhotos.count)")
+                        return
+                    }
+
                     // Wait before adding each tree's photos
                     try? await Task.sleep(for: .seconds(2))
+
+                    guard !Task.isCancelled else {
+                        print("🌐 Import: Photo import cancelled at tree \(index + 1)/\(treesWithPhotos.count)")
+                        return
+                    }
 
                     for (photoData, captureDate) in photos {
                         tree.addPhoto(photoData, capturedAt: captureDate)

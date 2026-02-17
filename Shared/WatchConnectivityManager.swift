@@ -13,9 +13,6 @@ final class WatchConnectivityManager: NSObject {
     /// Pending trees that failed to send (Watch side only)
     private(set) var pendingTrees: [WatchTree] = []
 
-    /// Trees received from Watch that need to be imported (iPhone side only)
-    private(set) var receivedTrees: [WatchTree] = []
-
     /// Callback for when new trees are received (iPhone side)
     var onTreesReceived: (([WatchTree]) -> Void)?
 
@@ -139,7 +136,6 @@ extension WatchConnectivityManager: WCSessionDelegate {
               let tree = try? JSONDecoder().decode(WatchTree.self, from: treeData) else { return }
 
         DispatchQueue.main.async {
-            self.receivedTrees.append(tree)
             self.onTreesReceived?([tree])
         }
         #endif

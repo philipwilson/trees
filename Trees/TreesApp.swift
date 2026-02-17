@@ -9,27 +9,43 @@ struct TreesApp: App {
     private static let enableCloudKit = true
 
     init() {
-        do {
-            let schema = Schema(versionedSchema: TreesSchemaV1.self)
-            let configuration: ModelConfiguration
+        let schema = Schema(versionedSchema: TreesSchemaV1.self)
 
-            if Self.enableCloudKit {
-                configuration = ModelConfiguration(
+        if Self.enableCloudKit {
+            do {
+                let cloudConfig = ModelConfiguration(
                     schema: schema,
                     cloudKitDatabase: .private("iCloud.com.treetracker.Trees")
                 )
-            } else {
-                configuration = ModelConfiguration(schema: schema)
+                modelContainer = try ModelContainer(
+                    for: schema,
+                    migrationPlan: TreesMigrationPlan.self,
+                    configurations: [cloudConfig]
+                )
+            } catch {
+                print("CloudKit ModelContainer failed, falling back to local-only: \(error)")
+                do {
+                    let localConfig = ModelConfiguration(schema: schema)
+                    modelContainer = try ModelContainer(
+                        for: schema,
+                        migrationPlan: TreesMigrationPlan.self,
+                        configurations: [localConfig]
+                    )
+                } catch {
+                    fatalError("Failed to create both CloudKit and local ModelContainer: \(error)")
+                }
             }
-
-            modelContainer = try ModelContainer(
-                for: schema,
-                migrationPlan: TreesMigrationPlan.self,
-                configurations: [configuration]
-            )
-
-        } catch {
-            fatalError("Failed to create ModelContainer: \(error)")
+        } else {
+            do {
+                let localConfig = ModelConfiguration(schema: schema)
+                modelContainer = try ModelContainer(
+                    for: schema,
+                    migrationPlan: TreesMigrationPlan.self,
+                    configurations: [localConfig]
+                )
+            } catch {
+                fatalError("Failed to create ModelContainer: \(error)")
+            }
         }
 
         setupWatchConnectivity()
