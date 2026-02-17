@@ -47,9 +47,7 @@ struct CSVExporter {
         let content = export(trees: trees)
         let filename = "\(filePrefix)_\(formattedDate()).csv"
 
-        guard let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) else {
-            return nil
-        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
 
         do {
             try content.write(to: url, atomically: true, encoding: .utf8)

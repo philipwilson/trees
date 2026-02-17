@@ -18,9 +18,9 @@ struct iPadTreeListView: View {
             return trees
         }
         return trees.filter { tree in
-            tree.species.localizedCaseInsensitiveContains(searchText) ||
-            (tree.variety ?? "").localizedCaseInsensitiveContains(searchText) ||
-            tree.treeNotes.contains { $0.text.localizedCaseInsensitiveContains(searchText) }
+            tree.species.localizedStandardContains(searchText) ||
+            (tree.variety ?? "").localizedStandardContains(searchText) ||
+            tree.treeNotes.contains { $0.text.localizedStandardContains(searchText) }
         }
     }
 

@@ -2,12 +2,17 @@ import UIKit
 import ImageIO
 
 enum ImageDownsampler {
-    /// Creates a downsampled UIImage from data without loading full resolution into memory
-    /// - Parameters:
-    ///   - data: The image data
-    ///   - maxDimension: The maximum width or height for the thumbnail
-    /// - Returns: A downsampled UIImage, or nil if creation failed
+    private static let cache = NSCache<NSString, UIImage>()
+
+    /// Creates a downsampled UIImage from data without loading full resolution into memory.
+    /// Results are cached by data fingerprint + dimension to avoid redundant work on re-render.
     static func downsample(data: Data, maxDimension: CGFloat) -> UIImage? {
+        let cacheKey = "\(data.count)-\(data.prefix(16).hashValue)-\(Int(maxDimension))" as NSString
+
+        if let cached = cache.object(forKey: cacheKey) {
+            return cached
+        }
+
         let imageSourceOptions = [kCGImageSourceShouldCache: false] as CFDictionary
 
         guard let imageSource = CGImageSourceCreateWithData(data as CFData, imageSourceOptions) else {
@@ -25,6 +30,8 @@ enum ImageDownsampler {
             return nil
         }
 
-        return UIImage(cgImage: downsampledImage)
+        let result = UIImage(cgImage: downsampledImage)
+        cache.setObject(result, forKey: cacheKey)
+        return result
     }
 }

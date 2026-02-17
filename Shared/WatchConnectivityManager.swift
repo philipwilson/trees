@@ -69,9 +69,15 @@ final class WatchConnectivityManager: NSObject {
         }
     }
 
+    private static let maxPendingTrees = 100
+
     private func enqueuePendingTree(_ tree: WatchTree) {
         guard !pendingTrees.contains(where: { $0.id == tree.id }) else { return }
         pendingTrees.append(tree)
+        // Drop oldest entries if queue exceeds limit
+        if pendingTrees.count > Self.maxPendingTrees {
+            pendingTrees.removeFirst(pendingTrees.count - Self.maxPendingTrees)
+        }
         savePendingTrees()
     }
 

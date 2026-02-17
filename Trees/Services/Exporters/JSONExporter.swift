@@ -87,9 +87,7 @@ struct JSONExporter {
     static func exportToFile(trees: [Tree], collections: [Collection] = [], includePhotos: Bool = false, filePrefix: String = "trees") -> URL? {
         let filename = "\(filePrefix)_\(formattedDate()).json"
 
-        guard let url = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask).first?.appendingPathComponent(filename) else {
-            return nil
-        }
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
 
         if !includePhotos {
             let content = export(trees: trees, collections: collections, includePhotos: false)
