@@ -7,7 +7,7 @@ struct DuplicateTreesView: View {
     @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
 
     @State private var duplicateGroups: [[Tree]] = []
-    @State private var selectedForDeletion: Set<UUID> = []
+    @State private var selectedForDeletion: Set<PersistentIdentifier> = []
     @State private var showingDeleteConfirmation = false
 
     var body: some View {
@@ -100,8 +100,8 @@ struct DuplicateTreesView: View {
                     Button {
                         toggleSelection(tree)
                     } label: {
-                        Image(systemName: selectedForDeletion.contains(tree.id) ? "checkmark.circle.fill" : "circle")
-                            .foregroundStyle(selectedForDeletion.contains(tree.id) ? .red : .secondary)
+                        Image(systemName: selectedForDeletion.contains(tree.persistentModelID) ? "checkmark.circle.fill" : "circle")
+                            .foregroundStyle(selectedForDeletion.contains(tree.persistentModelID) ? .red : .secondary)
                     }
                     .buttonStyle(.plain)
 
@@ -149,10 +149,11 @@ struct DuplicateTreesView: View {
     }
 
     private func toggleSelection(_ tree: Tree) {
-        if selectedForDeletion.contains(tree.id) {
-            selectedForDeletion.remove(tree.id)
+        let identity = tree.persistentModelID
+        if selectedForDeletion.contains(identity) {
+            selectedForDeletion.remove(identity)
         } else {
-            selectedForDeletion.insert(tree.id)
+            selectedForDeletion.insert(identity)
         }
     }
 
@@ -162,7 +163,7 @@ struct DuplicateTreesView: View {
             let sorted = group.sorted { $0.createdAt < $1.createdAt }
             // Keep the oldest (first), select the rest for deletion
             for tree in sorted.dropFirst() {
-                selectedForDeletion.insert(tree.id)
+                selectedForDeletion.insert(tree.persistentModelID)
             }
         }
     }
@@ -173,13 +174,13 @@ struct DuplicateTreesView: View {
             let sorted = group.sorted { $0.createdAt > $1.createdAt }
             // Keep the newest (first), select the rest for deletion
             for tree in sorted.dropFirst() {
-                selectedForDeletion.insert(tree.id)
+                selectedForDeletion.insert(tree.persistentModelID)
             }
         }
     }
 
     private func deleteSelected() {
-        for tree in trees where selectedForDeletion.contains(tree.id) {
+        for tree in trees where selectedForDeletion.contains(tree.persistentModelID) {
             modelContext.delete(tree)
         }
         selectedForDeletion.removeAll()

@@ -20,6 +20,9 @@ final class WatchConnectivityManager: NSObject {
     var onTreesReceived: (([WatchTree]) -> Void)?
 
     private var session: WCSession?
+    #if os(watchOS)
+    private let pendingTreesKey = "pendingWatchTrees"
+    #endif
 
     private override init() {
         super.init()
@@ -37,8 +40,7 @@ final class WatchConnectivityManager: NSObject {
     /// Send a captured tree to the iPhone
     func sendTree(_ tree: WatchTree) {
         guard let session = session, session.activationState == .activated else {
-            pendingTrees.append(tree)
-            savePendingTrees()
+            enqueuePendingTree(tree)
             return
         }
 
@@ -51,8 +53,7 @@ final class WatchConnectivityManager: NSObject {
 
             session.transferUserInfo(context)
         } catch {
-            pendingTrees.append(tree)
-            savePendingTrees()
+            enqueuePendingTree(tree)
         }
     }
 
@@ -62,21 +63,33 @@ final class WatchConnectivityManager: NSObject {
 
         let treesToSend = pendingTrees
         pendingTrees.removeAll()
+        savePendingTrees()
 
         for tree in treesToSend {
             sendTree(tree)
         }
     }
 
+    private func enqueuePendingTree(_ tree: WatchTree) {
+        guard !pendingTrees.contains(where: { $0.id == tree.id }) else { return }
+        pendingTrees.append(tree)
+        savePendingTrees()
+    }
+
     private func savePendingTrees() {
         guard let data = try? JSONEncoder().encode(pendingTrees) else { return }
-        UserDefaults.standard.set(data, forKey: "pendingWatchTrees")
+        UserDefaults.standard.set(data, forKey: pendingTreesKey)
     }
 
     private func loadPendingTrees() {
-        guard let data = UserDefaults.standard.data(forKey: "pendingWatchTrees"),
+        guard let data = UserDefaults.standard.data(forKey: pendingTreesKey),
               let trees = try? JSONDecoder().decode([WatchTree].self, from: data) else { return }
-        pendingTrees = trees
+        var seenIDs = Set<UUID>()
+        let dedupedTrees = trees.filter { seenIDs.insert($0.id).inserted }
+        pendingTrees = dedupedTrees
+        if dedupedTrees.count != trees.count {
+            savePendingTrees()
+        }
     }
     #endif
 }

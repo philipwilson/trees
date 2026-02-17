@@ -15,7 +15,13 @@ struct WatchTreeImporter {
             predicate: #Predicate { $0.id == existingID }
         )
 
-        if let existing = try? modelContext.fetch(descriptor), !existing.isEmpty {
+        do {
+            let existing = try modelContext.fetch(descriptor)
+            if !existing.isEmpty {
+                return nil
+            }
+        } catch {
+            print("Watch import fetch failed: \(error)")
             return nil
         }
 
@@ -41,6 +47,7 @@ struct WatchTreeImporter {
             try modelContext.save()
             return tree
         } catch {
+            print("Watch import save failed for \(watchTree.id): \(error)")
             return nil
         }
     }

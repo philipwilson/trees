@@ -220,7 +220,11 @@ struct TreeDetailView: View {
         }
 
         tree.updatedAt = Date()
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to save tree edits for \(tree.id): \(error)")
+        }
         newPhotos = []
         newPhotoDates = []
     }

@@ -177,7 +177,11 @@ struct CollectionDetailView: View {
             sortedTrees[index].updatedAt = Date()
         }
         collection.updatedAt = Date()
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to remove trees from collection \(collection.id): \(error)")
+        }
     }
 }
 
@@ -218,7 +222,11 @@ struct AddTreesToCollectionView: View {
             tree.updatedAt = Date()
         }
         collection.updatedAt = Date()
-        try? modelContext.save()
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to add trees to collection \(collection.id): \(error)")
+        }
         dismiss()
     }
 }

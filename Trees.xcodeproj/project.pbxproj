@@ -41,6 +41,7 @@
 		AAD62B8B49E30D2F1D3C09CA /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		AF68C3C7818DD2F4CE02D2E4 /* TreesWatchWidget.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AA3A92D0DE14A3726217238 /* TreesWatchWidget.swift */; };
 		AF9528309D016F7DB08770FE /* CaptureTreeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */; };
+		B0CBE9FD5968C2E8740FA37B /* TreesSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = E64ED7A9E52E45D19F50E03C /* TreesSchema.swift */; };
 		BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 37F08281F88024D47A957057 /* PhotoGalleryView.swift */; };
 		BCDB5BA7F162ADB75C8CA651 /* DuplicateTreesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3330119D689D0F19F2C6F6B /* DuplicateTreesView.swift */; };
 		BD38C4B50C76E7081D067F0A /* iPadCollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8ECEB4FA8C019AA20B7CA8 /* iPadCollectionListView.swift */; };
@@ -144,6 +145,7 @@
 		DEA89460FC189E7CEBC3771C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		E3346EB3009C6E848F543F4F /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
+		E64ED7A9E52E45D19F50E03C /* TreesSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesSchema.swift; sourceTree = "<group>"; };
 		E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporter.swift; sourceTree = "<group>"; };
 		EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeciesTextField.swift; sourceTree = "<group>"; };
 		F18511CA3A2E95CB885A2B6D /* Trees.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Trees.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -237,6 +239,7 @@
 				E3346EB3009C6E848F543F4F /* Note.swift */,
 				DEA89460FC189E7CEBC3771C /* Photo.swift */,
 				8DC825F3082A2B90559D7B68 /* Tree.swift */,
+				E64ED7A9E52E45D19F50E03C /* TreesSchema.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -483,6 +486,7 @@
 				62F379748862624975606356 /* TreeMapView.swift in Sources */,
 				444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */,
 				3FF5120BAA7CD44DA7A781F6 /* TreesApp.swift in Sources */,
+				B0CBE9FD5968C2E8740FA37B /* TreesSchema.swift in Sources */,
 				4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */,
 				D4E766862EDBFA98CB8E85D2 /* WatchTree.swift in Sources */,
 				36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */,

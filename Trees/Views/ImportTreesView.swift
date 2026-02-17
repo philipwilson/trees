@@ -134,11 +134,26 @@ struct ImportTreesView: View {
     private func importTrees(_ trees: [ImportedTreeData], collectionMap: [String: Collection], collectionCount: Int = 0) {
         var importedCount = 0
         var photoCount = 0
+        var remappedIDCount = 0
+        var seenImportedIDs = Set<UUID>()
         var treesWithPhotos: [(Tree, [(Data, Date?)])] = []
 
         for importedTree in trees {
+            let resolvedID: UUID
+            if let parsedID = importedTree.parsedId {
+                if seenImportedIDs.contains(parsedID) || treeIDExists(parsedID) {
+                    resolvedID = UUID()
+                    remappedIDCount += 1
+                } else {
+                    resolvedID = parsedID
+                    seenImportedIDs.insert(parsedID)
+                }
+            } else {
+                resolvedID = UUID()
+            }
+
             let tree = Tree(
-                id: importedTree.parsedId ?? UUID(),
+                id: resolvedID,
                 latitude: importedTree.latitude,
                 longitude: importedTree.longitude,
                 horizontalAccuracy: importedTree.horizontalAccuracy,
@@ -191,6 +206,12 @@ struct ImportTreesView: View {
             print("🌐 Import: Saved \(importedCount) trees")
         } catch {
             print("🌐 Import: Failed to save: \(error)")
+            importResult = ImportResult(
+                success: false,
+                message: "Import failed while saving trees: \(error.localizedDescription)"
+            )
+            showingResult = true
+            return
         }
 
         // Build result message
@@ -199,6 +220,9 @@ struct ImportTreesView: View {
             messageParts.append("\(collectionCount) collection\(collectionCount == 1 ? "" : "s")")
         }
         messageParts.append("\(importedCount) tree\(importedCount == 1 ? "" : "s")")
+        if remappedIDCount > 0 {
+            messageParts.append("\(remappedIDCount) ID\(remappedIDCount == 1 ? "" : "s") regenerated")
+        }
 
         // For delayed mode, add photos one tree at a time with delays
         if photoImportMode == .withDelay && !treesWithPhotos.isEmpty {
@@ -209,18 +233,31 @@ struct ImportTreesView: View {
             showingResult = true
 
             // Add photos with delays in background
-            Task {
+            Task { @MainActor in
+                var failedPhotoBatchSaves = 0
                 for (index, (tree, photos)) in treesWithPhotos.enumerated() {
                     // Wait before adding each tree's photos
                     try? await Task.sleep(for: .seconds(2))
 
-                    await MainActor.run {
-                        for (photoData, captureDate) in photos {
-                            tree.addPhoto(photoData, capturedAt: captureDate)
-                        }
-                        try? modelContext.save()
-                        print("🌐 Import: Added \(photos.count) photos to tree \(index + 1)/\(treesWithPhotos.count)")
+                    for (photoData, captureDate) in photos {
+                        tree.addPhoto(photoData, capturedAt: captureDate)
                     }
+
+                    do {
+                        try modelContext.save()
+                        print("🌐 Import: Added \(photos.count) photos to tree \(index + 1)/\(treesWithPhotos.count)")
+                    } catch {
+                        failedPhotoBatchSaves += 1
+                        print("🌐 Import: Failed to save delayed photos for tree \(index + 1): \(error)")
+                    }
+                }
+
+                if failedPhotoBatchSaves > 0 {
+                    importResult = ImportResult(
+                        success: false,
+                        message: "Imported \(messageParts.joined(separator: ", ")), but failed to save delayed photos for \(failedPhotoBatchSaves) tree\(failedPhotoBatchSaves == 1 ? "" : "s")."
+                    )
+                    showingResult = true
                 }
                 print("🌐 Import: Finished adding all photos")
             }
@@ -233,6 +270,19 @@ struct ImportTreesView: View {
                 message: "Successfully imported \(messageParts.joined(separator: ", "))."
             )
             showingResult = true
+        }
+    }
+
+    private func treeIDExists(_ id: UUID) -> Bool {
+        let descriptor = FetchDescriptor<Tree>(
+            predicate: #Predicate { $0.id == id }
+        )
+        do {
+            return !(try modelContext.fetch(descriptor)).isEmpty
+        } catch {
+            print("🌐 Import: Failed to check existing ID \(id): \(error)")
+            // Fail-safe: treat as existing so we regenerate an ID instead of risking conflict.
+            return true
         }
     }
 }

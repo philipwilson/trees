@@ -1,0 +1,7 @@
+# tree_id,collection_name
+# Use one row per tree.
+# Leave collection_name blank to clear collectionId for that tree.
+# Example:
+# 7C6A3D89-7A1E-4EA9-9485-A67C944F5E5B,Back Orchard
+
+tree_id,collection_name

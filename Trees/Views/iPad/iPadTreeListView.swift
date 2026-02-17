@@ -49,7 +49,11 @@ struct iPadTreeListView: View {
                                         tree.collection?.updatedAt = Date()
                                         tree.collection = nil
                                         tree.updatedAt = Date()
-                                        try? modelContext.save()
+                                        do {
+                                            try modelContext.save()
+                                        } catch {
+                                            print("Failed to remove tree \(tree.id) from collection: \(error)")
+                                        }
                                     } label: {
                                         Label("Remove from Collection", systemImage: "folder.badge.minus")
                                     }

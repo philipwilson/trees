@@ -128,9 +128,24 @@ struct ImportCollectionView: View {
 
             var importedCount = 0
             var photoCount = 0
+            var remappedIDCount = 0
+            var seenImportedIDs = Set<UUID>()
             for importedTree in trees {
+                let resolvedID: UUID
+                if let parsedID = importedTree.parsedId {
+                    if seenImportedIDs.contains(parsedID) || treeIDExists(parsedID) {
+                        resolvedID = UUID()
+                        remappedIDCount += 1
+                    } else {
+                        resolvedID = parsedID
+                        seenImportedIDs.insert(parsedID)
+                    }
+                } else {
+                    resolvedID = UUID()
+                }
+
                 let tree = Tree(
-                    id: importedTree.parsedId ?? UUID(),
+                    id: resolvedID,
                     latitude: importedTree.latitude,
                     longitude: importedTree.longitude,
                     horizontalAccuracy: importedTree.horizontalAccuracy,
@@ -163,15 +178,30 @@ struct ImportCollectionView: View {
                 importedCount += 1
             }
 
+            try modelContext.save()
+
             importResult = ImportResult(
                 success: true,
-                message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(photoCount > 0 ? " with \(photoCount) photos" : "") into \"\(collection.name)\"."
+                message: "Successfully imported \(importedCount) tree\(importedCount == 1 ? "" : "s")\(photoCount > 0 ? " with \(photoCount) photos" : "")\(remappedIDCount > 0 ? " (\(remappedIDCount) ID\(remappedIDCount == 1 ? "" : "s") regenerated)" : "") into \"\(collection.name)\"."
             )
             showingResult = true
 
         } catch {
-            importResult = ImportResult(success: false, message: "Failed to parse file: \(error.localizedDescription)")
+            importResult = ImportResult(success: false, message: "Import failed: \(error.localizedDescription)")
             showingResult = true
+        }
+    }
+
+    private func treeIDExists(_ id: UUID) -> Bool {
+        let descriptor = FetchDescriptor<Tree>(
+            predicate: #Predicate { $0.id == id }
+        )
+        do {
+            return !(try modelContext.fetch(descriptor)).isEmpty
+        } catch {
+            print("Collection import ID check failed for \(id): \(error)")
+            // Fail-safe: treat as existing so we regenerate an ID instead of risking conflict.
+            return true
         }
     }
 }

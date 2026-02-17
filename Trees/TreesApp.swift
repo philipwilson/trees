@@ -10,7 +10,7 @@ struct TreesApp: App {
 
     init() {
         do {
-            let schema = Schema([Tree.self, Collection.self, Photo.self, Note.self])
+            let schema = Schema(versionedSchema: TreesSchemaV1.self)
             let configuration: ModelConfiguration
 
             if Self.enableCloudKit {
@@ -22,7 +22,11 @@ struct TreesApp: App {
                 configuration = ModelConfiguration(schema: schema)
             }
 
-            modelContainer = try ModelContainer(for: schema, configurations: [configuration])
+            modelContainer = try ModelContainer(
+                for: schema,
+                migrationPlan: TreesMigrationPlan.self,
+                configurations: [configuration]
+            )
 
         } catch {
             fatalError("Failed to create ModelContainer: \(error)")

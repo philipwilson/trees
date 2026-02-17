@@ -138,3 +138,14 @@ targets:
         LD_RUNPATH_SEARCH_PATHS: "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks"
         MARKETING_VERSION: "1.0"
         CURRENT_PROJECT_VERSION: "1"
+
+schemes:
+  Trees:
+    shared: true
+    build:
+      targets:
+        Trees: all
+    run:
+      config: Debug
+    archive:
+      config: Release
