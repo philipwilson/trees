@@ -244,6 +244,7 @@ struct TreeDetailView: View {
 
 struct NoteRowView: View {
     let note: Note
+    @State private var selectedPhoto: Photo?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -275,6 +276,9 @@ struct NoteRowView: View {
                                     .frame(width: 60, height: 60)
                                     .clipped()
                                     .clipShape(RoundedRectangle(cornerRadius: 6))
+                                    .onTapGesture {
+                                        selectedPhoto = photo
+                                    }
                             }
                         }
                     }
@@ -282,6 +286,9 @@ struct NoteRowView: View {
             }
         }
         .padding(.vertical, 4)
+        .fullScreenCover(item: $selectedPhoto) { photo in
+            PhotoDetailView(photos: note.notePhotos, initialPhoto: photo)
+        }
     }
 }
 
