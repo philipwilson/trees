@@ -88,6 +88,15 @@ struct PhotoDetailView: View {
                         dismiss()
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if let photo = photos.first(where: { $0.id == currentPhotoID }),
+                       let uiImage = UIImage(data: photo.imageData) {
+                        ShareLink(
+                            item: Image(uiImage: uiImage),
+                            preview: SharePreview("Photo", image: Image(uiImage: uiImage))
+                        )
+                    }
+                }
                 ToolbarItem(placement: .principal) {
                     VStack(spacing: 2) {
                         Text("\(currentIndex + 1) of \(photos.count)")
