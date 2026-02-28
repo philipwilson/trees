@@ -73,9 +73,7 @@ struct PhotoDetailView: View {
             TabView(selection: $currentPhotoID) {
                 ForEach(photos) { photo in
                     if let uiImage = UIImage(data: photo.imageData) {
-                        Image(uiImage: uiImage)
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
+                        ZoomableImageView(image: uiImage)
                             .tag(photo.id)
                     }
                 }

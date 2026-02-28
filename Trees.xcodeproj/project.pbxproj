@@ -11,6 +11,7 @@
 		0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5335BA670CB205F7556844DA /* JSONExporter.swift */; };
 		13C090D4A9B9E0669F6293AD /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = C385534E9EFC669280796C68 /* Assets.xcassets */; };
 		199474C6ABD94964118D7D5F /* ImportTreesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 53CCDC475F15A0A70F6993B5 /* ImportTreesView.swift */; };
+		1BA96E74EAC7D3CE24E7184E /* ZoomableImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1914A7A9A551F6872204CD /* ZoomableImageView.swift */; };
 		1C04A1E99D1EBC61354CC81D /* Collection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F7FF05273647DCDC1D213C2 /* Collection.swift */; };
 		2054BD516F84B6FF0A7A2CCD /* iPadMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3FB447157EC6C8F325BF071 /* iPadMapView.swift */; };
 		2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE000A01E50BF4C4432D684 /* ContentView.swift */; };
@@ -147,6 +148,7 @@
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE76365F8AFD79DA86E9B50B /* iPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSidebarView.swift; sourceTree = "<group>"; };
 		DEA89460FC189E7CEBC3771C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
+		DF1914A7A9A551F6872204CD /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
 		E3346EB3009C6E848F543F4F /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
 		E64ED7A9E52E45D19F50E03C /* TreesSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesSchema.swift; sourceTree = "<group>"; };
@@ -233,6 +235,7 @@
 				57D86542CC445AF70E2D41FD /* InlineEditableField.swift */,
 				37F08281F88024D47A957057 /* PhotoGalleryView.swift */,
 				EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */,
+				DF1914A7A9A551F6872204CD /* ZoomableImageView.swift */,
 			);
 			path = Components;
 			sourceTree = "<group>";
@@ -561,6 +564,7 @@
 				4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */,
 				D4E766862EDBFA98CB8E85D2 /* WatchTree.swift in Sources */,
 				36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */,
+				1BA96E74EAC7D3CE24E7184E /* ZoomableImageView.swift in Sources */,
 				BD38C4B50C76E7081D067F0A /* iPadCollectionListView.swift in Sources */,
 				777CAA964A438818A81B83E5 /* iPadContentView.swift in Sources */,
 				2054BD516F84B6FF0A7A2CCD /* iPadMapView.swift in Sources */,
