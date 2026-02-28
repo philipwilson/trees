@@ -46,6 +46,7 @@ class ZoomableScrollView: UIScrollView, UIScrollViewDelegate {
         showsHorizontalScrollIndicator = false
         showsVerticalScrollIndicator = false
         backgroundColor = .clear
+        contentInsetAdjustmentBehavior = .never
 
         imageView.contentMode = .scaleAspectFit
         addSubview(imageView)

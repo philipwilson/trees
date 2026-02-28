@@ -51,9 +51,12 @@ struct TreesApp: App {
         setupWatchConnectivity()
     }
 
+    private let photoViewerState = PhotoViewerState()
+
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environment(photoViewerState)
         }
         .modelContainer(modelContainer)
     }

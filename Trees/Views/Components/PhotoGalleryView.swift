@@ -1,5 +1,10 @@
 import SwiftUI
 
+@Observable
+class PhotoViewerState {
+    var isPresented = false
+}
+
 struct PhotoGalleryView: View {
     let photos: [Photo]
     @State private var selectedPhoto: Photo?
@@ -52,6 +57,7 @@ struct PhotoDetailView: View {
     let photos: [Photo]
     @State private var currentPhotoID: UUID
     @Environment(\.dismiss) private var dismiss
+    @Environment(PhotoViewerState.self) private var photoViewerState
 
     init(photos: [Photo], initialPhoto: Photo) {
         self.photos = photos
@@ -99,17 +105,37 @@ struct PhotoDetailView: View {
                 ToolbarItem(placement: .principal) {
                     VStack(spacing: 2) {
                         Text("\(currentIndex + 1) of \(photos.count)")
-                            .foregroundStyle(.white)
                         if let dateString = currentDateString {
                             Text(dateString)
                                 .font(.caption)
-                                .foregroundStyle(.white.opacity(0.7))
+                                .opacity(0.7)
                         }
                     }
                 }
             }
             .toolbarBackground(.black, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+        }
+        .onAppear {
+            photoViewerState.isPresented = true
+            setWindowDarkMode(true)
+        }
+        .onDisappear {
+            photoViewerState.isPresented = false
+            setWindowDarkMode(false)
+        }
+    }
+
+    private func setWindowDarkMode(_ dark: Bool) {
+        for scene in UIApplication.shared.connectedScenes {
+            if let windowScene = scene as? UIWindowScene {
+                for window in windowScene.windows {
+                    window.overrideUserInterfaceStyle = dark ? .dark : .unspecified
+                }
+                #if targetEnvironment(macCatalyst)
+                windowScene.titlebar?.toolbar?.isVisible = !dark
+                #endif
+            }
         }
     }
 }

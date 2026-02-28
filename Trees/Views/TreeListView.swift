@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct TreeListView: View {
+    @Environment(PhotoViewerState.self) private var photoViewerState
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
     @Query(sort: \Collection.name) private var collections: [Collection]
@@ -45,35 +46,37 @@ struct TreeListView: View {
             }
             .navigationTitle("Trees")
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Menu {
-                        Button {
-                            showingImportSheet = true
+                if !photoViewerState.isPresented {
+                    ToolbarItem(placement: .topBarLeading) {
+                        Menu {
+                            Button {
+                                showingImportSheet = true
+                            } label: {
+                                Label("Import", systemImage: "square.and.arrow.down")
+                            }
+                            if !trees.isEmpty {
+                                Button {
+                                    showingExportSheet = true
+                                } label: {
+                                    Label("Export", systemImage: "square.and.arrow.up")
+                                }
+                                Divider()
+                                Button {
+                                    showingDuplicatesSheet = true
+                                } label: {
+                                    Label("Find Duplicates", systemImage: "doc.on.doc")
+                                }
+                            }
                         } label: {
-                            Label("Import", systemImage: "square.and.arrow.down")
+                            Image(systemName: "ellipsis.circle")
                         }
-                        if !trees.isEmpty {
-                            Button {
-                                showingExportSheet = true
-                            } label: {
-                                Label("Export", systemImage: "square.and.arrow.up")
-                            }
-                            Divider()
-                            Button {
-                                showingDuplicatesSheet = true
-                            } label: {
-                                Label("Find Duplicates", systemImage: "doc.on.doc")
-                            }
-                        }
-                    } label: {
-                        Image(systemName: "ellipsis.circle")
                     }
-                }
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showingCaptureSheet = true
-                    } label: {
-                        Image(systemName: "plus")
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            showingCaptureSheet = true
+                        } label: {
+                            Image(systemName: "plus")
+                        }
                     }
                 }
             }

@@ -4,6 +4,7 @@ import MapKit
 
 struct TreeDetailView: View {
     @Bindable var tree: Tree
+    @Environment(PhotoViewerState.self) private var photoViewerState
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Collection.name) private var collections: [Collection]
@@ -155,11 +156,13 @@ struct TreeDetailView: View {
         .navigationTitle(tree.species.isEmpty ? "Tree Details" : tree.species)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                Button(role: .destructive) {
-                    showingDeleteConfirmation = true
-                } label: {
-                    Image(systemName: "trash")
+            if !photoViewerState.isPresented {
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                    }
                 }
             }
         }
@@ -361,5 +364,6 @@ struct AddNoteView: View {
             species: "Red Maple"
         ))
     }
+    .environment(PhotoViewerState())
     .modelContainer(for: [Tree.self, Collection.self, Photo.self, Note.self], inMemory: true)
 }

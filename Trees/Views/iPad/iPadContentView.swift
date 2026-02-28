@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct iPadContentView: View {
+    @Environment(PhotoViewerState.self) private var photoViewerState
     @State private var selectedSection: SidebarSection = .trees
     @State private var selectedTree: Tree?
     @State private var selectedCollection: Collection?
@@ -40,6 +41,7 @@ struct iPadContentView: View {
                 } detail: {
                     detailColumn
                 }
+                .toolbar(photoViewerState.isPresented ? .hidden : .automatic, for: .navigationBar)
             }
         }
         .sheet(isPresented: $showingCaptureSheet) {

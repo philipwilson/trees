@@ -2,6 +2,7 @@ import SwiftUI
 import SwiftData
 
 struct iPadTreeListView: View {
+    @Environment(PhotoViewerState.self) private var photoViewerState
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
     @Binding var selectedTree: Tree?
@@ -85,35 +86,37 @@ struct iPadTreeListView: View {
         }
         .navigationTitle("Trees")
         .toolbar {
-            ToolbarItem(placement: .topBarLeading) {
-                Menu {
-                    Button {
-                        onImport()
+            if !photoViewerState.isPresented {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu {
+                        Button {
+                            onImport()
+                        } label: {
+                            Label("Import", systemImage: "square.and.arrow.down")
+                        }
+                        if !trees.isEmpty {
+                            Button {
+                                onExport()
+                            } label: {
+                                Label("Export", systemImage: "square.and.arrow.up")
+                            }
+                            Divider()
+                            Button {
+                                onFindDuplicates()
+                            } label: {
+                                Label("Find Duplicates", systemImage: "doc.on.doc")
+                            }
+                        }
                     } label: {
-                        Label("Import", systemImage: "square.and.arrow.down")
+                        Image(systemName: "ellipsis.circle")
                     }
-                    if !trees.isEmpty {
-                        Button {
-                            onExport()
-                        } label: {
-                            Label("Export", systemImage: "square.and.arrow.up")
-                        }
-                        Divider()
-                        Button {
-                            onFindDuplicates()
-                        } label: {
-                            Label("Find Duplicates", systemImage: "doc.on.doc")
-                        }
-                    }
-                } label: {
-                    Image(systemName: "ellipsis.circle")
                 }
-            }
-            ToolbarItem(placement: .topBarTrailing) {
-                Button {
-                    onCapture()
-                } label: {
-                    Label("Capture Tree", systemImage: "plus")
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button {
+                        onCapture()
+                    } label: {
+                        Label("Capture Tree", systemImage: "plus")
+                    }
                 }
             }
         }
