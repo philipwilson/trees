@@ -7,23 +7,31 @@ struct TreeDetailView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Collection.name) private var collections: [Collection]
-    @State private var isEditing = false
+    @FocusState private var focusedField: EditableField?
     @State private var showingDeleteConfirmation = false
     @State private var showingAddNote = false
     @State private var saveErrorMessage: String?
 
-    // Local editing state - only synced to tree on save
-    @State private var editSpecies = ""
-    @State private var editVariety = ""
-    @State private var editRootstock = ""
-    @State private var editCollection: Collection?
-
-    // For adding photos during editing
+    // For adding photos
     @State private var newPhotos: [Data] = []
     @State private var newPhotoDates: [Date?] = []
 
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: tree.latitude, longitude: tree.longitude)
+    }
+
+    private var varietyBinding: Binding<String> {
+        Binding(
+            get: { tree.variety ?? "" },
+            set: { tree.variety = $0.isEmpty ? nil : $0 }
+        )
+    }
+
+    private var rootstockBinding: Binding<String> {
+        Binding(
+            get: { tree.rootstock ?? "" },
+            set: { tree.rootstock = $0.isEmpty ? nil : $0 }
+        )
     }
 
     var body: some View {
@@ -40,6 +48,75 @@ struct TreeDetailView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .listRowInsets(EdgeInsets())
                 .listRowBackground(Color.clear)
+            }
+
+            Section {
+                SpeciesTextField(
+                    text: $tree.species,
+                    onFocusLost: { commitFieldEdit() }
+                )
+                .onSubmit { focusedField = .variety }
+
+                InlineEditableField(
+                    label: "Variety",
+                    placeholder: "Not specified",
+                    value: varietyBinding,
+                    focusedField: $focusedField,
+                    field: .variety,
+                    nextField: .rootstock
+                )
+
+                InlineEditableField(
+                    label: "Rootstock",
+                    placeholder: "Not specified",
+                    value: rootstockBinding,
+                    focusedField: $focusedField,
+                    field: .rootstock,
+                    nextField: nil
+                )
+            } header: {
+                Text("Details")
+            }
+
+            Section {
+                Picker("Collection", selection: $tree.collection) {
+                    Text("None").tag(nil as Collection?)
+                    ForEach(collections) { collection in
+                        Text(collection.name).tag(collection as Collection?)
+                    }
+                }
+            } header: {
+                Text("Collection")
+            }
+
+            Section {
+                PhotoGalleryView(photos: tree.treePhotos)
+                PhotosPicker(selectedPhotos: $newPhotos, photoDates: $newPhotoDates)
+            } header: {
+                Text("Photos (\(tree.treePhotos.count))")
+            }
+
+            Section {
+                if tree.treeNotes.isEmpty {
+                    ContentUnavailableView(
+                        "No Notes",
+                        systemImage: "note.text",
+                        description: Text("Tap Add Note to record observations")
+                    )
+                } else {
+                    ForEach(tree.treeNotes.sorted { $0.createdAt > $1.createdAt }) { note in
+                        NoteRowView(note: note)
+                    }
+                    .onDelete(perform: deleteNotes)
+                }
+
+                Button {
+                    showingAddNote = true
+                } label: {
+                    Label("Add Note", systemImage: "plus.circle")
+                }
+            } header: {
+                Text("Notes (\(tree.treeNotes.count))")
             }
 
             Section {
@@ -64,83 +141,6 @@ struct TreeDetailView: View {
             }
 
             Section {
-                if isEditing {
-                    SpeciesTextField(text: $editSpecies)
-                    TextField("Variety", text: $editVariety)
-                    TextField("Rootstock", text: $editRootstock)
-                } else {
-                    LabeledContent("Species") {
-                        Text(tree.species.isEmpty ? "Not specified" : tree.species)
-                            .foregroundStyle(tree.species.isEmpty ? .secondary : .primary)
-                    }
-                    if let variety = tree.variety, !variety.isEmpty {
-                        LabeledContent("Variety") {
-                            Text(variety)
-                        }
-                    }
-                    if let rootstock = tree.rootstock, !rootstock.isEmpty {
-                        LabeledContent("Rootstock") {
-                            Text(rootstock)
-                        }
-                    }
-                }
-            } header: {
-                Text("Details")
-            }
-
-            Section {
-                if isEditing {
-                    Picker("Collection", selection: $editCollection) {
-                        Text("None").tag(nil as Collection?)
-                        ForEach(collections) { collection in
-                            Text(collection.name).tag(collection as Collection?)
-                        }
-                    }
-                } else {
-                    LabeledContent("Collection") {
-                        Text(tree.collection?.name ?? "None")
-                            .foregroundStyle(tree.collection == nil ? .secondary : .primary)
-                    }
-                }
-            } header: {
-                Text("Collection")
-            }
-
-            Section {
-                if isEditing {
-                    EditablePhotoGalleryView(photos: $newPhotos, photoDates: $newPhotoDates)
-                    PhotosPicker(selectedPhotos: $newPhotos, photoDates: $newPhotoDates)
-                } else {
-                    PhotoGalleryView(photos: tree.treePhotos)
-                }
-            } header: {
-                Text("Photos (\(isEditing ? newPhotos.count + tree.treePhotos.count : tree.treePhotos.count))")
-            }
-
-            Section {
-                if tree.treeNotes.isEmpty && !isEditing {
-                    ContentUnavailableView(
-                        "No Notes",
-                        systemImage: "note.text",
-                        description: Text("Tap Add Note to record observations")
-                    )
-                } else {
-                    ForEach(tree.treeNotes.sorted { $0.createdAt > $1.createdAt }) { note in
-                        NoteRowView(note: note)
-                    }
-                    .onDelete(perform: deleteNotes)
-                }
-
-                Button {
-                    showingAddNote = true
-                } label: {
-                    Label("Add Note", systemImage: "plus.circle")
-                }
-            } header: {
-                Text("Notes (\(tree.treeNotes.count))")
-            }
-
-            Section {
                 LabeledContent("Created") {
                     Text(tree.createdAt.formatted(date: .abbreviated, time: .shortened))
                 }
@@ -150,47 +150,41 @@ struct TreeDetailView: View {
             } header: {
                 Text("Timestamps")
             }
-
-            if isEditing {
-                Section {
-                    Button(role: .destructive) {
-                        showingDeleteConfirmation = true
-                    } label: {
-                        HStack {
-                            Spacer()
-                            Text("Delete Tree")
-                            Spacer()
-                        }
-                    }
-                }
-            }
         }
+        .scrollDismissesKeyboard(.interactively)
         .navigationTitle(tree.species.isEmpty ? "Tree Details" : tree.species)
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if isEditing {
-                ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
-                        isEditing = false
-                        newPhotos = []
-                        newPhotoDates = []
-                    }
+            ToolbarItem(placement: .topBarTrailing) {
+                Button(role: .destructive) {
+                    showingDeleteConfirmation = true
+                } label: {
+                    Image(systemName: "trash")
                 }
-                ToolbarItem(placement: .confirmationAction) {
-                    Button("Done") {
-                        if saveEdits() {
-                            isEditing = false
-                        }
-                    }
-                    .fontWeight(.semibold)
-                }
-            } else {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Edit") {
-                        loadEditState()
-                        isEditing = true
-                    }
-                }
+            }
+        }
+        .onChange(of: focusedField) { oldField, _ in
+            if oldField != nil {
+                commitFieldEdit()
+            }
+        }
+        .onChange(of: newPhotos) { _, photos in
+            guard !photos.isEmpty else { return }
+            for (index, photoData) in photos.enumerated() {
+                let captureDate = index < newPhotoDates.count ? newPhotoDates[index] : Date()
+                tree.addPhoto(photoData, capturedAt: captureDate)
+            }
+            newPhotos = []
+            newPhotoDates = []
+            tree.updatedAt = Date()
+            saveContext()
+        }
+        .onChange(of: tree.collection) { oldCollection, newCollection in
+            if oldCollection?.id != newCollection?.id {
+                oldCollection?.updatedAt = Date()
+                newCollection?.updatedAt = Date()
+                tree.updatedAt = Date()
+                saveContext()
             }
         }
         .alert("Save Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
@@ -212,39 +206,24 @@ struct TreeDetailView: View {
         }
     }
 
-    private func loadEditState() {
-        editSpecies = tree.species
-        editVariety = tree.variety ?? ""
-        editRootstock = tree.rootstock ?? ""
-        editCollection = tree.collection
-        newPhotos = []
-        newPhotoDates = []
+    private func commitFieldEdit() {
+        tree.species = tree.species.trimmingCharacters(in: .whitespacesAndNewlines)
+        if let variety = tree.variety {
+            let trimmed = variety.trimmingCharacters(in: .whitespacesAndNewlines)
+            tree.variety = trimmed.isEmpty ? nil : trimmed
+        }
+        if let rootstock = tree.rootstock {
+            let trimmed = rootstock.trimmingCharacters(in: .whitespacesAndNewlines)
+            tree.rootstock = trimmed.isEmpty ? nil : trimmed
+        }
+        tree.updatedAt = Date()
+        saveContext()
     }
 
     @discardableResult
-    private func saveEdits() -> Bool {
-        tree.species = editSpecies
-        tree.variety = editVariety.isEmpty ? nil : editVariety
-        tree.rootstock = editRootstock.isEmpty ? nil : editRootstock
-
-        // Update collection timestamps if collection changed
-        if tree.collection?.id != editCollection?.id {
-            tree.collection?.updatedAt = Date()
-            editCollection?.updatedAt = Date()
-        }
-        tree.collection = editCollection
-
-        // Add new photos as Photo entities
-        for (index, photoData) in newPhotos.enumerated() {
-            let captureDate = index < newPhotoDates.count ? newPhotoDates[index] : Date()
-            tree.addPhoto(photoData, capturedAt: captureDate)
-        }
-
-        tree.updatedAt = Date()
+    private func saveContext() -> Bool {
         do {
             try modelContext.save()
-            newPhotos = []
-            newPhotoDates = []
             return true
         } catch {
             saveErrorMessage = "Could not save changes. Please try again."

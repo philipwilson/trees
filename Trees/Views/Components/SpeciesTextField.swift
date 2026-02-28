@@ -3,6 +3,7 @@ import SwiftData
 
 struct SpeciesTextField: View {
     @Binding var text: String
+    var onFocusLost: (() -> Void)? = nil
     @Environment(\.modelContext) private var modelContext
     @State private var allSpecies: [String] = []
     @State private var suggestions: [String] = []
@@ -19,6 +20,7 @@ struct SpeciesTextField: View {
                         updateSuggestions()
                     } else {
                         showingSuggestions = false
+                        onFocusLost?()
                     }
                 }
                 .onChange(of: text) { _, _ in

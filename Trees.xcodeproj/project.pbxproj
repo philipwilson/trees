@@ -48,6 +48,7 @@
 		BD38C4B50C76E7081D067F0A /* iPadCollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5A8ECEB4FA8C019AA20B7CA8 /* iPadCollectionListView.swift */; };
 		BE710E54AA33F84098234D35 /* CaptureView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F2E09E9737924E18950A488 /* CaptureView.swift */; };
 		C20E194CF983ABCD3090D17E /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4082492E29F2EE4E73C6FEB /* ContentView.swift */; };
+		CA0B4E6C2D6B999B8B10D614 /* InlineEditableField.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57D86542CC445AF70E2D41FD /* InlineEditableField.swift */; };
 		CCBBD459660703121E1EE4D2 /* GPXExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 559396C03C40B0AA63C15D57 /* GPXExporter.swift */; };
 		D4E766862EDBFA98CB8E85D2 /* WatchTree.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072D15159EDF377B08891E50 /* WatchTree.swift */; };
 		DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */ = {isa = PBXBuildFile; fileRef = BA501EF33874C584E39F8F8F /* ImagePicker.swift */; };
@@ -115,6 +116,7 @@
 		53CCDC475F15A0A70F6993B5 /* ImportTreesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportTreesView.swift; sourceTree = "<group>"; };
 		559396C03C40B0AA63C15D57 /* GPXExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPXExporter.swift; sourceTree = "<group>"; };
 		56120BD39256244311587662 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
+		57D86542CC445AF70E2D41FD /* InlineEditableField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineEditableField.swift; sourceTree = "<group>"; };
 		5A8ECEB4FA8C019AA20B7CA8 /* iPadCollectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadCollectionListView.swift; sourceTree = "<group>"; };
 		5F7FF05273647DCDC1D213C2 /* Collection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Collection.swift; sourceTree = "<group>"; };
 		61B8886E85F005476434A363 /* TreeDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeDetailView.swift; sourceTree = "<group>"; };
@@ -228,6 +230,7 @@
 			children = (
 				E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */,
 				BA501EF33874C584E39F8F8F /* ImagePicker.swift */,
+				57D86542CC445AF70E2D41FD /* InlineEditableField.swift */,
 				37F08281F88024D47A957057 /* PhotoGalleryView.swift */,
 				EFE6FF31498B5354620B2929 /* SpeciesTextField.swift */,
 			);
@@ -541,6 +544,7 @@
 				DD41FFE7E9F822DFFA8800DD /* ImagePicker.swift in Sources */,
 				3A8099C94F4229C375383F06 /* ImportCollectionView.swift in Sources */,
 				199474C6ABD94964118D7D5F /* ImportTreesView.swift in Sources */,
+				CA0B4E6C2D6B999B8B10D614 /* InlineEditableField.swift in Sources */,
 				0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */,
 				E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */,
 				92F9612A51CFACAE093B2A75 /* Note.swift in Sources */,
