@@ -89,11 +89,10 @@ struct PhotoDetailView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    if let photo = photos.first(where: { $0.id == currentPhotoID }),
-                       let uiImage = UIImage(data: photo.imageData) {
+                    if let photo = photos.first(where: { $0.id == currentPhotoID }) {
                         ShareLink(
-                            item: Image(uiImage: uiImage),
-                            preview: SharePreview("Photo", image: Image(uiImage: uiImage))
+                            item: PhotoFile(data: photo.imageData),
+                            preview: SharePreview("Photo", image: Image(uiImage: UIImage(data: photo.imageData) ?? UIImage()))
                         )
                     }
                 }
@@ -161,6 +160,16 @@ struct EditablePhotoGalleryView: View {
                     }
                 }
             }
+        }
+    }
+}
+
+private struct PhotoFile: Transferable {
+    let data: Data
+
+    static var transferRepresentation: some TransferRepresentation {
+        DataRepresentation(exportedContentType: .jpeg) { photo in
+            photo.data
         }
     }
 }
