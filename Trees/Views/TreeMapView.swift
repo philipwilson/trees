@@ -9,6 +9,7 @@ struct TreeMapView: View {
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedTree: Tree?
     @State private var showingCaptureSheet = false
+    @State private var showingOfflineTip = false
     @State private var locationManager = LocationManager()
 
     var body: some View {
@@ -66,13 +67,22 @@ struct TreeMapView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showVariety.toggle()
+                    Menu {
+                        Button {
+                            showVariety.toggle()
+                        } label: {
+                            Label(
+                                showVariety ? "Show Species" : "Show Variety",
+                                systemImage: showVariety ? "leaf.fill" : "leaf"
+                            )
+                        }
+                        Button {
+                            showingOfflineTip = true
+                        } label: {
+                            Label("Offline Maps", systemImage: "arrow.down.circle")
+                        }
                     } label: {
-                        Label(
-                            showVariety ? "Show Species" : "Show Variety",
-                            systemImage: showVariety ? "leaf.fill" : "leaf"
-                        )
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
@@ -94,6 +104,11 @@ struct TreeMapView: View {
             }
             .onAppear {
                 locationManager.requestPermission()
+            }
+            .alert("Offline Maps", isPresented: $showingOfflineTip) {
+                Button("OK") {}
+            } message: {
+                Text("To use maps without signal, download your area for offline use in Apple Maps.\n\nOpen Apple Maps → tap your profile → Offline Maps → Download New Map.")
             }
         }
     }

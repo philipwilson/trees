@@ -11,6 +11,7 @@ struct iPadMapView: View {
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedTree: Tree?
     @State private var showingCaptureSheet = false
+    @State private var showingOfflineTip = false
     @State private var showingTreeList = true
     @State private var searchText = ""
     @State private var locationManager = LocationManager()
@@ -113,13 +114,22 @@ struct iPadMapView: View {
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        showVariety.toggle()
+                    Menu {
+                        Button {
+                            showVariety.toggle()
+                        } label: {
+                            Label(
+                                showVariety ? "Show Species" : "Show Variety",
+                                systemImage: showVariety ? "leaf.fill" : "leaf"
+                            )
+                        }
+                        Button {
+                            showingOfflineTip = true
+                        } label: {
+                            Label("Offline Maps", systemImage: "arrow.down.circle")
+                        }
                     } label: {
-                        Label(
-                            showVariety ? "Show Species" : "Show Variety",
-                            systemImage: showVariety ? "leaf.fill" : "leaf"
-                        )
+                        Image(systemName: "ellipsis.circle")
                     }
                 }
             }
@@ -141,6 +151,11 @@ struct iPadMapView: View {
             }
             .onAppear {
                 locationManager.requestPermission()
+            }
+            .alert("Offline Maps", isPresented: $showingOfflineTip) {
+                Button("OK") {}
+            } message: {
+                Text("To use maps without signal, download your area for offline use in Apple Maps.\n\nOpen Apple Maps → tap your profile → Offline Maps → Download New Map.")
             }
         }
     }
