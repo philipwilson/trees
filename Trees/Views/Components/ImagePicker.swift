@@ -56,8 +56,10 @@ struct PhotosPicker: View {
             Label("Add Photo", systemImage: "camera.fill")
         }
         .confirmationDialog("Choose Photo Source", isPresented: $showingSourceSelection) {
-            Button("Camera") {
-                checkCameraPermission()
+            if UIImagePickerController.isSourceTypeAvailable(.camera) {
+                Button("Camera") {
+                    checkCameraPermission()
+                }
             }
             Button("Photo Library") {
                 useCamera = false

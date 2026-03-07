@@ -162,7 +162,9 @@ struct ExportView: View {
         let treesToExport = trees
         let includePhotos = includePhotosInJSON
 
-        Task.detached {
+        // Use Task (not .detached) to inherit MainActor context,
+        // keeping SwiftData model access on the main actor
+        Task {
             let url: URL?
 
             switch format {
@@ -174,12 +176,10 @@ struct ExportView: View {
                 url = GPXExporter.exportToFile(trees: treesToExport, filePrefix: prefix)
             }
 
-            await MainActor.run {
-                isExporting = false
-                if let url = url {
-                    exportURL = url
-                    showingShareSheet = true
-                }
+            isExporting = false
+            if let url = url {
+                exportURL = url
+                showingShareSheet = true
             }
         }
     }

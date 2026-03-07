@@ -43,7 +43,7 @@ targets:
         UISupportedInterfaceOrientations~ipad:
           - UIInterfaceOrientationPortrait
           - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscageLeft
+          - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSLocationWhenInUseUsageDescription: Tree Tracker needs your location to record precise GPS coordinates of trees you capture.
         NSLocationAlwaysAndWhenInUseUsageDescription: Tree Tracker needs your location to record precise GPS coordinates of trees you capture.

@@ -108,9 +108,20 @@ struct JSONExporter {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
 
+        var writeError = false
+
         func write(_ string: String) {
+            guard !writeError else { return }
             let bytes = Array(string.utf8)
-            outputStream.write(bytes, maxLength: bytes.count)
+            var offset = 0
+            while offset < bytes.count {
+                let written = outputStream.write(Array(bytes[offset...]), maxLength: bytes.count - offset)
+                if written <= 0 {
+                    writeError = true
+                    return
+                }
+                offset += written
+            }
         }
 
         // Write collections
@@ -163,6 +174,12 @@ struct JSONExporter {
         }
 
         write("]}")
+
+        if writeError {
+            try? FileManager.default.removeItem(at: url)
+            return nil
+        }
+
         return url
     }
 
