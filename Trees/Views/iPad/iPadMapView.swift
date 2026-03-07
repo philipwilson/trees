@@ -129,6 +129,13 @@ struct iPadMapView: View {
             .sheet(item: $selectedTree) { tree in
                 NavigationStack {
                     TreeDetailView(tree: tree)
+                        .toolbar {
+                            ToolbarItem(placement: .topBarLeading) {
+                                Button("Done") {
+                                    selectedTree = nil
+                                }
+                            }
+                        }
                 }
                 .presentationDetents([.medium, .large])
             }
