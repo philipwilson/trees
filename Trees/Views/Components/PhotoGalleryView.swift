@@ -122,28 +122,30 @@ struct PhotoDetailView: View {
             .toolbarBackground(.black, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
         }
+        .environment(\.colorScheme, .dark)
         .onAppear {
             photoViewerState.isPresented = true
-            setWindowDarkMode(true)
+            #if targetEnvironment(macCatalyst)
+            setMacCatalystToolbarVisible(false)
+            #endif
         }
         .onDisappear {
             photoViewerState.isPresented = false
-            setWindowDarkMode(false)
+            #if targetEnvironment(macCatalyst)
+            setMacCatalystToolbarVisible(true)
+            #endif
         }
     }
 
-    private func setWindowDarkMode(_ dark: Bool) {
+    #if targetEnvironment(macCatalyst)
+    private func setMacCatalystToolbarVisible(_ visible: Bool) {
         for scene in UIApplication.shared.connectedScenes {
             if let windowScene = scene as? UIWindowScene {
-                for window in windowScene.windows {
-                    window.overrideUserInterfaceStyle = dark ? .dark : .unspecified
-                }
-                #if targetEnvironment(macCatalyst)
-                windowScene.titlebar?.toolbar?.isVisible = !dark
-                #endif
+                windowScene.titlebar?.toolbar?.isVisible = visible
             }
         }
     }
+    #endif
 }
 
 /// Editable gallery for use during tree capture/editing
