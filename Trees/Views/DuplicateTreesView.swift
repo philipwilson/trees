@@ -188,22 +188,42 @@ struct DuplicateTreesView: View {
     }
 
     private func findDuplicates() {
-        // Group trees by rounded coordinates + species
-        // Using 4 decimal places (~11 meter precision) to account for GPS accuracy
+        // Find trees that are likely true duplicates (double-captures, sync issues)
+        // rather than adjacent trees. Criteria:
+        // - Same species (case-insensitive)
+        // - Coordinates within ~1 meter (6 decimal places)
+        // - Created within 5 minutes of each other
         var groups: [String: [Tree]] = [:]
 
         for tree in trees {
-            let key = String(format: "%.4f,%.4f,%@",
+            let key = String(format: "%.6f,%.6f,%@",
                            tree.latitude,
                            tree.longitude,
                            tree.species.lowercased().trimmingCharacters(in: .whitespaces))
             groups[key, default: []].append(tree)
         }
 
-        // Only keep groups with more than one tree (duplicates)
-        duplicateGroups = groups.values
-            .filter { $0.count > 1 }
-            .sorted { ($0.first?.species ?? "") < ($1.first?.species ?? "") }
+        // Further filter: only keep trees in a group whose creation times
+        // are within 5 minutes of another tree in the group
+        let timeThreshold: TimeInterval = 300 // 5 minutes
+        var result: [[Tree]] = []
+
+        for group in groups.values where group.count > 1 {
+            let sorted = group.sorted { $0.createdAt < $1.createdAt }
+            var cluster: [Tree] = [sorted[0]]
+
+            for i in 1..<sorted.count {
+                if sorted[i].createdAt.timeIntervalSince(cluster.last!.createdAt) <= timeThreshold {
+                    cluster.append(sorted[i])
+                } else {
+                    if cluster.count > 1 { result.append(cluster) }
+                    cluster = [sorted[i]]
+                }
+            }
+            if cluster.count > 1 { result.append(cluster) }
+        }
+
+        duplicateGroups = result.sorted { ($0.first?.species ?? "") < ($1.first?.species ?? "") }
     }
 }
 
