@@ -45,6 +45,7 @@ struct ExportView: View {
     @State private var exportURL: URL?
     @State private var showingShareSheet = false
     @State private var isExporting = false
+    @State private var showingExportError = false
 
     private var filePrefix: String {
         if let name = collectionName {
@@ -156,6 +157,11 @@ struct ExportView: View {
                     ShareSheet(items: [url])
                 }
             }
+            .alert("Export Failed", isPresented: $showingExportError) {
+                Button("OK") {}
+            } message: {
+                Text("Could not create the \(selectedFormat.rawValue) file. Please try again.")
+            }
         }
     }
 
@@ -185,6 +191,8 @@ struct ExportView: View {
             if let url = url {
                 exportURL = url
                 showingShareSheet = true
+            } else {
+                showingExportError = true
             }
         }
     }

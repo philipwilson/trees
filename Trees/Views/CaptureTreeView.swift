@@ -18,6 +18,7 @@ struct CaptureTreeView: View {
     @State private var capturedPhotos: [CapturedPhoto] = []
     @State private var capturedLocation: CLLocation?
     @State private var showingPermissionAlert = false
+    @State private var showingSaveError = false
     @State private var selectedCollection: Collection?
 
     private var canSave: Bool {
@@ -155,6 +156,11 @@ struct CaptureTreeView: View {
             } message: {
                 Text("Please enable location access in Settings to capture tree locations.")
             }
+            .alert("Save Failed", isPresented: $showingSaveError) {
+                Button("OK") {}
+            } message: {
+                Text("Could not save the tree. Please try again.")
+            }
         }
     }
 
@@ -209,11 +215,12 @@ struct CaptureTreeView: View {
 
         do {
             try modelContext.save()
+            dismiss()
         } catch {
             print("Failed to save new tree: \(error)")
+            modelContext.rollback()
+            showingSaveError = true
         }
-
-        dismiss()
     }
 }
 
