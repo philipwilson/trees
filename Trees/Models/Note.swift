@@ -33,16 +33,12 @@ extension Note {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    var notePhotos: [Photo] {
-        photos ?? []
-    }
+    var notePhotos: [Photo] { photos ?? [] }
 
     func addPhoto(_ data: Data, capturedAt: Date? = Date()) {
         let photo = Photo(imageData: data, captureDate: capturedAt)
         photo.note = self
-        if photos == nil {
-            photos = []
-        }
+        if photos == nil { photos = [] }
         photos?.append(photo)
         updatedAt = Date()
     }

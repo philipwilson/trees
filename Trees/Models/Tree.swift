@@ -62,15 +62,8 @@ extension Tree {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    /// Safe accessor for photos array
-    var treePhotos: [Photo] {
-        photos ?? []
-    }
-
-    /// Safe accessor for notes array
-    var treeNotes: [Note] {
-        notes ?? []
-    }
+    var treePhotos: [Photo] { photos ?? [] }
+    var treeNotes: [Note] { notes ?? [] }
 
     /// All photos including those attached to notes
     var allPhotos: [Photo] {
@@ -85,9 +78,7 @@ extension Tree {
     func addPhoto(_ data: Data, capturedAt: Date? = Date()) {
         let photo = Photo(imageData: data, captureDate: capturedAt)
         photo.tree = self
-        if photos == nil {
-            photos = []
-        }
+        if photos == nil { photos = [] }
         photos?.append(photo)
         updatedAt = Date()
     }
@@ -99,16 +90,14 @@ extension Tree {
     }
 
     /// Adds a new note to this tree
-    func addNote(text: String, photos: [Data] = []) -> Note {
+    func addNote(text: String, photos photoDataList: [Data] = []) -> Note {
         let note = Note(text: text)
         note.tree = self
-        for photoData in photos {
+        for photoData in photoDataList {
             note.addPhoto(photoData)
         }
-        if self.notes == nil {
-            self.notes = []
-        }
-        self.notes?.append(note)
+        if notes == nil { notes = [] }
+        notes?.append(note)
         updatedAt = Date()
         return note
     }

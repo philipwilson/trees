@@ -15,8 +15,7 @@ struct CaptureTreeView: View {
     @State private var variety = ""
     @State private var rootstock = ""
     @State private var initialNote = ""
-    @State private var photos: [Data] = []
-    @State private var photoDates: [Date?] = []
+    @State private var capturedPhotos: [CapturedPhoto] = []
     @State private var capturedLocation: CLLocation?
     @State private var showingPermissionAlert = false
     @State private var selectedCollection: Collection?
@@ -96,14 +95,14 @@ struct CaptureTreeView: View {
                 }
 
                 Section {
-                    if !photos.isEmpty {
-                        EditablePhotoGalleryView(photos: $photos, photoDates: $photoDates)
+                    if !capturedPhotos.isEmpty {
+                        EditablePhotoGalleryView(capturedPhotos: $capturedPhotos)
                     }
-                    PhotosPicker(selectedPhotos: $photos, photoDates: $photoDates)
+                    PhotosPicker(capturedPhotos: $capturedPhotos)
                 } header: {
                     Text("Photos")
                 } footer: {
-                    if photos.isEmpty {
+                    if capturedPhotos.isEmpty {
                         Text("Add photos to help identify the tree later")
                     }
                 }
@@ -199,9 +198,8 @@ struct CaptureTreeView: View {
         modelContext.insert(tree)
 
         // Add photos as Photo entities
-        for (index, photoData) in photos.enumerated() {
-            let captureDate = index < photoDates.count ? photoDates[index] : Date()
-            tree.addPhoto(photoData, capturedAt: captureDate)
+        for photo in capturedPhotos {
+            tree.addPhoto(photo.data, capturedAt: photo.captureDate)
         }
 
         // Add initial note if provided

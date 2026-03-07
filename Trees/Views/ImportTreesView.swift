@@ -9,6 +9,7 @@ struct ImportTreesView: View {
     @State private var showingFilePicker = false
     @State private var importResult: ImportResult?
     @State private var showingResult = false
+    @State private var isLoading = false
     @State private var photoImportMode: PhotoImportMode = .withDelay
     @State private var photoImportTask: Task<Void, Never>?
 
@@ -45,6 +46,16 @@ struct ImportTreesView: View {
                     Text("Import")
                 } footer: {
                     Text(photoImportMode.description)
+                }
+
+                if isLoading {
+                    Section {
+                        HStack {
+                            ProgressView()
+                            Text("Reading file...")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
             .navigationTitle("Import Trees")
@@ -97,23 +108,37 @@ struct ImportTreesView: View {
             showingResult = true
             return
         }
-        defer { url.stopAccessingSecurityScopedResource() }
 
-        do {
-            let data = try Data(contentsOf: url)
+        isLoading = true
 
-            // Try new format first (object with collections and trees)
-            if let importedData = try? JSONDecoder().decode(ImportedData.self, from: data) {
-                importNewFormat(importedData)
-            } else {
-                // Fall back to old format (array of trees)
-                let trees = try JSONDecoder().decode([ImportedTreeData].self, from: data)
-                importTrees(trees, collectionMap: [:])
+        Task.detached {
+            do {
+                let data = try Data(contentsOf: url)
+                let newFormat = try? JSONDecoder().decode(ImportedData.self, from: data)
+                let oldFormat: [ImportedTreeData]? = newFormat == nil
+                    ? try? JSONDecoder().decode([ImportedTreeData].self, from: data) : nil
+
+                await MainActor.run {
+                    url.stopAccessingSecurityScopedResource()
+                    isLoading = false
+
+                    if let importedData = newFormat {
+                        importNewFormat(importedData)
+                    } else if let trees = oldFormat {
+                        importTrees(trees, collectionMap: [:])
+                    } else {
+                        importResult = ImportResult(success: false, message: "Failed to parse file. Ensure it is a valid Trees JSON export.")
+                        showingResult = true
+                    }
+                }
+            } catch {
+                await MainActor.run {
+                    url.stopAccessingSecurityScopedResource()
+                    isLoading = false
+                    importResult = ImportResult(success: false, message: "Failed to read file: \(error.localizedDescription)")
+                    showingResult = true
+                }
             }
-
-        } catch {
-            importResult = ImportResult(success: false, message: "Failed to parse file: \(error.localizedDescription)")
-            showingResult = true
         }
     }
 

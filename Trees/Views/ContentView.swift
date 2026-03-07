@@ -1,13 +1,27 @@
 import SwiftUI
 
 struct ContentView: View {
+    var isCloudSyncActive = true
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @State private var showingSyncWarning = false
 
     var body: some View {
-        if horizontalSizeClass == .regular {
-            iPadContentView()
-        } else {
-            iPhoneContentView()
+        Group {
+            if horizontalSizeClass == .regular {
+                iPadContentView()
+            } else {
+                iPhoneContentView()
+            }
+        }
+        .onAppear {
+            if !isCloudSyncActive {
+                showingSyncWarning = true
+            }
+        }
+        .alert("iCloud Sync Unavailable", isPresented: $showingSyncWarning) {
+            Button("OK") {}
+        } message: {
+            Text("iCloud sync could not be enabled. Your data will be stored locally only and won't sync across devices.")
         }
     }
 }

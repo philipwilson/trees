@@ -13,6 +13,7 @@ struct ImportCollectionView: View {
     @State private var createNewCollection = true
     @State private var importResult: ImportResult?
     @State private var showingResult = false
+    @State private var isLoading = false
 
     var body: some View {
         NavigationStack {
@@ -45,6 +46,16 @@ struct ImportCollectionView: View {
                     Text("Import")
                 } footer: {
                     Text("Import trees from a JSON file exported by Tree Tracker.")
+                }
+
+                if isLoading {
+                    Section {
+                        HStack {
+                            ProgressView()
+                            Text("Reading file...")
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
             }
             .navigationTitle("Import Collection")
@@ -102,23 +113,40 @@ struct ImportCollectionView: View {
             showingResult = true
             return
         }
-        defer { url.stopAccessingSecurityScopedResource() }
 
+        isLoading = true
+
+        Task.detached {
+            do {
+                let data = try Data(contentsOf: url)
+                let decoded: [ImportedTree]
+                if let importedData = try? JSONDecoder().decode(ImportedCollectionData.self, from: data) {
+                    decoded = importedData.trees
+                } else {
+                    decoded = try JSONDecoder().decode([ImportedTree].self, from: data)
+                }
+
+                await MainActor.run {
+                    url.stopAccessingSecurityScopedResource()
+                    isLoading = false
+                    processImportedTrees(decoded)
+                }
+            } catch {
+                await MainActor.run {
+                    url.stopAccessingSecurityScopedResource()
+                    isLoading = false
+                    importResult = ImportResult(success: false, message: "Failed to read file: \(error.localizedDescription)")
+                    showingResult = true
+                }
+            }
+        }
+    }
+
+    private func processImportedTrees(_ trees: [ImportedTree]) {
         var insertedTrees: [Tree] = []
         var newCollection: Collection?
 
         do {
-            let data = try Data(contentsOf: url)
-
-            // Try new format first (object with collections and trees keys)
-            let trees: [ImportedTree]
-            if let importedData = try? JSONDecoder().decode(ImportedCollectionData.self, from: data) {
-                trees = importedData.trees
-            } else {
-                // Fall back to old format (bare array of trees)
-                trees = try JSONDecoder().decode([ImportedTree].self, from: data)
-            }
-
             let collection: Collection
             if createNewCollection {
                 let name = collectionName.trimmingCharacters(in: .whitespacesAndNewlines)

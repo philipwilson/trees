@@ -112,7 +112,7 @@ struct TreeMapView: View {
                 span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
             ))
         } else {
-            locationManager.startUpdatingLocation()
+            locationManager.requestSingleLocation()
         }
     }
 }

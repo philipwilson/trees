@@ -185,7 +185,7 @@ struct JSONExporter {
 
     private static func formattedDate() -> String {
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy-MM-dd_HHmmss"
+        formatter.dateFormat = "yyyy-MM-dd_HHmmss_SSS"
         return formatter.string(from: Date())
     }
 }

@@ -41,8 +41,7 @@ struct ImagePicker: UIViewControllerRepresentable {
 }
 
 struct PhotosPicker: View {
-    @Binding var selectedPhotos: [Data]
-    @Binding var photoDates: [Date?]
+    @Binding var capturedPhotos: [CapturedPhoto]
     @State private var showingImagePicker = false
     @State private var showingSourceSelection = false
     @State private var selectedImage: UIImage?
@@ -86,8 +85,7 @@ struct PhotosPicker: View {
         .onChange(of: selectedImage) { _, newImage in
             if let image = newImage,
                let data = image.jpegData(compressionQuality: 0.8) {
-                selectedPhotos.append(data)
-                photoDates.append(Date())
+                capturedPhotos.append(CapturedPhoto(data: data, captureDate: Date()))
                 selectedImage = nil
             }
         }

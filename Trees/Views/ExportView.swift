@@ -146,7 +146,12 @@ struct ExportView: View {
                     }
                 }
             }
-            .sheet(isPresented: $showingShareSheet) {
+            .sheet(isPresented: $showingShareSheet, onDismiss: {
+                if let url = exportURL {
+                    try? FileManager.default.removeItem(at: url)
+                    exportURL = nil
+                }
+            }) {
                 if let url = exportURL {
                     ShareSheet(items: [url])
                 }

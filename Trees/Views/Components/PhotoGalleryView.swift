@@ -1,5 +1,11 @@
 import SwiftUI
 
+struct CapturedPhoto: Identifiable {
+    let id = UUID()
+    let data: Data
+    let captureDate: Date?
+}
+
 @Observable
 class PhotoViewerState {
     var isPresented = false
@@ -141,10 +147,9 @@ struct PhotoDetailView: View {
 }
 
 /// Editable gallery for use during tree capture/editing
-/// Works with raw Data since Photo entities aren't created yet
+/// Works with CapturedPhoto since Photo entities aren't created yet
 struct EditablePhotoGalleryView: View {
-    @Binding var photos: [Data]
-    @Binding var photoDates: [Date?]
+    @Binding var capturedPhotos: [CapturedPhoto]
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var columns: [GridItem] {
@@ -154,8 +159,8 @@ struct EditablePhotoGalleryView: View {
 
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
-            ForEach(photos.indices, id: \.self) { index in
-                if let uiImage = ImageDownsampler.downsample(data: photos[index], maxDimension: 80) {
+            ForEach(capturedPhotos) { photo in
+                if let uiImage = ImageDownsampler.downsample(data: photo.data, maxDimension: 80) {
                     VStack(spacing: 4) {
                         ZStack(alignment: .topTrailing) {
                             Image(uiImage: uiImage)
@@ -166,10 +171,7 @@ struct EditablePhotoGalleryView: View {
                                 .clipShape(RoundedRectangle(cornerRadius: 8))
 
                             Button {
-                                photos.remove(at: index)
-                                if index < photoDates.count {
-                                    photoDates.remove(at: index)
-                                }
+                                capturedPhotos.removeAll { $0.id == photo.id }
                             } label: {
                                 Image(systemName: "xmark.circle.fill")
                                     .font(.title3)
@@ -178,7 +180,7 @@ struct EditablePhotoGalleryView: View {
                             .offset(x: 6, y: -6)
                         }
 
-                        if index < photoDates.count, let date = photoDates[index] {
+                        if let date = photo.captureDate {
                             Text(date.formatted(date: .abbreviated, time: .omitted))
                                 .font(.caption2)
                                 .foregroundStyle(.secondary)

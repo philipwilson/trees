@@ -4,12 +4,14 @@ import SwiftData
 @main
 struct TreesApp: App {
     let modelContainer: ModelContainer
+    let isCloudSyncActive: Bool
 
     // Set to true once Apple Developer Program enrollment is approved
     private static let enableCloudKit = true
 
     init() {
         let schema = Schema(versionedSchema: TreesSchemaV1.self)
+        var cloudSyncActive = false
 
         if Self.enableCloudKit {
             do {
@@ -22,6 +24,7 @@ struct TreesApp: App {
                     migrationPlan: TreesMigrationPlan.self,
                     configurations: [cloudConfig]
                 )
+                cloudSyncActive = true
             } catch {
                 print("CloudKit ModelContainer failed, falling back to local-only: \(error)")
                 do {
@@ -48,6 +51,7 @@ struct TreesApp: App {
             }
         }
 
+        isCloudSyncActive = cloudSyncActive
         setupWatchConnectivity()
     }
 
@@ -55,7 +59,7 @@ struct TreesApp: App {
 
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            ContentView(isCloudSyncActive: isCloudSyncActive)
                 .environment(photoViewerState)
         }
         .modelContainer(modelContainer)

@@ -13,9 +13,7 @@ struct TreeDetailView: View {
     @State private var showingAddNote = false
     @State private var saveErrorMessage: String?
 
-    // For adding photos
-    @State private var newPhotos: [Data] = []
-    @State private var newPhotoDates: [Date?] = []
+    @State private var newPhotos: [CapturedPhoto] = []
 
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: tree.latitude, longitude: tree.longitude)
@@ -92,7 +90,7 @@ struct TreeDetailView: View {
 
             Section {
                 PhotoGalleryView(photos: tree.treePhotos)
-                PhotosPicker(selectedPhotos: $newPhotos, photoDates: $newPhotoDates)
+                PhotosPicker(capturedPhotos: $newPhotos)
             } header: {
                 Text("Photos (\(tree.treePhotos.count))")
             }
@@ -171,14 +169,12 @@ struct TreeDetailView: View {
                 commitFieldEdit()
             }
         }
-        .onChange(of: newPhotos) { _, photos in
-            guard !photos.isEmpty else { return }
-            for (index, photoData) in photos.enumerated() {
-                let captureDate = index < newPhotoDates.count ? newPhotoDates[index] : Date()
-                tree.addPhoto(photoData, capturedAt: captureDate)
+        .onChange(of: newPhotos.count) { _, count in
+            guard count > 0 else { return }
+            for photo in newPhotos {
+                tree.addPhoto(photo.data, capturedAt: photo.captureDate)
             }
             newPhotos = []
-            newPhotoDates = []
             tree.updatedAt = Date()
             saveContext()
         }
@@ -301,8 +297,7 @@ struct AddNoteView: View {
     @Environment(\.dismiss) private var dismiss
 
     @State private var text = ""
-    @State private var photos: [Data] = []
-    @State private var photoDates: [Date?] = []
+    @State private var capturedPhotos: [CapturedPhoto] = []
 
     var body: some View {
         NavigationStack {
@@ -315,10 +310,10 @@ struct AddNoteView: View {
                 }
 
                 Section {
-                    if !photos.isEmpty {
-                        EditablePhotoGalleryView(photos: $photos, photoDates: $photoDates)
+                    if !capturedPhotos.isEmpty {
+                        EditablePhotoGalleryView(capturedPhotos: $capturedPhotos)
                     }
-                    PhotosPicker(selectedPhotos: $photos, photoDates: $photoDates)
+                    PhotosPicker(capturedPhotos: $capturedPhotos)
                 } header: {
                     Text("Photos")
                 }
@@ -335,7 +330,7 @@ struct AddNoteView: View {
                     Button("Save") {
                         saveNote()
                     }
-                    .disabled(text.isEmpty && photos.isEmpty)
+                    .disabled(text.isEmpty && capturedPhotos.isEmpty)
                     .fontWeight(.semibold)
                 }
             }
@@ -345,9 +340,8 @@ struct AddNoteView: View {
     private func saveNote() {
         let note = tree.addNote(text: text.trimmingCharacters(in: .whitespacesAndNewlines))
 
-        for (index, photoData) in photos.enumerated() {
-            let captureDate = index < photoDates.count ? photoDates[index] : Date()
-            note.addPhoto(photoData, capturedAt: captureDate)
+        for photo in capturedPhotos {
+            note.addPhoto(photo.data, capturedAt: photo.captureDate)
         }
 
         dismiss()
