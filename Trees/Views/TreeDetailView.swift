@@ -4,6 +4,9 @@ import MapKit
 
 struct TreeDetailView: View {
     @Bindable var tree: Tree
+    /// Called after the tree is deleted. Needed on iPad, where this view is a
+    /// split-view column and dismiss() can't clear the stale selection.
+    var onDelete: (() -> Void)? = nil
     @Environment(PhotoViewerState.self) private var photoViewerState
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
@@ -204,6 +207,7 @@ struct TreeDetailView: View {
         .confirmationDialog("Delete Tree", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
                 modelContext.delete(tree)
+                onDelete?()
                 dismiss()
             }
             Button("Cancel", role: .cancel) {}

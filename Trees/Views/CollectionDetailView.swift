@@ -3,6 +3,9 @@ import SwiftData
 
 struct CollectionDetailView: View {
     @Bindable var collection: Collection
+    /// Called after the collection is deleted. Needed on iPad, where this view is
+    /// a split-view column and dismiss() can't clear the stale selection.
+    var onDelete: (() -> Void)? = nil
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
     @Query(sort: \Tree.createdAt, order: .reverse) private var allTrees: [Tree]
@@ -168,6 +171,7 @@ struct CollectionDetailView: View {
         .confirmationDialog("Delete Collection", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
             Button("Delete", role: .destructive) {
                 modelContext.delete(collection)
+                onDelete?()
                 dismiss()
             }
             Button("Cancel", role: .cancel) {}

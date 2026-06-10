@@ -103,10 +103,12 @@ struct iPadContentView: View {
 
     @ViewBuilder
     private var detailColumn: some View {
-        if let tree = selectedTree, selectedSection == .trees {
-            TreeDetailView(tree: tree)
-        } else if let collection = selectedCollection, selectedSection == .collections {
-            CollectionDetailView(collection: collection)
+        // modelContext check guards against rendering a deleted model
+        // (e.g. removed on another device via CloudKit sync)
+        if let tree = selectedTree, selectedSection == .trees, tree.modelContext != nil {
+            TreeDetailView(tree: tree, onDelete: { selectedTree = nil })
+        } else if let collection = selectedCollection, selectedSection == .collections, collection.modelContext != nil {
+            CollectionDetailView(collection: collection, onDelete: { selectedCollection = nil })
         } else {
             ContentUnavailableView(
                 "Select an Item",
