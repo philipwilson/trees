@@ -135,6 +135,16 @@ struct TreeDetailView: View {
                         Text(String(format: "%.1f m", altitude))
                     }
                 }
+                Button {
+                    let placemark = MKPlacemark(coordinate: coordinate)
+                    let mapItem = MKMapItem(placemark: placemark)
+                    mapItem.name = tree.species.isEmpty ? "Tree" : tree.species
+                    mapItem.openInMaps(launchOptions: [
+                        MKLaunchOptionsDirectionsModeKey: MKLaunchOptionsDirectionsModeWalking
+                    ])
+                } label: {
+                    Label("Get Directions", systemImage: "arrow.triangle.turn.up.right.circle")
+                }
             } header: {
                 Text("Location")
             }
