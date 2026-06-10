@@ -1,11 +1,36 @@
 import Foundation
 
+/// Exports trees as versioned JSON (format v2).
+///
+/// v2 adds structured fields that round-trip the full data model:
+/// - `noteEntries`: one object per note with its text, dates, and own photos
+/// - `treePhotos`: photos owned by the tree itself (no longer flattened with note photos)
+///
+/// Legacy v1 fields are still written so older app builds and external tools can
+/// read v2 files (they get coordinates, species, dates, and the combined notes
+/// text, but no photos): `notes` stays the " | "-joined string and `photoCount`
+/// the total across tree and notes. The v1 flat `photos`/`photoDates` arrays are
+/// no longer written.
 struct JSONExporter {
+    static let formatVersion = 2
+
     struct ExportedCollection: Codable {
         let id: String
         let name: String
         let createdAt: String
         let updatedAt: String
+    }
+
+    struct ExportedPhoto: Codable {
+        let data: String          // base64-encoded image data
+        let captureDate: String?  // ISO8601
+    }
+
+    struct ExportedNote: Codable {
+        let text: String
+        let createdAt: String
+        let updatedAt: String
+        let photos: [ExportedPhoto]?
     }
 
     struct ExportedTree: Codable {
@@ -19,14 +44,15 @@ struct JSONExporter {
         let rootstock: String?
         let notes: String
         let photoCount: Int
-        let photos: [String]?
-        let photoDates: [String]?
+        let noteEntries: [ExportedNote]?
+        let treePhotos: [ExportedPhoto]?
         let collectionId: String?
         let createdAt: String
         let updatedAt: String
     }
 
     struct ExportedData: Codable {
+        let version: Int
         let collections: [ExportedCollection]
         let trees: [ExportedTree]
     }
@@ -34,44 +60,11 @@ struct JSONExporter {
     static func export(trees: [Tree], collections: [Collection] = [], includePhotos: Bool = false) -> String {
         let dateFormatter = ISO8601DateFormatter()
 
-        let exportedCollections = collections.map { collection in
-            ExportedCollection(
-                id: collection.id.uuidString,
-                name: collection.name,
-                createdAt: dateFormatter.string(from: collection.createdAt),
-                updatedAt: dateFormatter.string(from: collection.updatedAt)
-            )
-        }
-
-        let exportedTrees = trees.map { tree in
-            // Combine all notes into a single string
-            let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
-
-            // Get all photos from tree (including note photos)
-            let treePhotos = tree.allPhotos
-
-            return ExportedTree(
-                id: tree.id.uuidString,
-                latitude: tree.latitude,
-                longitude: tree.longitude,
-                horizontalAccuracy: tree.horizontalAccuracy,
-                altitude: tree.altitude,
-                species: tree.species,
-                variety: tree.variety,
-                rootstock: tree.rootstock,
-                notes: allNotesText,
-                photoCount: treePhotos.count,
-                photos: includePhotos ? treePhotos.map { $0.imageData.base64EncodedString() } : nil,
-                photoDates: includePhotos ? treePhotos.map { photo in
-                    photo.captureDate.map { dateFormatter.string(from: $0) } ?? ""
-                } : nil,
-                collectionId: tree.collection?.id.uuidString,
-                createdAt: dateFormatter.string(from: tree.createdAt),
-                updatedAt: dateFormatter.string(from: tree.updatedAt)
-            )
-        }
-
-        let exportedData = ExportedData(collections: exportedCollections, trees: exportedTrees)
+        let exportedData = ExportedData(
+            version: formatVersion,
+            collections: collections.map { makeExportedCollection($0, dateFormatter: dateFormatter) },
+            trees: trees.map { makeExportedTree($0, includePhotos: includePhotos, dateFormatter: dateFormatter) }
+        )
 
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
@@ -124,47 +117,18 @@ struct JSONExporter {
             }
         }
 
-        // Write collections
-        let exportedCollections = collections.map { collection in
-            ExportedCollection(
-                id: collection.id.uuidString,
-                name: collection.name,
-                createdAt: dateFormatter.string(from: collection.createdAt),
-                updatedAt: dateFormatter.string(from: collection.updatedAt)
-            )
-        }
+        let exportedCollections = collections.map { makeExportedCollection($0, dateFormatter: dateFormatter) }
         let collectionsJSON = (try? encoder.encode(exportedCollections))
             .flatMap { String(data: $0, encoding: .utf8) } ?? "[]"
 
-        write("{\"collections\":\(collectionsJSON),\"trees\":[")
+        write("{\"version\":\(formatVersion),\"collections\":\(collectionsJSON),\"trees\":[")
 
         // Write each tree individually so only one tree's photos are in memory at a time
         for (index, tree) in trees.enumerated() {
             autoreleasepool {
                 if index > 0 { write(",") }
 
-                let allNotesText = tree.treeNotes.map { $0.text }.joined(separator: " | ")
-                let treePhotos = tree.allPhotos
-
-                let exportedTree = ExportedTree(
-                    id: tree.id.uuidString,
-                    latitude: tree.latitude,
-                    longitude: tree.longitude,
-                    horizontalAccuracy: tree.horizontalAccuracy,
-                    altitude: tree.altitude,
-                    species: tree.species,
-                    variety: tree.variety,
-                    rootstock: tree.rootstock,
-                    notes: allNotesText,
-                    photoCount: treePhotos.count,
-                    photos: treePhotos.map { $0.imageData.base64EncodedString() },
-                    photoDates: treePhotos.map { photo in
-                        photo.captureDate.map { dateFormatter.string(from: $0) } ?? ""
-                    },
-                    collectionId: tree.collection?.id.uuidString,
-                    createdAt: dateFormatter.string(from: tree.createdAt),
-                    updatedAt: dateFormatter.string(from: tree.updatedAt)
-                )
+                let exportedTree = makeExportedTree(tree, includePhotos: true, dateFormatter: dateFormatter)
 
                 if let treeData = try? encoder.encode(exportedTree),
                    let treeJSON = String(data: treeData, encoding: .utf8) {
@@ -181,6 +145,51 @@ struct JSONExporter {
         }
 
         return url
+    }
+
+    private static func makeExportedCollection(_ collection: Collection, dateFormatter: ISO8601DateFormatter) -> ExportedCollection {
+        ExportedCollection(
+            id: collection.id.uuidString,
+            name: collection.name,
+            createdAt: dateFormatter.string(from: collection.createdAt),
+            updatedAt: dateFormatter.string(from: collection.updatedAt)
+        )
+    }
+
+    private static func makeExportedTree(_ tree: Tree, includePhotos: Bool, dateFormatter: ISO8601DateFormatter) -> ExportedTree {
+        let noteEntries = tree.treeNotes.map { note in
+            ExportedNote(
+                text: note.text,
+                createdAt: dateFormatter.string(from: note.createdAt),
+                updatedAt: dateFormatter.string(from: note.updatedAt),
+                photos: includePhotos ? note.notePhotos.map { makeExportedPhoto($0, dateFormatter: dateFormatter) } : nil
+            )
+        }
+
+        return ExportedTree(
+            id: tree.id.uuidString,
+            latitude: tree.latitude,
+            longitude: tree.longitude,
+            horizontalAccuracy: tree.horizontalAccuracy,
+            altitude: tree.altitude,
+            species: tree.species,
+            variety: tree.variety,
+            rootstock: tree.rootstock,
+            notes: tree.treeNotes.map { $0.text }.joined(separator: " | "),
+            photoCount: tree.allPhotos.count,
+            noteEntries: noteEntries,
+            treePhotos: includePhotos ? tree.treePhotos.map { makeExportedPhoto($0, dateFormatter: dateFormatter) } : nil,
+            collectionId: tree.collection?.id.uuidString,
+            createdAt: dateFormatter.string(from: tree.createdAt),
+            updatedAt: dateFormatter.string(from: tree.updatedAt)
+        )
+    }
+
+    private static func makeExportedPhoto(_ photo: Photo, dateFormatter: ISO8601DateFormatter) -> ExportedPhoto {
+        ExportedPhoto(
+            data: photo.imageData.base64EncodedString(),
+            captureDate: photo.captureDate.map { dateFormatter.string(from: $0) }
+        )
     }
 
     private static func formattedDate() -> String {
