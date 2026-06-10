@@ -53,11 +53,17 @@ final class WatchLocationManager: NSObject {
 
 extension WatchLocationManager: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        guard let location = locations.last else { return }
+        // Core Location replays the last known fix when updates start; it can be
+        // minutes old and from a different place, so reject stale or invalid fixes.
+        guard let location = locations.last,
+              location.horizontalAccuracy >= 0,
+              abs(location.timestamp.timeIntervalSinceNow) < 15 else { return }
         currentLocation = location
     }
 
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        // locationUnknown is transient — the manager keeps trying on its own
+        if (error as? CLError)?.code == .locationUnknown { return }
         locationError = error
         isRequestingLocation = false
     }
