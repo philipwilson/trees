@@ -84,10 +84,8 @@ struct PhotoDetailView: View {
         NavigationStack {
             TabView(selection: $currentPhotoID) {
                 ForEach(photos) { photo in
-                    if let uiImage = UIImage(data: photo.imageData) {
-                        ZoomableImageView(image: uiImage)
-                            .tag(photo.id)
-                    }
+                    PhotoPageView(photo: photo)
+                        .tag(photo.id)
                 }
             }
             .tabViewStyle(.page)
@@ -104,7 +102,10 @@ struct PhotoDetailView: View {
                     if let photo = photos.first(where: { $0.id == currentPhotoID }) {
                         ShareLink(
                             item: PhotoFile(data: photo.imageData),
-                            preview: SharePreview("Photo", image: Image(uiImage: UIImage(data: photo.imageData) ?? UIImage()))
+                            preview: SharePreview(
+                                "Photo",
+                                image: Image(uiImage: ImageDownsampler.downsample(data: photo.imageData, maxDimension: 200) ?? UIImage())
+                            )
                         )
                     }
                 }
@@ -146,6 +147,38 @@ struct PhotoDetailView: View {
         }
     }
     #endif
+}
+
+/// A single page of the fullscreen viewer. Loads its image lazily and
+/// downsampled to screen size, and releases it when swiped off-screen,
+/// so peak memory stays bounded regardless of photo count.
+private struct PhotoPageView: View {
+    let photo: Photo
+    @State private var image: UIImage?
+
+    var body: some View {
+        Group {
+            if let image {
+                ZoomableImageView(image: image)
+            } else {
+                ProgressView()
+                    .tint(.white)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+            }
+        }
+        .task(id: photo.id) {
+            guard image == nil else { return }
+            let screen = UIScreen.main.bounds.size
+            let maxDimension = max(screen.width, screen.height)
+            let data = photo.imageData
+            image = await Task.detached(priority: .userInitiated) {
+                ImageDownsampler.downsample(data: data, maxDimension: maxDimension)
+            }.value
+        }
+        .onDisappear {
+            image = nil
+        }
+    }
 }
 
 /// Editable gallery for use during tree capture/editing
