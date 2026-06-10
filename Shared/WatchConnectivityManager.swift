@@ -28,6 +28,12 @@ final class WatchConnectivityManager: NSObject {
     func activate() {
         guard WCSession.isSupported() else { return }
 
+        #if os(watchOS)
+        // Load before activating so a capture made prior to activation
+        // enqueues alongside the persisted queue instead of overwriting it.
+        loadPendingTrees()
+        #endif
+
         session = WCSession.default
         session?.delegate = self
         session?.activate()
@@ -116,7 +122,6 @@ extension WatchConnectivityManager: WCSessionDelegate {
             #endif
 
             #if os(watchOS)
-            self.loadPendingTrees()
             if activationState == .activated && !self.pendingTrees.isEmpty {
                 self.retrySendingPendingTrees()
             }
@@ -146,8 +151,15 @@ extension WatchConnectivityManager: WCSessionDelegate {
 
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         #if os(iOS)
-        guard let treeData = userInfo["tree"] as? Data,
-              let tree = try? JSONDecoder().decode(WatchTree.self, from: treeData) else { return }
+        guard let treeData = userInfo["tree"] as? Data else { return }
+        let tree: WatchTree
+        do {
+            tree = try JSONDecoder().decode(WatchTree.self, from: treeData)
+        } catch {
+            // transferUserInfo delivers exactly once — a dropped payload is gone for good
+            print("WatchConnectivity: failed to decode received tree, payload lost: \(error)")
+            return
+        }
 
         DispatchQueue.main.async {
             self.onTreesReceived?([tree])
