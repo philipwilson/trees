@@ -156,6 +156,22 @@ targets:
         name: Set Build Number from Git
         basedOnDependencyAnalysis: false
 
+  TreesTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: TreesTests
+        excludes:
+          - "**/.DS_Store"
+    dependencies:
+      - target: Trees
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.treetracker.TreesTests
+        GENERATE_INFOPLIST_FILE: true
+        CODE_SIGN_STYLE: Automatic
+        DEVELOPMENT_TEAM: 3L3ASPMXH9
+
 schemes:
   Trees:
     shared: true
@@ -164,5 +180,9 @@ schemes:
         Trees: all
     run:
       config: Debug
+    test:
+      config: Debug
+      targets:
+        - TreesTests
     archive:
       config: Release
