@@ -141,6 +141,7 @@ struct TreeImportService {
                 species: record.species,
                 variety: record.variety,
                 rootstock: record.rootstock,
+                label: record.label,
                 createdAt: record.parsedCreatedAt ?? Date(),
                 updatedAt: record.parsedUpdatedAt ?? Date()
             )

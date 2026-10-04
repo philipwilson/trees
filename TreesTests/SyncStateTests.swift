@@ -96,7 +96,7 @@ final class SyncStateTests: XCTestCase {
     // MARK: - Notices
 
     func testWatchImportText() throws {
-        let schema = Schema(versionedSchema: TreesSchemaV1.self)
+        let schema = Schema(versionedSchema: CurrentTreesSchema.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         let container = try ModelContainer(for: schema, configurations: [config])
         func tree(_ species: String) -> Tree {

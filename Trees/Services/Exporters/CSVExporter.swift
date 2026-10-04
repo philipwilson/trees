@@ -2,7 +2,7 @@ import Foundation
 
 struct CSVExporter {
     static func export(trees: [Tree]) -> String {
-        var csv = "id,latitude,longitude,accuracy_meters,altitude,species,variety,rootstock,notes,created_at,updated_at\n"
+        var csv = "id,latitude,longitude,accuracy_meters,altitude,species,variety,rootstock,notes,created_at,updated_at,label\n"
 
         let dateFormatter = ISO8601DateFormatter()
 
@@ -27,7 +27,9 @@ struct CSVExporter {
                 rootstockEscaped,
                 notesEscaped,
                 dateFormatter.string(from: tree.createdAt),
-                dateFormatter.string(from: tree.updatedAt)
+                dateFormatter.string(from: tree.updatedAt),
+                // Appended last so existing column positions don't move
+                escapeCSV(tree.label ?? "")
             ].joined(separator: ",")
 
             csv += row + "\n"

@@ -33,12 +33,13 @@ open Trees.xcodeproj
 iOS app using SwiftUI + SwiftData (iOS 17+) with watchOS companion app (watchOS 11+). Project generated via xcodegen from `project.yml`.
 
 ### Data Flow
-- **Tree** (@Model): SwiftData entity storing GPS coordinates, accuracy, species, variety, rootstock, and optional Collection relationship
+- **Tree** (@Model): SwiftData entity storing GPS coordinates, accuracy, species, variety, rootstock, an optional user label, and optional Collection relationship. Also used for shrubs and other perennial plants
 - **Photo** (@Model): Individual photo with single Data asset (external storage), belongs to Tree or Note
 - **Note** (@Model): Dated observation/note text with optional attached photos, belongs to Tree
 - **Collection** (@Model): Named group of trees with one-to-many relationship (deleteRule: nullify)
 - **LocationManager** (@Observable): Wraps CLLocationManager with `kCLLocationAccuracyBest` for precise GPS capture. Take positions to save from `capturableLocation()`, which rechecks age and accuracy; `currentLocation` is only the live reading
 - **SwiftData ModelContainer**: Configured in TreesApp.swift for Tree, Collection, Photo, and Note models
+- **Schema versions** (`Models/TreesSchema.swift`): `CurrentTreesSchema` is the live version (V2). Earlier versions are frozen copies nested in their enum and must not be edited. The steps for changing the model are in that file; `TreesTests/Fixtures` holds a frozen store per version that every later version must open
 
 ### Watch App (TreesWatch/)
 Companion watchOS app for quick tree capture from the wrist.

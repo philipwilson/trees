@@ -11,6 +11,9 @@ class Tree {
     var species: String = ""
     var variety: String?
     var rootstock: String?
+    /// A name or tag of the user's own that tells this plant apart from its
+    /// neighbours, e.g. "Row 3, bush 4". Added in schema version 2.
+    var label: String?
     @Relationship
     var collection: Collection?
     var createdAt: Date = Date()
@@ -33,6 +36,7 @@ class Tree {
         species: String = "",
         variety: String? = nil,
         rootstock: String? = nil,
+        label: String? = nil,
         createdAt: Date = Date(),
         updatedAt: Date = Date()
     ) {
@@ -44,6 +48,7 @@ class Tree {
         self.species = species
         self.variety = variety
         self.rootstock = rootstock
+        self.label = label
         self.createdAt = createdAt
         self.updatedAt = updatedAt
     }
@@ -71,13 +76,14 @@ extension Tree {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    /// Whether the species, variety, rootstock, collection name, capture date,
-    /// or any note contains the search text. The one definition of "matches"
+    /// Whether the species, variety, rootstock, label, collection name,
+    /// capture date, or any note contains the search text. The one definition of "matches"
     /// shared by every tree search field.
     func matches(searchText: String) -> Bool {
         species.localizedStandardContains(searchText) ||
         (variety ?? "").localizedStandardContains(searchText) ||
         (rootstock ?? "").localizedStandardContains(searchText) ||
+        (label ?? "").localizedStandardContains(searchText) ||
         (collection?.name ?? "").localizedStandardContains(searchText) ||
         searchableDateText.localizedStandardContains(searchText) ||
         treeNotes.contains { $0.text.localizedStandardContains(searchText) }
@@ -88,6 +94,13 @@ extension Tree {
     private var searchableDateText: String {
         createdAt.formatted(date: .long, time: .omitted) + " " +
         createdAt.formatted(.iso8601.year().month().day())
+    }
+
+    /// The variety and label on one line for list rows, e.g. "Bramley · Row 3".
+    /// Nil when the tree has neither.
+    var varietyAndLabel: String? {
+        let parts = [variety, label].compactMap { $0 }.filter { !$0.isEmpty }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     var treePhotos: [Photo] { (photos ?? []).sorted(by: Photo.isOrderedBefore) }

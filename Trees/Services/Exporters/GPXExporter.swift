@@ -22,6 +22,9 @@ struct GPXExporter {
             let time = dateFormatter.string(from: tree.createdAt)
 
             var descParts: [String] = []
+            if let label = tree.label, !label.isEmpty {
+                descParts.append("Label: \(label)")
+            }
             if let variety = tree.variety {
                 descParts.append("Variety: \(variety)")
             }

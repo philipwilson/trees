@@ -42,6 +42,7 @@ struct JSONExporter {
         let species: String
         let variety: String?
         let rootstock: String?
+        let label: String?
         let notes: String
         let photoCount: Int
         let noteEntries: [ExportedNote]?
@@ -184,6 +185,7 @@ struct JSONExporter {
             species: tree.species,
             variety: tree.variety,
             rootstock: tree.rootstock,
+            label: tree.label,
             notes: tree.treeNotes.map { $0.text }.joined(separator: " | "),
             photoCount: tree.allPhotos.count,
             noteEntries: noteEntries,

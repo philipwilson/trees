@@ -4,6 +4,7 @@ enum EditableField: Hashable {
     case species
     case variety
     case rootstock
+    case label
 }
 
 struct InlineEditableField: View {

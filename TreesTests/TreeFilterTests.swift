@@ -8,7 +8,7 @@ final class TreeFilterTests: XCTestCase {
     // ModelContext does not keep its container alive, so tests must hold the
     // container itself; using a context whose container deallocated traps in SwiftData.
     private func makeContainer() throws -> ModelContainer {
-        let schema = Schema(versionedSchema: TreesSchemaV1.self)
+        let schema = Schema(versionedSchema: CurrentTreesSchema.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         return try ModelContainer(for: schema, configurations: [config])
     }

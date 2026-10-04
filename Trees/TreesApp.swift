@@ -15,7 +15,7 @@ struct TreesApp: App {
     private static let enableCloudKit = true
 
     init() {
-        let schema = Schema(versionedSchema: TreesSchemaV1.self)
+        let schema = Schema(versionedSchema: CurrentTreesSchema.self)
         var cloudSyncActive = false
 
         #if DEBUG

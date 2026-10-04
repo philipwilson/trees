@@ -38,6 +38,7 @@
 		4D9B8E061560D7DEDA92F2C8 /* PendingPhotoImportQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949494AC673467512AD9977F /* PendingPhotoImportQueueTests.swift */; };
 		4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
+		5064C01BB7F97A26B3453783 /* LabelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 209D6F3E3DF13A8B0B87D319 /* LabelTests.swift */; };
 		5070975D8A5D276CDB212D70 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = F25CD4B4F52C9E0C2564D907 /* PrivacyInfo.xcprivacy */; };
 		50F50BE7BF9AF7AE50CA7BDD /* TreeFilterMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3A7CA4BEB8FEF4E7CEE603FB /* TreeFilterMenu.swift */; };
 		53B5F26AB2B8D036868A7496 /* iPadTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D06A53E5F7477F6B192AB9 /* iPadTreeListView.swift */; };
@@ -48,6 +49,7 @@
 		62F379748862624975606356 /* TreeMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 888A735E0810BFF9906BE845 /* TreeMapView.swift */; };
 		63043D16C4F6FBF9B3CE1560 /* TreeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0613EE22C0E3599C2B14FC52 /* TreeFilter.swift */; };
 		6356639ECE4A2BBCD7A7C661 /* ExportWorker.swift in Sources */ = {isa = PBXBuildFile; fileRef = F18ED920F6DE9D55E3326E49 /* ExportWorker.swift */; };
+		657EA7F813389A13B28FDFAF /* TreesSchemaV2.store in Resources */ = {isa = PBXBuildFile; fileRef = E51B09EF6D00322B994F0B9D /* TreesSchemaV2.store */; };
 		6DC575F9EC175BCDFE942E5F /* PerformancePathTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E46681C01C94363ACB350159 /* PerformancePathTests.swift */; };
 		6FC5777C8B87E14A7DAF1DA5 /* CollectionDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */; };
 		706732CB57140F2201A8D395 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C73D6F74D4C09FFF51C58226 /* PrivacyInfo.xcprivacy */; };
@@ -156,6 +158,7 @@
 		1493666A5AB116C814B48417 /* TreeMapCanvas.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeMapCanvas.swift; sourceTree = "<group>"; };
 		1D98FEFE3CF07D58C71596FE /* SyncStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateTests.swift; sourceTree = "<group>"; };
 		1FE000A01E50BF4C4432D684 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		209D6F3E3DF13A8B0B87D319 /* LabelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LabelTests.swift; sourceTree = "<group>"; };
 		214CE774C065B3434C23D793 /* MapClustererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClustererTests.swift; sourceTree = "<group>"; };
 		2413E17568562F77FEEF8C6B /* WatchTreeInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeInbox.swift; sourceTree = "<group>"; };
 		244065D612BAD7C6916CA3C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -229,6 +232,7 @@
 		DF1914A7A9A551F6872204CD /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
 		E3346EB3009C6E848F543F4F /* Note.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Note.swift; sourceTree = "<group>"; };
 		E46681C01C94363ACB350159 /* PerformancePathTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PerformancePathTests.swift; sourceTree = "<group>"; };
+		E51B09EF6D00322B994F0B9D /* TreesSchemaV2.store */ = {isa = PBXFileReference; path = TreesSchemaV2.store; sourceTree = "<group>"; };
 		E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccuracyBadge.swift; sourceTree = "<group>"; };
 		E64ED7A9E52E45D19F50E03C /* TreesSchema.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesSchema.swift; sourceTree = "<group>"; };
 		E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporter.swift; sourceTree = "<group>"; };
@@ -300,6 +304,7 @@
 			isa = PBXGroup;
 			children = (
 				D32ABC0BAAF8A100B6AB0D32 /* TreesSchemaV1.store */,
+				E51B09EF6D00322B994F0B9D /* TreesSchemaV2.store */,
 			);
 			path = Fixtures;
 			sourceTree = "<group>";
@@ -390,6 +395,7 @@
 				0D1CAE662723B06BDEAC767B /* EditingTests.swift */,
 				26A6F644E1C77D04361E90DD /* ExporterTests.swift */,
 				9C3E63C447D3BE5D84446D14 /* JSONRoundTripTests.swift */,
+				209D6F3E3DF13A8B0B87D319 /* LabelTests.swift */,
 				6EBA4753E77EB9613736CEFC /* LocationFreshnessTests.swift */,
 				214CE774C065B3434C23D793 /* MapClustererTests.swift */,
 				949494AC673467512AD9977F /* PendingPhotoImportQueueTests.swift */,
@@ -618,6 +624,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				85C47E3C191DE64E715D2D41 /* TreesSchemaV1.store in Resources */,
+				657EA7F813389A13B28FDFAF /* TreesSchemaV2.store in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -715,6 +722,7 @@
 				8AB390EDD94B120EEA4CF41B /* EditingTests.swift in Sources */,
 				250A5B96800A59CA51A32265 /* ExporterTests.swift in Sources */,
 				E0ECE713DFDBE2F2C48ACECD /* JSONRoundTripTests.swift in Sources */,
+				5064C01BB7F97A26B3453783 /* LabelTests.swift in Sources */,
 				323B4F1757B231D17498E0ED /* LocationFreshnessTests.swift in Sources */,
 				446D78F9B9531A701ED1A613 /* MapClustererTests.swift in Sources */,
 				4D9B8E061560D7DEDA92F2C8 /* PendingPhotoImportQueueTests.swift in Sources */,

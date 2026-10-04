@@ -24,8 +24,8 @@ struct TreeRowView: View {
                 Text(tree.species.isEmpty ? "Unknown Species" : tree.species)
                     .font(.headline)
 
-                if let variety = tree.variety, !variety.isEmpty {
-                    Text(variety)
+                if let detail = tree.varietyAndLabel {
+                    Text(detail)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

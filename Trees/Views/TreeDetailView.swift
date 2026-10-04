@@ -34,6 +34,13 @@ struct TreeDetailView: View {
         )
     }
 
+    private var labelBinding: Binding<String> {
+        Binding(
+            get: { tree.label ?? "" },
+            set: { tree.label = $0.isEmpty ? nil : $0 }
+        )
+    }
+
     private var rootstockBinding: Binding<String> {
         Binding(
             get: { tree.rootstock ?? "" },
@@ -82,10 +89,21 @@ struct TreeDetailView: View {
                     value: rootstockBinding,
                     focusedField: $focusedField,
                     field: .rootstock,
+                    nextField: .label
+                )
+
+                InlineEditableField(
+                    label: "Label",
+                    placeholder: "e.g. Row 3, bush 4",
+                    value: labelBinding,
+                    focusedField: $focusedField,
+                    field: .label,
                     nextField: nil
                 )
             } header: {
                 Text("Details")
+            } footer: {
+                Text("A label is your own name or tag for telling this plant apart from its neighbours.")
             }
 
             Section {
@@ -207,7 +225,7 @@ struct TreeDetailView: View {
             }
         }
         .task(id: tree.id) {
-            committedFields = (tree.id, FieldValues(species: tree.species, variety: tree.variety, rootstock: tree.rootstock))
+            committedFields = (tree.id, FieldValues(species: tree.species, variety: tree.variety, rootstock: tree.rootstock, label: tree.label))
         }
         .onChange(of: focusedField) { oldField, _ in
             if oldField != nil {
@@ -267,10 +285,14 @@ struct TreeDetailView: View {
             let trimmed = rootstock.trimmingCharacters(in: .whitespacesAndNewlines)
             tree.rootstock = trimmed.isEmpty ? nil : trimmed
         }
+        if let label = tree.label {
+            let trimmed = label.trimmingCharacters(in: .whitespacesAndNewlines)
+            tree.label = trimmed.isEmpty ? nil : trimmed
+        }
 
         // Focus moving between fields calls this even when nothing was typed;
         // only stamp and save (and so trigger a sync) for a real change.
-        let current = FieldValues(species: tree.species, variety: tree.variety, rootstock: tree.rootstock)
+        let current = FieldValues(species: tree.species, variety: tree.variety, rootstock: tree.rootstock, label: tree.label)
         if let committed = committedFields, committed.treeID == tree.id, committed.values == current {
             return
         }
@@ -284,6 +306,7 @@ struct TreeDetailView: View {
         let species: String
         let variety: String?
         let rootstock: String?
+        let label: String?
     }
 
     @discardableResult

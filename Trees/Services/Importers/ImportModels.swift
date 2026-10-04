@@ -67,6 +67,7 @@ struct ImportedTreeRecord: Codable {
     let species: String
     let variety: String?
     let rootstock: String?
+    let label: String?
     let notes: String
     let photos: [String]?           // legacy: base64 strings, tree + note photos flattened
     let photoDates: [Date]?         // legacy: capture dates as Date
@@ -79,7 +80,7 @@ struct ImportedTreeRecord: Codable {
 
     enum CodingKeys: String, CodingKey {
         case id, latitude, longitude, horizontalAccuracy, altitude
-        case species, variety, rootstock, notes, photos, photoDates
+        case species, variety, rootstock, label, notes, photos, photoDates
         case noteEntries, treePhotos, collectionId, createdAt, updatedAt
     }
 
@@ -94,6 +95,7 @@ struct ImportedTreeRecord: Codable {
         species: String,
         variety: String?,
         rootstock: String?,
+        label: String?,
         notes: String,
         createdAt: String?,
         updatedAt: String?
@@ -106,6 +108,7 @@ struct ImportedTreeRecord: Codable {
         self.species = species
         self.variety = variety
         self.rootstock = rootstock
+        self.label = label
         self.notes = notes
         self.createdAt = createdAt
         self.updatedAt = updatedAt
@@ -127,6 +130,7 @@ struct ImportedTreeRecord: Codable {
         species = try container.decode(String.self, forKey: .species)
         variety = try container.decodeIfPresent(String.self, forKey: .variety)
         rootstock = try container.decodeIfPresent(String.self, forKey: .rootstock)
+        label = try container.decodeIfPresent(String.self, forKey: .label)
         notes = try container.decodeIfPresent(String.self, forKey: .notes) ?? ""
         photos = try container.decodeIfPresent([String].self, forKey: .photos)
         noteEntries = try container.decodeIfPresent([ImportedNoteRecord].self, forKey: .noteEntries)

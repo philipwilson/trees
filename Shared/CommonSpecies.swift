@@ -1,6 +1,7 @@
 import Foundation
 
-/// Common tree species for quick selection in the Watch app
+/// Common species for quick selection: trees, plus the shrubs, canes and
+/// vines that share an orchard or garden with them
 let commonSpecies: [String] = [
     // Fruit trees
     "Apple",
@@ -15,6 +16,26 @@ let commonSpecies: [String] = [
     "Mulberry",
     "Fig",
     "Persimmon",
+
+    // Soft fruit, shrubs and vines
+    "Blackcurrant",
+    "Redcurrant",
+    "Whitecurrant",
+    "Gooseberry",
+    "Jostaberry",
+    "Honeyberry",
+    "Raspberry",
+    "Blackberry",
+    "Loganberry",
+    "Tayberry",
+    "Blueberry",
+    "Elderberry",
+    "Serviceberry",
+    "Sea Buckthorn",
+    "Aronia",
+    "Grape",
+    "Kiwi",
+    "Hops",
 
     // Nut trees
     "Walnut",

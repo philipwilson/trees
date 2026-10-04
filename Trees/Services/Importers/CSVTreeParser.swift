@@ -9,7 +9,7 @@ import Foundation
 enum CSVTreeParser {
     private enum Column: CaseIterable {
         case id, latitude, longitude, accuracy, altitude
-        case species, variety, rootstock, notes, createdAt, updatedAt
+        case species, variety, rootstock, label, notes, createdAt, updatedAt
 
         var names: [String] {
             switch self {
@@ -21,6 +21,7 @@ enum CSVTreeParser {
             case .species: return ["species", "name", "tree"]
             case .variety: return ["variety", "cultivar"]
             case .rootstock: return ["rootstock"]
+            case .label: return ["label", "tag", "reference", "ref"]
             case .notes: return ["notes", "note", "description", "desc", "comments"]
             case .createdAt: return ["created_at", "createdat", "created", "date"]
             case .updatedAt: return ["updated_at", "updatedat", "updated"]
@@ -86,6 +87,7 @@ enum CSVTreeParser {
                 species: field(.species) ?? "",
                 variety: field(.variety),
                 rootstock: field(.rootstock),
+                label: field(.label),
                 notes: field(.notes) ?? "",
                 createdAt: isoDateString(field(.createdAt)),
                 updatedAt: isoDateString(field(.updatedAt))

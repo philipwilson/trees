@@ -14,6 +14,7 @@ struct CaptureTreeView: View {
     @State private var species = ""
     @State private var variety = ""
     @State private var rootstock = ""
+    @State private var label = ""
     @State private var initialNote = ""
     @State private var capturedPhotos: [CapturedPhoto] = []
     @State private var capturedLocation: CLLocation?
@@ -81,6 +82,7 @@ struct CaptureTreeView: View {
                     SpeciesTextField(text: $species)
                     TextField("Variety (optional)", text: $variety)
                     TextField("Rootstock (optional)", text: $rootstock)
+                    TextField("Label, e.g. Row 3, bush 4 (optional)", text: $label)
                 } header: {
                     Text("Details")
                 }
@@ -203,6 +205,7 @@ struct CaptureTreeView: View {
         let trimmedVariety = variety.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedRootstock = rootstock.trimmingCharacters(in: .whitespacesAndNewlines)
         let trimmedNote = initialNote.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmedLabel = label.trimmingCharacters(in: .whitespacesAndNewlines)
 
         let tree = Tree(
             latitude: location.coordinate.latitude,
@@ -211,7 +214,8 @@ struct CaptureTreeView: View {
             altitude: location.altitude,
             species: species.trimmingCharacters(in: .whitespacesAndNewlines),
             variety: trimmedVariety.isEmpty ? nil : trimmedVariety,
-            rootstock: trimmedRootstock.isEmpty ? nil : trimmedRootstock
+            rootstock: trimmedRootstock.isEmpty ? nil : trimmedRootstock,
+            label: trimmedLabel.isEmpty ? nil : trimmedLabel
         )
 
         tree.collection = selectedCollection

@@ -5,11 +5,14 @@ import CoreData
 
 /// Guards against schema changes that strand existing users' data.
 ///
+/// The current schema is version 2, so opening this fixture runs the real
+/// V1 → V2 migration.
+///
 /// `Fixtures/TreesSchemaV1.store` is a real on-disk store written by the app's
-/// models as they were at schema V1 (October 2026). It must never be
-/// regenerated: every future schema version has to open it through
+/// models as they were at schema V1 (October 2026). The fixtures must never be
+/// regenerated: every future schema version has to open them through
 /// `TreesMigrationPlan` and still find this data. When a new schema version
-/// ships, add a frozen fixture for it alongside this one.
+/// ships, add a frozen fixture for it alongside these.
 ///
 /// Fixture contents:
 /// - Collection "Orchard"
@@ -65,6 +68,7 @@ final class StoreCompatibilityTests: XCTestCase {
         XCTAssertEqual(apple.altitude, 33.0)
         XCTAssertEqual(apple.variety, "Bramley")
         XCTAssertEqual(apple.rootstock, "M25")
+        XCTAssertNil(apple.label, "fields added after V1 start out empty")
         XCTAssertEqual(apple.createdAt, Date(timeIntervalSince1970: 1_700_000_000))
         XCTAssertEqual(apple.updatedAt, Date(timeIntervalSince1970: 1_700_005_000))
         XCTAssertEqual(apple.collection?.name, "Orchard")
@@ -92,6 +96,40 @@ final class StoreCompatibilityTests: XCTestCase {
         XCTAssertTrue(pear.treeNotes.isEmpty)
     }
 
+    /// `Fixtures/TreesSchemaV2.store` was written by schema version 2 (which
+    /// added `Tree.label`), frozen in October 2026. Contents: collection
+    /// "Fruit Cage"; "Blackcurrant" (Ben Sarek, label "Row 3, bush 4") in it
+    /// with one photo and one note; "Honeyberry" with no label, collection,
+    /// or known accuracy.
+    func testV2StoreOpensWithCurrentSchemaAndKeepsItsData() throws {
+        let container = try openCopyOfFixture("TreesSchemaV2")
+        let context = container.mainContext
+
+        let trees = try context.fetch(FetchDescriptor<Tree>(sortBy: [SortDescriptor(\.createdAt)]))
+        XCTAssertEqual(trees.map(\.species), ["Blackcurrant", "Honeyberry"])
+
+        let currant = trees[0]
+        XCTAssertEqual(currant.id, UUID(uuidString: "BBBBBBBB-0000-0000-0000-000000000011"))
+        XCTAssertEqual(currant.label, "Row 3, bush 4")
+        XCTAssertEqual(currant.variety, "Ben Sarek")
+        XCTAssertNil(currant.rootstock)
+        XCTAssertEqual(currant.horizontalAccuracy, 3.1)
+        XCTAssertEqual(currant.altitude, 20.0)
+        XCTAssertEqual(currant.createdAt, Date(timeIntervalSince1970: 1_760_000_000))
+        XCTAssertEqual(currant.collection?.name, "Fruit Cage")
+        XCTAssertEqual(currant.treePhotos.map(\.imageData), [Data([0xFF, 0xD8, 0x11])])
+        XCTAssertEqual(currant.treeNotes.map(\.text), ["First fruit"])
+
+        let honeyberry = trees[1]
+        XCTAssertNil(honeyberry.label)
+        XCTAssertNil(honeyberry.collection)
+        XCTAssertFalse(honeyberry.hasKnownAccuracy)
+
+        honeyberry.label = "By the gate"
+        try context.save()
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Tree>(predicate: #Predicate { $0.label == "By the gate" })).count, 1)
+    }
+
     /// The opened store must also be writable: a migration that leaves the
     /// store readable but unsaveable would still break the app.
     func testV1StoreAcceptsNewDataAfterOpening() throws {
@@ -100,12 +138,17 @@ final class StoreCompatibilityTests: XCTestCase {
 
         let apple = try XCTUnwrap(try context.fetch(FetchDescriptor<Tree>()).first { $0.species == "Apple" })
         _ = apple.addNote(text: "Added after upgrade", photos: [Data([0xFF, 0xD8, 0x03])])
+        apple.label = "Row 1, tree 1"
         context.insert(Tree(latitude: 1, longitude: 2, horizontalAccuracy: 3, species: "Plum"))
         try context.save()
 
         XCTAssertEqual(try context.fetch(FetchDescriptor<Tree>()).count, 3)
         XCTAssertEqual(apple.treeNotes.count, 2)
         XCTAssertEqual(try context.fetch(FetchDescriptor<Photo>()).count, 3)
+
+        // A field added by a later schema version can be written and read back
+        let labelled = FetchDescriptor<Tree>(predicate: #Predicate { $0.label == "Row 1, tree 1" })
+        XCTAssertEqual(try context.fetch(labelled).map(\.species), ["Apple"])
     }
 }
 
@@ -126,7 +169,7 @@ final class CloudKitSchemaModelTests: XCTestCase {
         }
         XCTAssertEqual(fields("Tree"), [
             "id", "latitude", "longitude", "horizontalAccuracy", "altitude", "species", "variety",
-            "rootstock", "createdAt", "updatedAt", "collection", "photos", "notes",
+            "rootstock", "label", "createdAt", "updatedAt", "collection", "photos", "notes",
         ])
         XCTAssertEqual(fields("Note"), ["id", "text", "createdAt", "updatedAt", "tree", "photos"])
         XCTAssertEqual(fields("Photo"), ["id", "imageData", "captureDate", "createdAt", "tree", "note"])
@@ -146,7 +189,7 @@ final class CloudKitSchemaModelTests: XCTestCase {
 
     @MainActor
     func testExportFileNamesUseA24HourTimestamp() throws {
-        let schema = Schema(versionedSchema: TreesSchemaV1.self)
+        let schema = Schema(versionedSchema: CurrentTreesSchema.self)
         let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
         let container = try ModelContainer(for: schema, configurations: [config])
         let tree = Tree(latitude: 51.5, longitude: -0.12, horizontalAccuracy: 4, species: "Oak")

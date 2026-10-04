@@ -118,8 +118,8 @@ struct DuplicateTreesView: View {
                     VStack(alignment: .leading, spacing: 4) {
                         Text(tree.species.isEmpty ? "Unknown Species" : tree.species)
                             .font(.headline)
-                        if let variety = tree.variety, !variety.isEmpty {
-                            Text(variety)
+                        if let detail = tree.varietyAndLabel {
+                            Text(detail)
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -221,7 +221,7 @@ struct DuplicateTreesView: View {
     /// Finds trees that are likely the same tree recorded more than once
     /// (double-captures, sync or import copies) rather than neighbours:
     /// - same species (ignoring case and surrounding spaces)
-    /// - varieties don't contradict each other (both set and different)
+    /// - varieties and labels don't contradict each other (both set and different)
     /// - within `duplicateDistanceMeters` of another tree in the group
     /// - created within `duplicateTimeWindow` of the previous tree in the group
     static func duplicateGroups(in trees: [Tree]) -> [[Tree]] {
@@ -231,9 +231,14 @@ struct DuplicateTreesView: View {
         func location(_ tree: Tree) -> CLLocation {
             CLLocation(latitude: tree.latitude, longitude: tree.longitude)
         }
-        func varietiesCompatible(_ lhs: Tree, _ rhs: Tree) -> Bool {
-            let left = normalized(lhs.variety), right = normalized(rhs.variety)
+        /// Two values contradict each other only if both are set and differ
+        func compatible(_ lhs: String?, _ rhs: String?) -> Bool {
+            let left = normalized(lhs), right = normalized(rhs)
             return left.isEmpty || right.isEmpty || left == right
+        }
+        func varietiesCompatible(_ lhs: Tree, _ rhs: Tree) -> Bool {
+            // Different labels mean the user has told these apart on purpose
+            compatible(lhs.variety, rhs.variety) && compatible(lhs.label, rhs.label)
         }
 
         var result: [[Tree]] = []
