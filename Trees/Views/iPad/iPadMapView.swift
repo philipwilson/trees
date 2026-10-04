@@ -14,17 +14,16 @@ struct iPadMapView: View {
     @State private var showingOfflineTip = false
     @State private var showingTreeList = true
     @State private var searchText = ""
+    /// Trails `searchText` by a short pause so filtering (which reads every
+    /// tree's notes) doesn't run on each keystroke
+    @State private var activeSearchText = ""
     @State private var locationManager = LocationManager()
 
     var filteredTrees: [Tree] {
-        if searchText.isEmpty {
+        if activeSearchText.isEmpty {
             return trees
         }
-        return trees.filter { tree in
-            tree.species.localizedCaseInsensitiveContains(searchText) ||
-            (tree.variety ?? "").localizedCaseInsensitiveContains(searchText) ||
-            tree.treeNotes.contains { $0.text.localizedCaseInsensitiveContains(searchText) }
-        }
+        return trees.filter { $0.matches(searchText: activeSearchText) }
     }
 
     var body: some View {
@@ -152,6 +151,18 @@ struct iPadMapView: View {
             .onAppear {
                 locationManager.requestPermission()
             }
+            .task(id: searchText) {
+                if searchText.isEmpty {
+                    activeSearchText = ""
+                    return
+                }
+                do {
+                    try await Task.sleep(for: .milliseconds(250))
+                    activeSearchText = searchText
+                } catch {
+                    // Superseded by a newer keystroke
+                }
+            }
             .alert("Offline Maps", isPresented: $showingOfflineTip) {
                 Button("OK") {}
             } message: {
@@ -161,7 +172,10 @@ struct iPadMapView: View {
     }
 
     private var floatingPanel: some View {
-        VStack(spacing: 0) {
+        // Filter once per render, not once per row
+        let visibleTrees = filteredTrees
+
+        return VStack(spacing: 0) {
             HStack {
                 Image(systemName: "magnifyingglass")
                     .foregroundStyle(.secondary)
@@ -183,7 +197,7 @@ struct iPadMapView: View {
 
             ScrollView {
                 LazyVStack(spacing: 0) {
-                    ForEach(filteredTrees) { tree in
+                    ForEach(visibleTrees) { tree in
                         Button {
                             selectedTree = tree
                             position = .region(MKCoordinateRegion(
@@ -195,11 +209,8 @@ struct iPadMapView: View {
                             ))
                         } label: {
                             HStack(spacing: 12) {
-                                if let firstPhoto = tree.treePhotos.first,
-                                   let uiImage = ImageDownsampler.downsample(data: firstPhoto.imageData, maxDimension: 40) {
-                                    Image(uiImage: uiImage)
-                                        .resizable()
-                                        .aspectRatio(contentMode: .fill)
+                                if let firstPhoto = tree.treePhotos.first {
+                                    PhotoThumbnail(photo: firstPhoto, maxDimension: 40)
                                         .frame(width: 40, height: 40)
                                         .clipShape(RoundedRectangle(cornerRadius: 6))
                                 } else {
@@ -237,7 +248,7 @@ struct iPadMapView: View {
                         .buttonStyle(.plain)
                         .hoverEffect(.highlight)
 
-                        if tree.id != filteredTrees.last?.id {
+                        if tree.id != visibleTrees.last?.id {
                             Divider()
                                 .padding(.leading, 64)
                         }

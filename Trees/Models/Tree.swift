@@ -62,6 +62,14 @@ extension Tree {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
+    /// Whether the species, variety, or any note contains the search text.
+    /// The one definition of "matches" shared by every tree search field.
+    func matches(searchText: String) -> Bool {
+        species.localizedStandardContains(searchText) ||
+        (variety ?? "").localizedStandardContains(searchText) ||
+        treeNotes.contains { $0.text.localizedStandardContains(searchText) }
+    }
+
     var treePhotos: [Photo] { (photos ?? []).sorted(by: Photo.isOrderedBefore) }
     var treeNotes: [Note] { notes ?? [] }
 

@@ -7,20 +7,19 @@ struct TreeListView: View {
     @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
     @Query(sort: \Collection.name) private var collections: [Collection]
     @State private var searchText = ""
+    /// Trails `searchText` by a short pause so filtering (which reads every
+    /// tree's notes) doesn't run on each keystroke
+    @State private var activeSearchText = ""
     @State private var showingCaptureSheet = false
     @State private var showingExportSheet = false
     @State private var showingImportSheet = false
     @State private var showingDuplicatesSheet = false
 
     var filteredTrees: [Tree] {
-        if searchText.isEmpty {
+        if activeSearchText.isEmpty {
             return trees
         }
-        return trees.filter { tree in
-            tree.species.localizedStandardContains(searchText) ||
-            (tree.variety ?? "").localizedStandardContains(searchText) ||
-            tree.treeNotes.contains { $0.text.localizedStandardContains(searchText) }
-        }
+        return trees.filter { $0.matches(searchText: activeSearchText) }
     }
 
     var body: some View {
@@ -42,6 +41,9 @@ struct TreeListView: View {
                         .onDelete(perform: deleteTrees)
                     }
                     .searchable(text: $searchText, prompt: "Search species or notes")
+                    .task(id: searchText) {
+                        await debounceSearch()
+                    }
                 }
             }
             .navigationTitle("Trees")
@@ -92,6 +94,19 @@ struct TreeListView: View {
             .sheet(isPresented: $showingDuplicatesSheet) {
                 DuplicateTreesView()
             }
+        }
+    }
+
+    private func debounceSearch() async {
+        if searchText.isEmpty {
+            activeSearchText = ""
+            return
+        }
+        do {
+            try await Task.sleep(for: .milliseconds(250))
+            activeSearchText = searchText
+        } catch {
+            // Superseded by a newer keystroke
         }
     }
 

@@ -17,6 +17,9 @@ struct TreeDetailView: View {
     @State private var saveErrorMessage: String?
 
     @State private var newPhotos: [CapturedPhoto] = []
+    /// The text field values as of the last save, tagged with their tree
+    /// because iPad reuses this view when the selection changes
+    @State private var committedFields: (treeID: UUID, values: FieldValues)?
 
     private var coordinate: CLLocationCoordinate2D {
         CLLocationCoordinate2D(latitude: tree.latitude, longitude: tree.longitude)
@@ -177,6 +180,9 @@ struct TreeDetailView: View {
                 }
             }
         }
+        .task(id: tree.id) {
+            committedFields = (tree.id, FieldValues(species: tree.species, variety: tree.variety, rootstock: tree.rootstock))
+        }
         .onChange(of: focusedField) { oldField, _ in
             if oldField != nil {
                 commitFieldEdit()
@@ -229,8 +235,23 @@ struct TreeDetailView: View {
             let trimmed = rootstock.trimmingCharacters(in: .whitespacesAndNewlines)
             tree.rootstock = trimmed.isEmpty ? nil : trimmed
         }
+
+        // Focus moving between fields calls this even when nothing was typed;
+        // only stamp and save (and so trigger a sync) for a real change.
+        let current = FieldValues(species: tree.species, variety: tree.variety, rootstock: tree.rootstock)
+        if let committed = committedFields, committed.treeID == tree.id, committed.values == current {
+            return
+        }
         tree.updatedAt = Date()
-        saveContext()
+        if saveContext() {
+            committedFields = (tree.id, current)
+        }
+    }
+
+    private struct FieldValues: Equatable {
+        let species: String
+        let variety: String?
+        let rootstock: String?
     }
 
     @discardableResult
@@ -282,17 +303,12 @@ struct NoteRowView: View {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {
                         ForEach(note.notePhotos) { photo in
-                            if let uiImage = ImageDownsampler.downsample(data: photo.imageData, maxDimension: 60) {
-                                Image(uiImage: uiImage)
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                                    .frame(width: 60, height: 60)
-                                    .clipped()
-                                    .clipShape(RoundedRectangle(cornerRadius: 6))
-                                    .onTapGesture {
-                                        selectedPhoto = photo
-                                    }
-                            }
+                            PhotoThumbnail(photo: photo, maxDimension: 60)
+                                .frame(width: 60, height: 60)
+                                .clipShape(RoundedRectangle(cornerRadius: 6))
+                                .onTapGesture {
+                                    selectedPhoto = photo
+                                }
                         }
                     }
                 }

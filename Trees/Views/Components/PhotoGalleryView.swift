@@ -12,6 +12,8 @@ class PhotoViewerState {
 }
 
 struct PhotoGalleryView: View {
+    static let thumbnailDimension: CGFloat = 120
+
     let photos: [Photo]
     @State private var selectedPhoto: Photo?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -31,23 +33,20 @@ struct PhotoGalleryView: View {
         } else {
             LazyVGrid(columns: columns, spacing: 8) {
                 ForEach(photos) { photo in
-                    if let uiImage = ImageDownsampler.downsample(data: photo.imageData, maxDimension: 120) {
-                        VStack(spacing: 4) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(minWidth: 100, minHeight: 100)
-                                .clipped()
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
-                                .onTapGesture {
-                                    selectedPhoto = photo
-                                }
-
-                            if let captureDate = photo.captureDate {
-                                Text(captureDate.formatted(date: .abbreviated, time: .omitted))
-                                    .font(.caption2)
-                                    .foregroundStyle(.secondary)
+                    VStack(spacing: 4) {
+                        PhotoThumbnail(photo: photo, maxDimension: Self.thumbnailDimension)
+                            .frame(minWidth: 100, minHeight: 100)
+                            .aspectRatio(1, contentMode: .fit)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .contentShape(Rectangle())
+                            .onTapGesture {
+                                selectedPhoto = photo
                             }
+
+                        if let captureDate = photo.captureDate {
+                            Text(captureDate.formatted(date: .abbreviated, time: .omitted))
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
                     }
                 }
@@ -104,7 +103,9 @@ struct PhotoDetailView: View {
                             item: PhotoFile(data: photo.imageData),
                             preview: SharePreview(
                                 "Photo",
-                                image: Image(uiImage: ImageDownsampler.downsample(data: photo.imageData, maxDimension: 200) ?? UIImage())
+                                image: Image(uiImage: ImageDownsampler.cachedThumbnail(
+                                    id: photo.id, maxDimension: PhotoGalleryView.thumbnailDimension
+                                ) ?? UIImage())
                             )
                         )
                     }
@@ -151,9 +152,11 @@ struct PhotoDetailView: View {
 
 /// A single page of the fullscreen viewer. Loads its image lazily and
 /// downsampled to screen size, and releases it when swiped off-screen,
-/// so peak memory stays bounded regardless of photo count.
+/// so peak memory stays bounded regardless of photo count. Deliberately
+/// bypasses the thumbnail cache, which would keep these large images alive.
 private struct PhotoPageView: View {
     let photo: Photo
+    @Environment(\.displayScale) private var displayScale
     @State private var image: UIImage?
 
     var body: some View {
@@ -171,8 +174,9 @@ private struct PhotoPageView: View {
             let screen = UIScreen.main.bounds.size
             let maxDimension = max(screen.width, screen.height)
             let data = photo.imageData
+            let scale = displayScale
             image = await Task.detached(priority: .userInitiated) {
-                ImageDownsampler.downsample(data: data, maxDimension: maxDimension)
+                ImageDownsampler.downsample(data: data, maxDimension: maxDimension, scale: scale)
             }.value
         }
         .onDisappear {
@@ -195,31 +199,26 @@ struct EditablePhotoGalleryView: View {
     var body: some View {
         LazyVGrid(columns: columns, spacing: 8) {
             ForEach(capturedPhotos) { photo in
-                if let uiImage = ImageDownsampler.downsample(data: photo.data, maxDimension: 80) {
-                    VStack(spacing: 4) {
-                        ZStack(alignment: .topTrailing) {
-                            Image(uiImage: uiImage)
-                                .resizable()
-                                .aspectRatio(contentMode: .fill)
-                                .frame(width: 80, height: 80)
-                                .clipped()
-                                .clipShape(RoundedRectangle(cornerRadius: 8))
+                VStack(spacing: 4) {
+                    ZStack(alignment: .topTrailing) {
+                        PhotoThumbnail(capturedPhoto: photo, maxDimension: 80)
+                            .frame(width: 80, height: 80)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                            Button {
-                                capturedPhotos.removeAll { $0.id == photo.id }
-                            } label: {
-                                Image(systemName: "xmark.circle.fill")
-                                    .font(.title3)
-                                    .foregroundStyle(.white, .red)
-                            }
-                            .offset(x: 6, y: -6)
+                        Button {
+                            capturedPhotos.removeAll { $0.id == photo.id }
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .font(.title3)
+                                .foregroundStyle(.white, .red)
                         }
+                        .offset(x: 6, y: -6)
+                    }
 
-                        if let date = photo.captureDate {
-                            Text(date.formatted(date: .abbreviated, time: .omitted))
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
-                        }
+                    if let date = photo.captureDate {
+                        Text(date.formatted(date: .abbreviated, time: .omitted))
+                            .font(.caption2)
+                            .foregroundStyle(.secondary)
                     }
                 }
             }

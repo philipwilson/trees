@@ -5,11 +5,8 @@ struct TreeRowView: View {
 
     var body: some View {
         HStack(spacing: 12) {
-            if let firstPhoto = tree.treePhotos.first,
-               let uiImage = ImageDownsampler.downsample(data: firstPhoto.imageData, maxDimension: 50) {
-                Image(uiImage: uiImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
+            if let firstPhoto = tree.treePhotos.first {
+                PhotoThumbnail(photo: firstPhoto, maxDimension: 50)
                     .frame(width: 50, height: 50)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .accessibilityLabel("Photo of \(tree.species.isEmpty ? "tree" : tree.species)")

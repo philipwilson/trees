@@ -1,4 +1,5 @@
 import SwiftUI
+import SwiftData
 
 enum ExportFormat: String, CaseIterable, Identifiable {
     case csv = "CSV"
@@ -39,6 +40,7 @@ struct ExportView: View {
     var collections: [Collection] = []
     var collectionName: String? = nil
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @State private var selectedFormat: ExportFormat = .csv
     @State private var includePhotosInJSON = false
     @State private var includeCollections = true
@@ -178,27 +180,32 @@ struct ExportView: View {
     private func exportData() {
         isExporting = true
         let prefix = filePrefix
-        let collectionsToExport = includeCollections ? collections : []
         let format = selectedFormat
-        let treesToExport = trees
         let includePhotos = includePhotosInJSON
+        let treeIDs = trees.map(\.persistentModelID)
+        let collectionIDs = (includeCollections ? collections : []).map(\.persistentModelID)
 
-        // Use Task (not .detached) to inherit MainActor context,
-        // keeping SwiftData model access on the main actor
+        // The worker reads through its own context, so pending edits must be
+        // saved for it to see them.
+        try? modelContext.save()
+        let container = modelContext.container
+
         Task {
-            let url: URL?
-
-            switch format {
-            case .csv:
-                url = CSVExporter.exportToFile(trees: treesToExport, filePrefix: prefix)
-            case .json:
-                url = JSONExporter.exportToFile(trees: treesToExport, collections: collectionsToExport, includePhotos: includePhotos, filePrefix: prefix)
-            case .gpx:
-                url = GPXExporter.exportToFile(trees: treesToExport, filePrefix: prefix)
-            }
+            // Created inside a detached task: a model actor made on the main
+            // actor would do its work on the main thread.
+            let url = await Task.detached(priority: .userInitiated) {
+                let worker = ExportWorker(modelContainer: container)
+                return await worker.export(
+                    format: format,
+                    treeIDs: treeIDs,
+                    collectionIDs: collectionIDs,
+                    includePhotos: includePhotos,
+                    filePrefix: prefix
+                )
+            }.value
 
             isExporting = false
-            if let url = url {
+            if let url {
                 exportURL = url
                 showingShareSheet = true
             } else {

@@ -8,7 +8,8 @@ struct CollectionDetailView: View {
     var onDelete: (() -> Void)? = nil
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
-    @Query(sort: \Tree.createdAt, order: .reverse) private var allTrees: [Tree]
+    @Query(filter: #Predicate<Tree> { $0.collection == nil }, sort: \Tree.createdAt, order: .reverse)
+    private var unassignedTrees: [Tree]
 
     @State private var isEditing = false
     @State private var showingExportSheet = false
@@ -19,10 +20,6 @@ struct CollectionDetailView: View {
 
     // Local editing state to avoid lag from SwiftData updates on every keystroke
     @State private var editName = ""
-
-    private var unassignedTrees: [Tree] {
-        allTrees.filter { $0.collection == nil }
-    }
 
     private var collectionTrees: [Tree] {
         collection.trees ?? []

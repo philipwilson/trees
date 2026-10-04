@@ -1,9 +1,12 @@
 import SwiftUI
 import PhotosUI
 import AVFoundation
+import ImageIO
 
 struct ImagePicker: UIViewControllerRepresentable {
-    @Binding var image: UIImage?
+    /// Called with the picked image and when it was taken: now for the camera,
+    /// the photo's own metadata for the library (nil if it has none).
+    var onPick: (UIImage, Date?) -> Void
     @Environment(\.dismiss) private var dismiss
     var sourceType: UIImagePickerController.SourceType = .camera
 
@@ -29,9 +32,27 @@ struct ImagePicker: UIViewControllerRepresentable {
 
         func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
             if let image = info[.originalImage] as? UIImage {
-                parent.image = image
+                let captureDate: Date?
+                if picker.sourceType == .camera {
+                    captureDate = Date()
+                } else {
+                    captureDate = (info[.imageURL] as? URL).flatMap(Self.originalCaptureDate(ofImageAt:))
+                }
+                parent.onPick(image, captureDate)
             }
             parent.dismiss()
+        }
+
+        /// Reads the EXIF capture time, which is local time with no zone.
+        static func originalCaptureDate(ofImageAt url: URL) -> Date? {
+            guard let source = CGImageSourceCreateWithURL(url as CFURL, nil),
+                  let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+                  let exif = properties[kCGImagePropertyExifDictionary] as? [CFString: Any],
+                  let dateString = exif[kCGImagePropertyExifDateTimeOriginal] as? String else { return nil }
+            let formatter = DateFormatter()
+            formatter.locale = Locale(identifier: "en_US_POSIX")
+            formatter.dateFormat = "yyyy:MM:dd HH:mm:ss"
+            return formatter.date(from: dateString)
         }
 
         func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
@@ -44,7 +65,6 @@ struct PhotosPicker: View {
     @Binding var capturedPhotos: [CapturedPhoto]
     @State private var showingImagePicker = false
     @State private var showingSourceSelection = false
-    @State private var selectedImage: UIImage?
     @State private var useCamera = true
     @State private var showingCameraPermissionAlert = false
 
@@ -78,15 +98,21 @@ struct PhotosPicker: View {
         }
         .sheet(isPresented: $showingImagePicker) {
             ImagePicker(
-                image: $selectedImage,
+                onPick: { image, captureDate in addPhoto(image, captureDate: captureDate) },
                 sourceType: useCamera ? .camera : .photoLibrary
             )
         }
-        .onChange(of: selectedImage) { _, newImage in
-            if let image = newImage,
-               let data = image.jpegData(compressionQuality: 0.8) {
-                capturedPhotos.append(CapturedPhoto(data: data, captureDate: Date()))
-                selectedImage = nil
+    }
+
+    private func addPhoto(_ image: UIImage, captureDate: Date?) {
+        Task {
+            // JPEG-encoding a full-resolution photo takes long enough to
+            // stutter the picker's dismissal if done on the main thread
+            let data = await Task.detached(priority: .userInitiated) {
+                image.jpegData(compressionQuality: 0.8)
+            }.value
+            if let data {
+                capturedPhotos.append(CapturedPhoto(data: data, captureDate: captureDate))
             }
         }
     }
