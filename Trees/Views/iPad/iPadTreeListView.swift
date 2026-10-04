@@ -10,7 +10,6 @@ struct iPadTreeListView: View {
     /// Trails `searchText` by a short pause so filtering (which reads every
     /// tree's notes) doesn't run on each keystroke
     @State private var activeSearchText = ""
-    @State private var saveErrorMessage: String?
     @State private var pendingDeletion = PendingDeletion<Tree>()
 
     var onCapture: () -> Void
@@ -46,21 +45,7 @@ struct iPadTreeListView: View {
                                     Label("View Details", systemImage: "info.circle")
                                 }
 
-                                if tree.collection != nil {
-                                    Button {
-                                        tree.collection?.updatedAt = Date()
-                                        tree.collection = nil
-                                        tree.updatedAt = Date()
-                                        do {
-                                            try modelContext.save()
-                                        } catch {
-                                            saveErrorMessage = "Could not save changes. Please try again."
-                                            print("Failed to remove tree \(tree.id) from collection: \(error)")
-                                        }
-                                    } label: {
-                                        Label("Remove from Collection", systemImage: "folder.badge.minus")
-                                    }
-                                }
+                                MoveToCollectionMenu(tree: tree)
 
                                 Divider()
 
@@ -78,11 +63,6 @@ struct iPadTreeListView: View {
                     await debounceSearch()
                 }
             }
-        }
-        .alert("Save Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
-            Button("OK") { saveErrorMessage = nil }
-        } message: {
-            if let msg = saveErrorMessage { Text(msg) }
         }
         .deleteConfirmation(
             $pendingDeletion,

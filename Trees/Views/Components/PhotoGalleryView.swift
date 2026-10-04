@@ -6,6 +6,13 @@ struct CapturedPhoto: Identifiable {
     let captureDate: Date?
 }
 
+/// Asks for the fullscreen viewer to open on a photo. Carries the ID rather
+/// than the model, because the photo can be deleted from inside the viewer
+/// while this request is still the presented item.
+struct PhotoViewerRequest: Identifiable {
+    let id: UUID
+}
+
 @Observable
 class PhotoViewerState {
     var isPresented = false
@@ -15,7 +22,7 @@ struct PhotoGalleryView: View {
     static let thumbnailDimension: CGFloat = 120
 
     let photos: [Photo]
-    @State private var selectedPhoto: Photo?
+    @State private var viewerRequest: PhotoViewerRequest?
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     private var columns: [GridItem] {
@@ -40,7 +47,7 @@ struct PhotoGalleryView: View {
                             .clipShape(RoundedRectangle(cornerRadius: 8))
                             .contentShape(Rectangle())
                             .onTapGesture {
-                                selectedPhoto = photo
+                                viewerRequest = PhotoViewerRequest(id: photo.id)
                             }
 
                         if let captureDate = photo.captureDate {
@@ -51,22 +58,26 @@ struct PhotoGalleryView: View {
                     }
                 }
             }
-            .fullScreenCover(item: $selectedPhoto) { photo in
-                PhotoDetailView(photos: photos, initialPhoto: photo)
+            .fullScreenCover(item: $viewerRequest) { request in
+                PhotoDetailView(photos: photos, initialPhotoID: request.id)
             }
         }
     }
 }
 
 struct PhotoDetailView: View {
-    let photos: [Photo]
+    // State, not a constant: photos can be deleted from within the viewer
+    @State private var photos: [Photo]
     @State private var currentPhotoID: UUID
+    @State private var showingDeleteConfirmation = false
+    @State private var showingDeleteError = false
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.modelContext) private var modelContext
     @Environment(PhotoViewerState.self) private var photoViewerState
 
-    init(photos: [Photo], initialPhoto: Photo) {
-        self.photos = photos
-        _currentPhotoID = State(initialValue: initialPhoto.id)
+    init(photos: [Photo], initialPhotoID: UUID) {
+        _photos = State(initialValue: photos)
+        _currentPhotoID = State(initialValue: initialPhotoID)
     }
 
     private var currentIndex: Int {
@@ -110,6 +121,14 @@ struct PhotoDetailView: View {
                         )
                     }
                 }
+                ToolbarItem(placement: .topBarTrailing) {
+                    Button(role: .destructive) {
+                        showingDeleteConfirmation = true
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .accessibilityLabel("Delete Photo")
+                }
                 ToolbarItem(placement: .principal) {
                     VStack(spacing: 2) {
                         Text("\(currentIndex + 1) of \(photos.count)")
@@ -123,6 +142,19 @@ struct PhotoDetailView: View {
             }
             .toolbarBackground(.black, for: .navigationBar)
             .toolbarColorScheme(.dark, for: .navigationBar)
+            .confirmationDialog("Delete Photo", isPresented: $showingDeleteConfirmation, titleVisibility: .visible) {
+                Button("Delete", role: .destructive) {
+                    deleteCurrentPhoto()
+                }
+                Button("Cancel", role: .cancel) {}
+            } message: {
+                Text("This action cannot be undone.")
+            }
+            .alert("Delete Failed", isPresented: $showingDeleteError) {
+                Button("OK") {}
+            } message: {
+                Text("Could not delete the photo. Please try again.")
+            }
         }
         .environment(\.colorScheme, .dark)
         .onAppear {
@@ -136,6 +168,33 @@ struct PhotoDetailView: View {
             #if targetEnvironment(macCatalyst)
             setMacCatalystToolbarVisible(true)
             #endif
+        }
+    }
+
+    private func deleteCurrentPhoto() {
+        guard let index = photos.firstIndex(where: { $0.id == currentPhotoID }) else { return }
+        let photo = photos[index]
+
+        let now = Date()
+        photo.tree?.updatedAt = now
+        photo.note?.updatedAt = now
+        photo.note?.tree?.updatedAt = now
+        modelContext.delete(photo)
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete photo \(photo.id): \(error)")
+            modelContext.rollback()
+            showingDeleteError = true
+            return
+        }
+
+        photos.remove(at: index)
+        if photos.isEmpty {
+            dismiss()
+        } else {
+            currentPhotoID = photos[min(index, photos.count - 1)].id
         }
     }
 

@@ -47,10 +47,18 @@ struct CaptureTreeView: View {
                             VStack(alignment: .leading) {
                                 Text("Location Captured")
                                     .font(.headline)
-                                Text(String(format: "%.6f, %.6f", location.coordinate.latitude, location.coordinate.longitude))
+                                Text(String(format: "%.6f, %.6f (±%.1f m)", location.coordinate.latitude, location.coordinate.longitude, location.horizontalAccuracy))
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
+                            Spacer()
+                            // The first fix is often not the best one; allow
+                            // taking a newer one once accuracy has settled
+                            Button("Recapture") {
+                                captureLocation()
+                            }
+                            .buttonStyle(.bordered)
+                            .disabled(!locationManager.hasAcceptableAccuracy)
                         }
                     } else {
                         Button {

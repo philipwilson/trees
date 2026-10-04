@@ -14,6 +14,8 @@ struct TreeDetailView: View {
     @FocusState private var focusedField: EditableField?
     @State private var showingDeleteConfirmation = false
     @State private var showingAddNote = false
+    @State private var noteBeingEdited: Note?
+    @State private var showingUpdateLocation = false
     @State private var saveErrorMessage: String?
 
     @State private var newPhotos: [CapturedPhoto] = []
@@ -49,6 +51,9 @@ struct TreeDetailView: View {
                     Marker(tree.species.isEmpty ? "Tree" : tree.species, coordinate: coordinate)
                         .tint(.green)
                 }
+                // initialPosition is read once, so rebuild the map when the
+                // tree's position is updated
+                .id("\(tree.latitude),\(tree.longitude)")
                 .frame(height: 200)
                 .clipShape(RoundedRectangle(cornerRadius: 12))
                 .listRowInsets(EdgeInsets())
@@ -111,6 +116,21 @@ struct TreeDetailView: View {
                 } else {
                     ForEach(tree.treeNotes.sorted { $0.createdAt > $1.createdAt }) { note in
                         NoteRowView(note: note)
+                            .swipeActions(edge: .leading) {
+                                Button {
+                                    noteBeingEdited = note
+                                } label: {
+                                    Label("Edit", systemImage: "pencil")
+                                }
+                                .tint(.blue)
+                            }
+                            .contextMenu {
+                                Button {
+                                    noteBeingEdited = note
+                                } label: {
+                                    Label("Edit Note", systemImage: "pencil")
+                                }
+                            }
                     }
                     .onDelete(perform: deleteNotes)
                 }
@@ -150,6 +170,11 @@ struct TreeDetailView: View {
                     ])
                 } label: {
                     Label("Get Directions", systemImage: "arrow.triangle.turn.up.right.circle")
+                }
+                Button {
+                    showingUpdateLocation = true
+                } label: {
+                    Label("Update Location", systemImage: "location.circle")
                 }
             } header: {
                 Text("Location")
@@ -223,6 +248,12 @@ struct TreeDetailView: View {
         .sheet(isPresented: $showingAddNote) {
             AddNoteView(tree: tree)
         }
+        .sheet(item: $noteBeingEdited) { note in
+            AddNoteView(tree: tree, editing: note)
+        }
+        .sheet(isPresented: $showingUpdateLocation) {
+            UpdateLocationView(tree: tree)
+        }
     }
 
     private func commitFieldEdit() {
@@ -278,7 +309,7 @@ struct TreeDetailView: View {
 
 struct NoteRowView: View {
     let note: Note
-    @State private var selectedPhoto: Photo?
+    @State private var viewerRequest: PhotoViewerRequest?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
@@ -307,7 +338,7 @@ struct NoteRowView: View {
                                 .frame(width: 60, height: 60)
                                 .clipShape(RoundedRectangle(cornerRadius: 6))
                                 .onTapGesture {
-                                    selectedPhoto = photo
+                                    viewerRequest = PhotoViewerRequest(id: photo.id)
                                 }
                         }
                     }
@@ -315,20 +346,32 @@ struct NoteRowView: View {
             }
         }
         .padding(.vertical, 4)
-        .fullScreenCover(item: $selectedPhoto) { photo in
-            PhotoDetailView(photos: note.notePhotos, initialPhoto: photo)
+        .fullScreenCover(item: $viewerRequest) { request in
+            PhotoDetailView(photos: note.notePhotos, initialPhotoID: request.id)
         }
     }
 }
 
+/// Adds a note to a tree, or edits an existing one when `editing` is set.
 struct AddNoteView: View {
     let tree: Tree
+    let editing: Note?
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
 
-    @State private var text = ""
+    @State private var text: String
     @State private var capturedPhotos: [CapturedPhoto] = []
     @State private var showingSaveError = false
+
+    init(tree: Tree, editing: Note? = nil) {
+        self.tree = tree
+        self.editing = editing
+        _text = State(initialValue: editing?.text ?? "")
+    }
+
+    private var existingPhotos: [Photo] {
+        editing?.notePhotos ?? []
+    }
 
     var body: some View {
         NavigationStack {
@@ -341,15 +384,22 @@ struct AddNoteView: View {
                 }
 
                 Section {
+                    if !existingPhotos.isEmpty {
+                        PhotoGalleryView(photos: existingPhotos)
+                    }
                     if !capturedPhotos.isEmpty {
                         EditablePhotoGalleryView(capturedPhotos: $capturedPhotos)
                     }
                     PhotosPicker(capturedPhotos: $capturedPhotos)
                 } header: {
                     Text("Photos")
+                } footer: {
+                    if !existingPhotos.isEmpty {
+                        Text("Tap a photo to view or delete it.")
+                    }
                 }
             }
-            .navigationTitle("Add Note")
+            .navigationTitle(editing == nil ? "Add Note" : "Edit Note")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -361,7 +411,7 @@ struct AddNoteView: View {
                     Button("Save") {
                         saveNote()
                     }
-                    .disabled(trimmedText.isEmpty && capturedPhotos.isEmpty)
+                    .disabled(trimmedText.isEmpty && capturedPhotos.isEmpty && existingPhotos.isEmpty)
                     .fontWeight(.semibold)
                 }
             }
@@ -378,7 +428,19 @@ struct AddNoteView: View {
     }
 
     private func saveNote() {
-        let note = tree.addNote(text: trimmedText)
+        let note: Note
+        if let editing {
+            note = editing
+            if note.text != trimmedText {
+                note.text = trimmedText
+                note.updatedAt = Date()
+            }
+            if !capturedPhotos.isEmpty || note.updatedAt > tree.updatedAt {
+                tree.updatedAt = Date()
+            }
+        } else {
+            note = tree.addNote(text: trimmedText)
+        }
 
         for photo in capturedPhotos {
             note.addPhoto(photo.data, capturedAt: photo.captureDate)

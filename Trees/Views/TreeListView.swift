@@ -38,6 +38,15 @@ struct TreeListView: View {
                             NavigationLink(destination: TreeDetailView(tree: tree)) {
                                 TreeRowView(tree: tree)
                             }
+                            .contextMenu {
+                                MoveToCollectionMenu(tree: tree)
+                                Divider()
+                                Button(role: .destructive) {
+                                    pendingDeletion.request([tree])
+                                } label: {
+                                    Label("Delete", systemImage: "trash")
+                                }
+                            }
                         }
                         .onDelete(perform: deleteTrees)
                     }
