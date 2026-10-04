@@ -81,15 +81,11 @@ final class WatchConnectivityManager: NSObject {
         }
     }
 
-    private static let maxPendingTrees = 100
-
+    // Deliberately uncapped: a WatchTree is a few hundred bytes, and dropping
+    // entries would silently lose captured field data.
     private func enqueuePendingTree(_ tree: WatchTree) {
         guard !pendingTrees.contains(where: { $0.id == tree.id }) else { return }
         pendingTrees.append(tree)
-        // Drop oldest entries if queue exceeds limit
-        if pendingTrees.count > Self.maxPendingTrees {
-            pendingTrees.removeFirst(pendingTrees.count - Self.maxPendingTrees)
-        }
         savePendingTrees()
     }
 
@@ -113,6 +109,10 @@ final class WatchConnectivityManager: NSObject {
 
 extension WatchConnectivityManager: WCSessionDelegate {
     func session(_ session: WCSession, activationDidCompleteWith activationState: WCSessionActivationState, error: Error?) {
+        if let error {
+            print("WatchConnectivity: activation failed: \(error)")
+        }
+
         DispatchQueue.main.async {
             self.isReachable = session.isReachable
 
@@ -140,6 +140,21 @@ extension WatchConnectivityManager: WCSessionDelegate {
             #endif
         }
     }
+
+    #if os(watchOS)
+    func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
+        guard let error else { return }
+        print("WatchConnectivity: tree transfer failed, re-queueing: \(error)")
+
+        // The system has given up on this transfer; put the tree back in the
+        // pending queue so it is retried instead of being lost.
+        guard let treeData = userInfoTransfer.userInfo["tree"] as? Data,
+              let tree = try? JSONDecoder().decode(WatchTree.self, from: treeData) else { return }
+        DispatchQueue.main.async {
+            self.enqueuePendingTree(tree)
+        }
+    }
+    #endif
 
     #if os(iOS)
     func sessionDidBecomeInactive(_ session: WCSession) {}
