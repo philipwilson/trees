@@ -62,12 +62,23 @@ extension Tree {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    /// Whether the species, variety, or any note contains the search text.
-    /// The one definition of "matches" shared by every tree search field.
+    /// Whether the species, variety, rootstock, collection name, capture date,
+    /// or any note contains the search text. The one definition of "matches"
+    /// shared by every tree search field.
     func matches(searchText: String) -> Bool {
         species.localizedStandardContains(searchText) ||
         (variety ?? "").localizedStandardContains(searchText) ||
+        (rootstock ?? "").localizedStandardContains(searchText) ||
+        (collection?.name ?? "").localizedStandardContains(searchText) ||
+        searchableDateText.localizedStandardContains(searchText) ||
         treeNotes.contains { $0.text.localizedStandardContains(searchText) }
+    }
+
+    /// The capture date spelled out and as yyyy-MM-dd, so "october", "2026",
+    /// "4 Oct" and "2026-10-04" all find the tree.
+    private var searchableDateText: String {
+        createdAt.formatted(date: .long, time: .omitted) + " " +
+        createdAt.formatted(.iso8601.year().month().day())
     }
 
     var treePhotos: [Photo] { (photos ?? []).sorted(by: Photo.isOrderedBefore) }

@@ -11,6 +11,9 @@ struct iPadTreeListView: View {
     /// tree's notes) doesn't run on each keystroke
     @State private var activeSearchText = ""
     @State private var pendingDeletion = PendingDeletion<Tree>()
+    @Query(sort: \Collection.name) private var collections: [Collection]
+    @State private var filter = TreeFilter()
+    @AppStorage("treeSortOrder") private var sortOrder: TreeSortOrder = .newest
 
     var onCapture: () -> Void
     var onExport: () -> Void
@@ -18,10 +21,7 @@ struct iPadTreeListView: View {
     var onFindDuplicates: () -> Void
 
     var filteredTrees: [Tree] {
-        if activeSearchText.isEmpty {
-            return trees
-        }
-        return trees.filter { $0.matches(searchText: activeSearchText) }
+        filter.apply(to: trees, searchText: activeSearchText, sortOrder: sortOrder)
     }
 
     var body: some View {
@@ -58,7 +58,12 @@ struct iPadTreeListView: View {
                     }
                     .onDelete(perform: deleteTrees)
                 }
-                .searchable(text: $searchText, prompt: "Search species or notes")
+                .overlay {
+                    if filteredTrees.isEmpty {
+                        NoMatchingTreesView(searchText: activeSearchText, filter: $filter)
+                    }
+                }
+                .searchable(text: $searchText, prompt: "Species, notes, collection, date")
                 .task(id: searchText) {
                     await debounceSearch()
                 }
@@ -101,6 +106,16 @@ struct iPadTreeListView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    if !trees.isEmpty {
+                        TreeFilterMenu(
+                            filter: $filter,
+                            sortOrder: $sortOrder,
+                            collections: collections,
+                            speciesOptions: TreeFilter.speciesOptions(in: trees)
+                        )
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
