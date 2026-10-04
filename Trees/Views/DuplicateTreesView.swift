@@ -1,5 +1,6 @@
 import SwiftUI
 import SwiftData
+import CoreLocation
 
 struct DuplicateTreesView: View {
     @Environment(\.modelContext) private var modelContext
@@ -23,7 +24,7 @@ struct DuplicateTreesView: View {
                 } else {
                     List {
                         Section {
-                            Text("Found \(duplicateGroups.count) group\(duplicateGroups.count == 1 ? "" : "s") of duplicate trees. Select which copies to delete.")
+                            Text("Found \(duplicateGroups.count) group\(duplicateGroups.count == 1 ? "" : "s") of possible duplicates: same species, within \(Int(Self.duplicateDistanceMeters)) m, captured minutes apart. Check each before selecting copies to delete.")
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
                         }
@@ -207,40 +208,53 @@ struct DuplicateTreesView: View {
         duplicateGroups = Self.duplicateGroups(in: trees)
     }
 
-    static func duplicateGroups(in trees: [Tree]) -> [[Tree]] {
-        // Find trees that are likely true duplicates (double-captures, sync issues)
-        // rather than adjacent trees. Criteria:
-        // - Same species (case-insensitive)
-        // - Coordinates within ~1 meter (6 decimal places)
-        // - Created within 5 minutes of each other
-        var groups: [String: [Tree]] = [:]
+    /// Two captures of the same tree rarely share coordinates exactly: GPS
+    /// drifts a metre or two between fixes. This is kept below typical
+    /// planting distances so neighbouring trees in a row aren't flagged.
+    static let duplicateDistanceMeters: CLLocationDistance = 2
+    static let duplicateTimeWindow: TimeInterval = 300 // 5 minutes
 
-        for tree in trees {
-            let key = String(format: "%.6f,%.6f,%@",
-                           tree.latitude,
-                           tree.longitude,
-                           tree.species.lowercased().trimmingCharacters(in: .whitespaces))
-            groups[key, default: []].append(tree)
+    /// Finds trees that are likely the same tree recorded more than once
+    /// (double-captures, sync or import copies) rather than neighbours:
+    /// - same species (ignoring case and surrounding spaces)
+    /// - varieties don't contradict each other (both set and different)
+    /// - within `duplicateDistanceMeters` of another tree in the group
+    /// - created within `duplicateTimeWindow` of the previous tree in the group
+    static func duplicateGroups(in trees: [Tree]) -> [[Tree]] {
+        func normalized(_ text: String?) -> String {
+            (text ?? "").lowercased().trimmingCharacters(in: .whitespaces)
+        }
+        func location(_ tree: Tree) -> CLLocation {
+            CLLocation(latitude: tree.latitude, longitude: tree.longitude)
+        }
+        func varietiesCompatible(_ lhs: Tree, _ rhs: Tree) -> Bool {
+            let left = normalized(lhs.variety), right = normalized(rhs.variety)
+            return left.isEmpty || right.isEmpty || left == right
         }
 
-        // Further filter: only keep trees in a group whose creation times
-        // are within 5 minutes of another tree in the group
-        let timeThreshold: TimeInterval = 300 // 5 minutes
         var result: [[Tree]] = []
 
-        for group in groups.values where group.count > 1 {
-            let sorted = group.sorted { $0.createdAt < $1.createdAt }
-            var cluster: [Tree] = [sorted[0]]
+        for sameSpecies in Dictionary(grouping: trees, by: { normalized($0.species) }).values where sameSpecies.count > 1 {
+            var clusters: [[Tree]] = []
 
-            for i in 1..<sorted.count {
-                if sorted[i].createdAt.timeIntervalSince(cluster.last!.createdAt) <= timeThreshold {
-                    cluster.append(sorted[i])
+            for tree in sameSpecies.sorted(by: { $0.createdAt < $1.createdAt }) {
+                let treeLocation = location(tree)
+                let match = clusters.firstIndex { cluster in
+                    guard let latest = cluster.last,
+                          tree.createdAt.timeIntervalSince(latest.createdAt) <= duplicateTimeWindow else { return false }
+                    return cluster.contains { member in
+                        varietiesCompatible(member, tree) &&
+                        location(member).distance(from: treeLocation) <= duplicateDistanceMeters
+                    }
+                }
+                if let match {
+                    clusters[match].append(tree)
                 } else {
-                    if cluster.count > 1 { result.append(cluster) }
-                    cluster = [sorted[i]]
+                    clusters.append([tree])
                 }
             }
-            if cluster.count > 1 { result.append(cluster) }
+
+            result.append(contentsOf: clusters.filter { $0.count > 1 })
         }
 
         return result.sorted { ($0.first?.species ?? "") < ($1.first?.species ?? "") }

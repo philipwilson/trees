@@ -115,9 +115,19 @@ struct CollectionDetailView: View {
                 Menu {
                     Button {
                         if isEditing {
-                            // Save local state back to collection
-                            collection.name = editName
-                            collection.updatedAt = Date()
+                            // Save local state back to collection; a blank
+                            // name is ignored and the old one kept
+                            let newName = editName.trimmingCharacters(in: .whitespacesAndNewlines)
+                            if !newName.isEmpty, newName != collection.name {
+                                collection.name = newName
+                                collection.updatedAt = Date()
+                                do {
+                                    try modelContext.save()
+                                } catch {
+                                    saveErrorMessage = "Could not save changes. Please try again."
+                                    print("Failed to rename collection \(collection.id): \(error)")
+                                }
+                            }
                         } else {
                             // Load collection data into local state
                             editName = collection.name

@@ -58,6 +58,11 @@ struct JSONExporter {
     }
 
     static func export(trees: [Tree], collections: [Collection] = [], includePhotos: Bool = false) -> String {
+        encode(trees: trees, collections: collections, includePhotos: includePhotos) ?? "{}"
+    }
+
+    /// Returns nil if the data cannot be encoded (e.g. a non-finite coordinate).
+    private static func encode(trees: [Tree], collections: [Collection], includePhotos: Bool) -> String? {
         let dateFormatter = ISO8601DateFormatter()
 
         let exportedData = ExportedData(
@@ -69,12 +74,8 @@ struct JSONExporter {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.prettyPrinted, .sortedKeys]
 
-        guard let data = try? encoder.encode(exportedData),
-              let jsonString = String(data: data, encoding: .utf8) else {
-            return "{}"
-        }
-
-        return jsonString
+        guard let data = try? encoder.encode(exportedData) else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 
     static func exportToFile(trees: [Tree], collections: [Collection] = [], includePhotos: Bool = false, filePrefix: String = "trees") -> URL? {
@@ -83,7 +84,9 @@ struct JSONExporter {
         let url = FileManager.default.temporaryDirectory.appendingPathComponent(filename)
 
         if !includePhotos {
-            let content = export(trees: trees, collections: collections, includePhotos: false)
+            guard let content = encode(trees: trees, collections: collections, includePhotos: false) else {
+                return nil
+            }
             do {
                 try content.write(to: url, atomically: true, encoding: .utf8)
                 return url
@@ -101,6 +104,9 @@ struct JSONExporter {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys]
 
+        // Set by a failed write or a tree that won't encode. Either way the
+        // file is incomplete, so it is deleted and the export reported as failed
+        // rather than handing over a backup with data silently missing.
         var writeError = false
 
         func write(_ string: String) {
@@ -126,14 +132,17 @@ struct JSONExporter {
         // Write each tree individually so only one tree's photos are in memory at a time
         for (index, tree) in trees.enumerated() {
             autoreleasepool {
-                if index > 0 { write(",") }
-
+                guard !writeError else { return }
                 let exportedTree = makeExportedTree(tree, includePhotos: true, dateFormatter: dateFormatter)
 
-                if let treeData = try? encoder.encode(exportedTree),
-                   let treeJSON = String(data: treeData, encoding: .utf8) {
-                    write(treeJSON)
+                guard let treeData = try? encoder.encode(exportedTree),
+                      let treeJSON = String(data: treeData, encoding: .utf8) else {
+                    print("JSON export: failed to encode tree \(tree.id)")
+                    writeError = true
+                    return
                 }
+                if index > 0 { write(",") }
+                write(treeJSON)
             }
         }
 

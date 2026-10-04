@@ -5,6 +5,7 @@ struct iPadCollectionListView: View {
     @Environment(\.modelContext) private var modelContext
     @Query(sort: \Collection.name) private var collections: [Collection]
     @Binding var selectedCollection: Collection?
+    @State private var pendingDeletion = PendingDeletion<Collection>()
 
     var onImport: () -> Void
     var onCreate: () -> Void
@@ -33,10 +34,7 @@ struct iPadCollectionListView: View {
                                 Divider()
 
                                 Button(role: .destructive) {
-                                    if selectedCollection?.id == collection.id {
-                                        selectedCollection = nil
-                                    }
-                                    modelContext.delete(collection)
+                                    pendingDeletion.request([collection])
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -44,6 +42,18 @@ struct iPadCollectionListView: View {
                     }
                     .onDelete(perform: deleteCollections)
                 }
+            }
+        }
+        .deleteConfirmation(
+            $pendingDeletion,
+            title: Collection.deletionTitle(for:),
+            message: Collection.deletionMessage
+        ) { collections in
+            for collection in collections {
+                if selectedCollection?.id == collection.id {
+                    selectedCollection = nil
+                }
+                modelContext.delete(collection)
             }
         }
         .navigationTitle("Collections")
@@ -66,13 +76,7 @@ struct iPadCollectionListView: View {
     }
 
     private func deleteCollections(at offsets: IndexSet) {
-        for index in offsets {
-            let collection = collections[index]
-            if selectedCollection?.id == collection.id {
-                selectedCollection = nil
-            }
-            modelContext.delete(collection)
-        }
+        pendingDeletion.request(offsets.map { collections[$0] })
     }
 }
 

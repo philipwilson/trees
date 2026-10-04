@@ -15,6 +15,10 @@ struct CaptureView: View {
         capturedLocation != nil && !selectedSpecies.isEmpty
     }
 
+    private var locationAccessDenied: Bool {
+        locationManager.authorizationStatus == .denied || locationManager.authorizationStatus == .restricted
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -26,12 +30,22 @@ struct CaptureView: View {
                     )
 
                     // Capture/Captured Location
-                    if let location = capturedLocation {
+                    if capturedLocation != nil {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
                                 .foregroundStyle(.green)
                             Text("Location captured")
                                 .font(.caption)
+                        }
+                    } else if locationAccessDenied {
+                        VStack(spacing: 4) {
+                            Label("Location Access Off", systemImage: "location.slash.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            Text("Allow location for Tree Tracker in Settings → Privacy & Security → Location Services.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
                         }
                     } else {
                         Button {
@@ -213,14 +227,13 @@ struct SpeciesPickerView: View {
                 Section {
                     TextField("Dictate or type species", text: $dictatedSpecies)
 
-                    if !dictatedSpecies.isEmpty {
+                    if !dictatedSpecies.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
                         Button {
-                            let formatted = dictatedSpecies.prefix(1).uppercased() + dictatedSpecies.dropFirst().lowercased()
-                            selectedSpecies = formatted
+                            selectedSpecies = formattedSpeciesName(dictatedSpecies)
                             dismiss()
                         } label: {
                             HStack {
-                                Text("Use \"\(dictatedSpecies)\"")
+                                Text("Use \"\(formattedSpeciesName(dictatedSpecies))\"")
                                 Spacer()
                                 Image(systemName: "checkmark.circle.fill")
                                     .foregroundStyle(.green)

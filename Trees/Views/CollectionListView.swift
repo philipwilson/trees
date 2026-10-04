@@ -7,6 +7,7 @@ struct CollectionListView: View {
     @State private var showingNewCollectionSheet = false
     @State private var newCollectionName = ""
     @State private var showingImportSheet = false
+    @State private var pendingDeletion = PendingDeletion<Collection>()
 
     var body: some View {
         NavigationStack {
@@ -59,6 +60,15 @@ struct CollectionListView: View {
             .sheet(isPresented: $showingImportSheet) {
                 ImportCollectionView()
             }
+            .deleteConfirmation(
+                $pendingDeletion,
+                title: Collection.deletionTitle(for:),
+                message: Collection.deletionMessage
+            ) { collections in
+                for collection in collections {
+                    modelContext.delete(collection)
+                }
+            }
         }
     }
 
@@ -72,10 +82,7 @@ struct CollectionListView: View {
     }
 
     private func deleteCollections(at offsets: IndexSet) {
-        for index in offsets {
-            let collection = collections[index]
-            modelContext.delete(collection)
-        }
+        pendingDeletion.request(offsets.map { collections[$0] })
     }
 }
 

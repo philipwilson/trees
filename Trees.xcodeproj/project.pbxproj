@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		0045F1F994D37A51AB2F65D9 /* DeleteConfirmation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 59CF2834D51ED1FCC0E33F69 /* DeleteConfirmation.swift */; };
 		01DD1BC657317FC4E0A59126 /* TreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = F1C6A4B3E8AE21DAA0D9DDE1 /* TreeListView.swift */; };
 		0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5335BA670CB205F7556844DA /* JSONExporter.swift */; };
 		08EA1FF4B07C952BB9FF54EE /* StoreCompatibilityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = BDD54AFF9286829C20BC81DA /* StoreCompatibilityTests.swift */; };
@@ -140,6 +141,7 @@
 		559396C03C40B0AA63C15D57 /* GPXExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GPXExporter.swift; sourceTree = "<group>"; };
 		56120BD39256244311587662 /* CSVExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CSVExporter.swift; sourceTree = "<group>"; };
 		57D86542CC445AF70E2D41FD /* InlineEditableField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InlineEditableField.swift; sourceTree = "<group>"; };
+		59CF2834D51ED1FCC0E33F69 /* DeleteConfirmation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeleteConfirmation.swift; sourceTree = "<group>"; };
 		5A4BF0DD4021EEC4C278FA51 /* DuplicateDetectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DuplicateDetectionTests.swift; sourceTree = "<group>"; };
 		5A8ECEB4FA8C019AA20B7CA8 /* iPadCollectionListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadCollectionListView.swift; sourceTree = "<group>"; };
 		5BEA2508886C1420F0DAD468 /* TreeImportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeImportService.swift; sourceTree = "<group>"; };
@@ -277,6 +279,7 @@
 			isa = PBXGroup;
 			children = (
 				E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */,
+				59CF2834D51ED1FCC0E33F69 /* DeleteConfirmation.swift */,
 				BA501EF33874C584E39F8F8F /* ImagePicker.swift */,
 				57D86542CC445AF70E2D41FD /* InlineEditableField.swift */,
 				37F08281F88024D47A957057 /* PhotoGalleryView.swift */,
@@ -662,6 +665,7 @@
 				7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */,
 				E8D93E973EEA26E6E0084084 /* CommonSpecies.swift in Sources */,
 				2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */,
+				0045F1F994D37A51AB2F65D9 /* DeleteConfirmation.swift in Sources */,
 				BCDB5BA7F162ADB75C8CA651 /* DuplicateTreesView.swift in Sources */,
 				54810EEA4E52A384B489BB7A /* ExportView.swift in Sources */,
 				6356639ECE4A2BBCD7A7C661 /* ExportWorker.swift in Sources */,

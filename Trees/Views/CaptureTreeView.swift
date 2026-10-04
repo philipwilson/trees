@@ -139,6 +139,9 @@ struct CaptureTreeView: View {
             .onChange(of: locationManager.authorizationStatus) { _, newStatus in
                 if newStatus == .authorizedWhenInUse || newStatus == .authorizedAlways {
                     locationManager.startUpdatingLocation()
+                } else if newStatus == .denied || newStatus == .restricted {
+                    // Covers "Don't Allow" on the first prompt, which onAppear can't see
+                    showingPermissionAlert = true
                 }
             }
             .onDisappear {

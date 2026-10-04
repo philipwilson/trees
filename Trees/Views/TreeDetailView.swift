@@ -328,6 +328,7 @@ struct AddNoteView: View {
 
     @State private var text = ""
     @State private var capturedPhotos: [CapturedPhoto] = []
+    @State private var showingSaveError = false
 
     var body: some View {
         NavigationStack {
@@ -360,21 +361,37 @@ struct AddNoteView: View {
                     Button("Save") {
                         saveNote()
                     }
-                    .disabled(text.isEmpty && capturedPhotos.isEmpty)
+                    .disabled(trimmedText.isEmpty && capturedPhotos.isEmpty)
                     .fontWeight(.semibold)
                 }
+            }
+            .alert("Save Failed", isPresented: $showingSaveError) {
+                Button("OK") {}
+            } message: {
+                Text("Could not save the note. Please try again.")
             }
         }
     }
 
+    private var trimmedText: String {
+        text.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
     private func saveNote() {
-        let note = tree.addNote(text: text.trimmingCharacters(in: .whitespacesAndNewlines))
+        let note = tree.addNote(text: trimmedText)
 
         for photo in capturedPhotos {
             note.addPhoto(photo.data, capturedAt: photo.captureDate)
         }
 
-        dismiss()
+        do {
+            try modelContext.save()
+            dismiss()
+        } catch {
+            print("Failed to save note for tree \(tree.id): \(error)")
+            modelContext.rollback()
+            showingSaveError = true
+        }
     }
 }
 

@@ -19,12 +19,15 @@ final class DuplicateDetectionTests: XCTestCase {
         in context: ModelContext,
         species: String,
         latitude: Double = 51.5,
+        metersNorth: Double = 0,
+        variety: String? = nil,
         offset: TimeInterval = 0
     ) -> Tree {
         let created = base.addingTimeInterval(offset)
+        // One degree of latitude is about 111,320 m
         let tree = Tree(
-            latitude: latitude, longitude: -0.12, horizontalAccuracy: 4.0,
-            species: species, createdAt: created, updatedAt: created
+            latitude: latitude + metersNorth / 111_320, longitude: -0.12, horizontalAccuracy: 4.0,
+            species: species, variety: variety, createdAt: created, updatedAt: created
         )
         context.insert(tree)
         return tree
@@ -43,6 +46,58 @@ final class DuplicateDetectionTests: XCTestCase {
 
         XCTAssertEqual(groups.count, 1)
         XCTAssertEqual(Set(groups[0].map(\.id)), [first.id, second.id])
+    }
+
+    /// A second capture of the same tree lands a metre or so away because of
+    /// GPS drift; it must still be found.
+    func testGroupsCapturesSeparatedByGPSJitter() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let first = makeTree(in: context, species: "Apple")
+        let second = makeTree(in: context, species: "Apple", metersNorth: 1.2, offset: 45)
+        let third = makeTree(in: context, species: "Apple", metersNorth: -0.8, offset: 90)
+
+        let groups = DuplicateTreesView.duplicateGroups(in: try context.fetch(FetchDescriptor<Tree>()))
+
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(Set(groups[0].map(\.id)), [first.id, second.id, third.id])
+    }
+
+    /// Walking a row and capturing each tree gives the same species minutes
+    /// apart, a planting distance away. Those are not duplicates.
+    func testNeighbouringTreesInARowAreNotGrouped() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        for index in 0..<5 {
+            _ = makeTree(in: context, species: "Apple", metersNorth: Double(index) * 3, offset: Double(index) * 60)
+        }
+
+        let groups = DuplicateTreesView.duplicateGroups(in: try context.fetch(FetchDescriptor<Tree>()))
+
+        XCTAssertTrue(groups.isEmpty)
+    }
+
+    func testDifferentVarietiesAtTheSameSpotAreNotGrouped() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        _ = makeTree(in: context, species: "Apple", variety: "Bramley")
+        _ = makeTree(in: context, species: "Apple", variety: "Cox", offset: 30)
+
+        XCTAssertTrue(DuplicateTreesView.duplicateGroups(in: try context.fetch(FetchDescriptor<Tree>())).isEmpty)
+    }
+
+    /// A capture with the variety filled in and one without can still be the
+    /// same tree.
+    func testMissingVarietyDoesNotPreventGrouping() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        _ = makeTree(in: context, species: "Apple", variety: "Bramley")
+        _ = makeTree(in: context, species: "Apple", variety: nil, offset: 30)
+        _ = makeTree(in: context, species: "Apple", variety: " bramley", offset: 60)
+
+        let groups = DuplicateTreesView.duplicateGroups(in: try context.fetch(FetchDescriptor<Tree>()))
+
+        XCTAssertEqual(groups.map(\.count), [3])
     }
 
     /// After deleting one of a pair, regrouping the remaining trees must not

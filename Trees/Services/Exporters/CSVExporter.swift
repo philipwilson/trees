@@ -35,8 +35,15 @@ struct CSVExporter {
         return csv
     }
 
-    private static func escapeCSV(_ value: String) -> String {
-        if value.contains(",") || value.contains("\"") || value.contains("\n") {
+    private static func escapeCSV(_ text: String) -> String {
+        var value = text
+        // Spreadsheets run a cell starting with one of these as a formula; a
+        // leading apostrophe makes them treat it as text. Only free-text
+        // fields come through here, so negative numbers are unaffected.
+        if let first = value.first, "=+-@\t\r".contains(first) {
+            value = "'" + value
+        }
+        if value.contains(",") || value.contains("\"") || value.contains("\n") || value.contains("\r") {
             let escaped = value.replacingOccurrences(of: "\"", with: "\"\"")
             return "\"\(escaped)\""
         }

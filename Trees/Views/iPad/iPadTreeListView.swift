@@ -11,6 +11,7 @@ struct iPadTreeListView: View {
     /// tree's notes) doesn't run on each keystroke
     @State private var activeSearchText = ""
     @State private var saveErrorMessage: String?
+    @State private var pendingDeletion = PendingDeletion<Tree>()
 
     var onCapture: () -> Void
     var onExport: () -> Void
@@ -64,10 +65,7 @@ struct iPadTreeListView: View {
                                 Divider()
 
                                 Button(role: .destructive) {
-                                    if selectedTree?.id == tree.id {
-                                        selectedTree = nil
-                                    }
-                                    modelContext.delete(tree)
+                                    pendingDeletion.request([tree])
                                 } label: {
                                     Label("Delete", systemImage: "trash")
                                 }
@@ -85,6 +83,18 @@ struct iPadTreeListView: View {
             Button("OK") { saveErrorMessage = nil }
         } message: {
             if let msg = saveErrorMessage { Text(msg) }
+        }
+        .deleteConfirmation(
+            $pendingDeletion,
+            title: Tree.deletionTitle(for:),
+            message: Tree.deletionMessage
+        ) { trees in
+            for tree in trees {
+                if selectedTree?.id == tree.id {
+                    selectedTree = nil
+                }
+                modelContext.delete(tree)
+            }
         }
         .navigationTitle("Trees")
         .toolbar {
@@ -138,13 +148,8 @@ struct iPadTreeListView: View {
     }
 
     private func deleteTrees(at offsets: IndexSet) {
-        for index in offsets {
-            let tree = filteredTrees[index]
-            if selectedTree?.id == tree.id {
-                selectedTree = nil
-            }
-            modelContext.delete(tree)
-        }
+        let visible = filteredTrees
+        pendingDeletion.request(offsets.map { visible[$0] })
     }
 }
 

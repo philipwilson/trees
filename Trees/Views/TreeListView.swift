@@ -14,6 +14,7 @@ struct TreeListView: View {
     @State private var showingExportSheet = false
     @State private var showingImportSheet = false
     @State private var showingDuplicatesSheet = false
+    @State private var pendingDeletion = PendingDeletion<Tree>()
 
     var filteredTrees: [Tree] {
         if activeSearchText.isEmpty {
@@ -94,6 +95,15 @@ struct TreeListView: View {
             .sheet(isPresented: $showingDuplicatesSheet) {
                 DuplicateTreesView()
             }
+            .deleteConfirmation(
+                $pendingDeletion,
+                title: Tree.deletionTitle(for:),
+                message: Tree.deletionMessage
+            ) { trees in
+                for tree in trees {
+                    modelContext.delete(tree)
+                }
+            }
         }
     }
 
@@ -111,10 +121,8 @@ struct TreeListView: View {
     }
 
     private func deleteTrees(at offsets: IndexSet) {
-        for index in offsets {
-            let tree = filteredTrees[index]
-            modelContext.delete(tree)
-        }
+        let visible = filteredTrees
+        pendingDeletion.request(offsets.map { visible[$0] })
     }
 }
 
