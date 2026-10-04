@@ -9,6 +9,7 @@ struct DuplicateTreesView: View {
     @State private var duplicateGroups: [[Tree]] = []
     @State private var selectedForDeletion: Set<PersistentIdentifier> = []
     @State private var showingDeleteConfirmation = false
+    @State private var saveErrorMessage: String?
 
     var body: some View {
         NavigationStack {
@@ -85,6 +86,11 @@ struct DuplicateTreesView: View {
                 Button("Cancel", role: .cancel) {}
             } message: {
                 Text("This action cannot be undone.")
+            }
+            .alert("Delete Failed", isPresented: Binding(get: { saveErrorMessage != nil }, set: { if !$0 { saveErrorMessage = nil } })) {
+                Button("OK") { saveErrorMessage = nil }
+            } message: {
+                if let msg = saveErrorMessage { Text(msg) }
             }
             .onAppear {
                 findDuplicates()
@@ -180,14 +186,31 @@ struct DuplicateTreesView: View {
     }
 
     private func deleteSelected() {
-        for tree in trees where selectedForDeletion.contains(tree.persistentModelID) {
+        let deletedIDs = selectedForDeletion
+        for tree in trees where deletedIDs.contains(tree.persistentModelID) {
             modelContext.delete(tree)
         }
         selectedForDeletion.removeAll()
-        findDuplicates()
+
+        do {
+            try modelContext.save()
+        } catch {
+            print("Failed to delete duplicate trees: \(error)")
+            modelContext.rollback()
+            saveErrorMessage = "Could not delete the selected trees. Please try again."
+            return
+        }
+
+        // The @Query result still holds the deleted trees until the next view
+        // update, so exclude them explicitly rather than regrouping stale models.
+        duplicateGroups = Self.duplicateGroups(in: trees.filter { !deletedIDs.contains($0.persistentModelID) })
     }
 
     private func findDuplicates() {
+        duplicateGroups = Self.duplicateGroups(in: trees)
+    }
+
+    static func duplicateGroups(in trees: [Tree]) -> [[Tree]] {
         // Find trees that are likely true duplicates (double-captures, sync issues)
         // rather than adjacent trees. Criteria:
         // - Same species (case-insensitive)
@@ -223,7 +246,7 @@ struct DuplicateTreesView: View {
             if cluster.count > 1 { result.append(cluster) }
         }
 
-        duplicateGroups = result.sorted { ($0.first?.species ?? "") < ($1.first?.species ?? "") }
+        return result.sorted { ($0.first?.species ?? "") < ($1.first?.species ?? "") }
     }
 }
 

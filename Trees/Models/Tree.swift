@@ -62,7 +62,7 @@ extension Tree {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    var treePhotos: [Photo] { photos ?? [] }
+    var treePhotos: [Photo] { (photos ?? []).sorted(by: Photo.isOrderedBefore) }
     var treeNotes: [Note] { notes ?? [] }
 
     /// All photos including those attached to notes

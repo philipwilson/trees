@@ -166,6 +166,9 @@ struct ImportTreesView: View {
         if summary.remappedIDCount > 0 {
             messageParts.append("\(summary.remappedIDCount) ID\(summary.remappedIDCount == 1 ? "" : "s") regenerated")
         }
+        if summary.alreadyPresentCount > 0 {
+            messageParts.append("\(summary.alreadyPresentCount) already present (skipped)")
+        }
         if summary.skippedCount > 0 {
             messageParts.append("\(summary.skippedCount) skipped (invalid coordinates)")
         }

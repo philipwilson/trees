@@ -17,6 +17,15 @@ struct TreeImportService {
         case deferred
     }
 
+    /// What to do with an archive tree whose ID is already in the store.
+    enum ExistingIDPolicy {
+        /// Leave the existing tree alone and don't import the record, so
+        /// re-importing a backup doesn't duplicate trees
+        case skip
+        /// Import the record as a copy under a new ID
+        case remap
+    }
+
     /// A decoded photo not yet attached to its target.
     struct PendingPhoto {
         let data: Data
@@ -31,6 +40,7 @@ struct TreeImportService {
         var skippedCount = 0
         var photoCount = 0
         var remappedIDCount = 0
+        var alreadyPresentCount = 0
         var deferredPhotos: [(tree: Tree, photos: [PendingPhoto])] = []
     }
 
@@ -54,9 +64,13 @@ struct TreeImportService {
     /// the archive's own collections are ignored. Otherwise archive collections
     /// are matched against existing ones by UUID, then by name, and only created
     /// when neither matches — so re-importing a backup doesn't duplicate them.
+    ///
+    /// IDs repeated within the archive itself are always remapped; IDs already
+    /// in the store follow `existingIDPolicy`.
     func importArchive(
         _ archive: ImportedArchive,
         photoHandling: PhotoHandling,
+        existingIDPolicy: ExistingIDPolicy = .skip,
         overrideCollection: Collection? = nil
     ) throws -> Summary {
         var summary = Summary()
@@ -91,6 +105,11 @@ struct TreeImportService {
                   record.longitude >= -180, record.longitude <= 180,
                   record.horizontalAccuracy >= 0 else {
                 summary.skippedCount += 1
+                continue
+            }
+
+            if existingIDPolicy == .skip, let parsedID = record.parsedId, existingIDs.contains(parsedID) {
+                summary.alreadyPresentCount += 1
                 continue
             }
 

@@ -24,3 +24,12 @@ class Photo {
         self.createdAt = createdAt
     }
 }
+
+extension Photo {
+    /// SwiftData to-many relationships have no stable order, so photo lists are
+    /// sorted by when they were added (id breaks ties) wherever they are read.
+    static func isOrderedBefore(_ lhs: Photo, _ rhs: Photo) -> Bool {
+        if lhs.createdAt != rhs.createdAt { return lhs.createdAt < rhs.createdAt }
+        return lhs.id.uuidString < rhs.id.uuidString
+    }
+}

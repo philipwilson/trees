@@ -168,8 +168,8 @@ final class JSONRoundTripTests: XCTestCase {
         XCTAssertEqual(imported.createdAt.timeIntervalSince1970, expected.timeIntervalSince1970, accuracy: 1.0)
     }
 
-    /// Re-importing the same archive must not duplicate collections, and trees
-    /// whose IDs already exist get remapped rather than colliding.
+    /// Re-importing the same archive must not duplicate collections, and under
+    /// the remap policy trees whose IDs already exist are imported as copies.
     func testReimportDoesNotDuplicateCollections() throws {
         let json = """
         {
@@ -192,12 +192,74 @@ final class JSONRoundTripTests: XCTestCase {
         XCTAssertEqual(first.collectionsCreated, 1)
         XCTAssertEqual(first.remappedIDCount, 0)
 
-        let second = try service.importArchive(archive, photoHandling: .none)
+        let second = try service.importArchive(archive, photoHandling: .none, existingIDPolicy: .remap)
         XCTAssertEqual(second.collectionsCreated, 0)
         XCTAssertEqual(second.remappedIDCount, 1)
 
         XCTAssertEqual(try context.fetch(FetchDescriptor<Collection>()).count, 1)
         XCTAssertEqual(try context.fetch(FetchDescriptor<Tree>()).count, 2)
+    }
+
+    /// By default, re-importing the same archive leaves existing trees alone.
+    func testReimportSkipsTreesAlreadyPresent() throws {
+        let json = """
+        {
+          "version": 2,
+          "collections": [],
+          "trees": [
+            {"id": "55555555-5555-5555-5555-555555555555",
+             "latitude": 51.0, "longitude": -1.0, "horizontalAccuracy": 5.0, "species": "Plum", "notes": ""},
+            {"id": "55555555-5555-5555-5555-555555555555",
+             "latitude": 51.1, "longitude": -1.1, "horizontalAccuracy": 5.0, "species": "Plum copy", "notes": ""}
+          ]
+        }
+        """
+        let archive = try XCTUnwrap(TreeImportService.decode(Data(json.utf8)))
+        let container = try makeContainer()
+        let context = container.mainContext
+        let service = TreeImportService(modelContext: context)
+
+        // An ID repeated inside the file is still remapped on first import
+        let first = try service.importArchive(archive, photoHandling: .none)
+        XCTAssertEqual(first.importedCount, 2)
+        XCTAssertEqual(first.remappedIDCount, 1)
+        XCTAssertEqual(first.alreadyPresentCount, 0)
+
+        let second = try service.importArchive(archive, photoHandling: .none)
+        XCTAssertEqual(second.importedCount, 0)
+        XCTAssertEqual(second.alreadyPresentCount, 2)
+        XCTAssertEqual(second.remappedIDCount, 0)
+
+        XCTAssertEqual(try context.fetch(FetchDescriptor<Tree>()).count, 2)
+    }
+
+    /// Photo lists come back in the order the photos were added, and that order
+    /// survives an export/import round trip.
+    func testPhotoOrderIsStableAcrossRoundTrip() throws {
+        let sourceContainer = try makeContainer()
+        let sourceContext = sourceContainer.mainContext
+        let tree = Tree(latitude: 51.5, longitude: -0.12, horizontalAccuracy: 4.0, species: "Apple")
+        sourceContext.insert(tree)
+
+        let base = Date(timeIntervalSince1970: 1_700_000_000)
+        let payloads = (0..<6).map { Data([0xFF, 0xD8, UInt8($0)]) }
+        // Insert in scrambled order; createdAt defines the expected order
+        for index in [3, 0, 5, 1, 4, 2] {
+            let photo = Photo(imageData: payloads[index], createdAt: base.addingTimeInterval(Double(index)))
+            photo.tree = tree
+            sourceContext.insert(photo)
+        }
+        try sourceContext.save()
+        XCTAssertEqual(tree.treePhotos.map(\.imageData), payloads)
+
+        let json = JSONExporter.export(trees: [tree], includePhotos: true)
+        let archive = try XCTUnwrap(TreeImportService.decode(Data(json.utf8)))
+        let destContainer = try makeContainer()
+        let destContext = destContainer.mainContext
+        _ = try TreeImportService(modelContext: destContext).importArchive(archive, photoHandling: .immediate)
+
+        let imported = try XCTUnwrap(try destContext.fetch(FetchDescriptor<Tree>()).first)
+        XCTAssertEqual(imported.treePhotos.map(\.imageData), payloads)
     }
 
     /// Deferred mode must hand photos back to the caller instead of attaching them.

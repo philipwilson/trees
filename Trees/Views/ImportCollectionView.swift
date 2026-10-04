@@ -157,8 +157,15 @@ struct ImportCollectionView: View {
         let service = TreeImportService(modelContext: modelContext)
         do {
             // overrideCollection puts every tree into the chosen destination; the
-            // archive's own collections are ignored by design in this flow.
-            let summary = try service.importArchive(archive, photoHandling: .immediate, overrideCollection: collection)
+            // archive's own collections are ignored by design in this flow. Trees
+            // that already exist are imported as copies so the destination
+            // collection always receives the file's full contents.
+            let summary = try service.importArchive(
+                archive,
+                photoHandling: .immediate,
+                existingIDPolicy: .remap,
+                overrideCollection: collection
+            )
 
             var details: [String] = []
             if summary.photoCount > 0 {

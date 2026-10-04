@@ -33,7 +33,7 @@ extension Note {
         createdAt.formatted(date: .abbreviated, time: .shortened)
     }
 
-    var notePhotos: [Photo] { photos ?? [] }
+    var notePhotos: [Photo] { (photos ?? []).sorted(by: Photo.isOrderedBefore) }
 
     func addPhoto(_ data: Data, capturedAt: Date? = Date()) {
         let photo = Photo(imageData: data, captureDate: capturedAt)
