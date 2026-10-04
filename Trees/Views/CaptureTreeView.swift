@@ -40,6 +40,8 @@ struct CaptureTreeView: View {
                     .frame(maxWidth: .infinity)
                     .listRowBackground(Color.clear)
 
+                    LocationProblemNotice(locationManager: locationManager)
+
                     if let location = capturedLocation {
                         HStack {
                             Image(systemName: "checkmark.circle.fill")
@@ -189,7 +191,9 @@ struct CaptureTreeView: View {
     }
 
     private func captureLocation() {
-        guard let location = locationManager.currentLocation else { return }
+        // Rechecked here, not just when the button was drawn: the fix must
+        // still be fresh at the moment it becomes the tree's position
+        guard let location = locationManager.capturableLocation() else { return }
         capturedLocation = location
     }
 

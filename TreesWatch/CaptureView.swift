@@ -47,6 +47,25 @@ struct CaptureView: View {
                                 .foregroundStyle(.secondary)
                                 .multilineTextAlignment(.center)
                         }
+                    } else if locationManager.isPreciseLocationOff {
+                        VStack(spacing: 4) {
+                            Label("Precise Location Off", systemImage: "scope")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            Text("Turn on Precise Location for Tree Tracker in Settings → Privacy & Security → Location Services.")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
+                                .multilineTextAlignment(.center)
+                        }
+                    } else if locationManager.locationError != nil {
+                        VStack(spacing: 6) {
+                            Label("Can't Get Location", systemImage: "exclamationmark.triangle.fill")
+                                .font(.caption)
+                                .foregroundStyle(.orange)
+                            Button("Try Again") {
+                                locationManager.startUpdatingLocation()
+                            }
+                        }
                     } else {
                         Button {
                             captureLocation()
@@ -123,7 +142,9 @@ struct CaptureView: View {
     }
 
     private func captureLocation() {
-        guard let location = locationManager.currentLocation else { return }
+        // Rechecked here, not just when the button was drawn: the fix must
+        // still be fresh at the moment it becomes the tree's position
+        guard let location = locationManager.capturableLocation() else { return }
         capturedLocation = location
     }
 

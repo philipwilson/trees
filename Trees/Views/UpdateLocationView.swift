@@ -34,10 +34,9 @@ struct UpdateLocationView: View {
                 }
 
                 Section {
-                    if locationAccessDenied {
-                        Label("Location access is off. Enable it for Tree Tracker in Settings.", systemImage: "location.slash.fill")
-                            .foregroundStyle(.orange)
-                    } else {
+                    LocationProblemNotice(locationManager: locationManager)
+
+                    if !locationAccessDenied {
                         LiveAccuracyView(
                             accuracy: locationManager.currentLocation?.horizontalAccuracy,
                             isUpdating: locationManager.isUpdatingLocation
@@ -109,7 +108,8 @@ struct UpdateLocationView: View {
     }
 
     private func useCurrentLocation() {
-        guard let location = locationManager.currentLocation else { return }
+        // Rechecked at the moment of use: the fix must still be fresh
+        guard let location = locationManager.capturableLocation() else { return }
         tree.apply(location: location)
 
         do {

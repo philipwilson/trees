@@ -53,6 +53,7 @@
 		777CAA964A438818A81B83E5 /* iPadContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD413525F9C7B61836CA443B /* iPadContentView.swift */; };
 		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
 		7F7AB1938A6739C379B587C7 /* TreeFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC77885A9F5572569C4CCD50 /* TreeFilterTests.swift */; };
+		83047D0C956AAF947F5F864B /* LocationProblemNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272AF99F8979CDF3C824E7E0 /* LocationProblemNotice.swift */; };
 		85C47E3C191DE64E715D2D41 /* TreesSchemaV1.store in Resources */ = {isa = PBXBuildFile; fileRef = D32ABC0BAAF8A100B6AB0D32 /* TreesSchemaV1.store */; };
 		8AB390EDD94B120EEA4CF41B /* EditingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0D1CAE662723B06BDEAC767B /* EditingTests.swift */; };
 		8B46E9C5FCD41F533D26BAA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 244065D612BAD7C6916CA3C9 /* Assets.xcassets */; };
@@ -155,6 +156,7 @@
 		214CE774C065B3434C23D793 /* MapClustererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClustererTests.swift; sourceTree = "<group>"; };
 		244065D612BAD7C6916CA3C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26A6F644E1C77D04361E90DD /* ExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExporterTests.swift; sourceTree = "<group>"; };
+		272AF99F8979CDF3C824E7E0 /* LocationProblemNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProblemNotice.swift; sourceTree = "<group>"; };
 		2945D4AADEC5544CAE27988D /* WelcomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WelcomeView.swift; sourceTree = "<group>"; };
 		2F2E09E9737924E18950A488 /* CaptureView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CaptureView.swift; sourceTree = "<group>"; };
 		346D0BA1C9F5D0B1214DDEAB /* SyncMonitor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncMonitor.swift; sourceTree = "<group>"; };
@@ -323,6 +325,7 @@
 				59CF2834D51ED1FCC0E33F69 /* DeleteConfirmation.swift */,
 				BA501EF33874C584E39F8F8F /* ImagePicker.swift */,
 				57D86542CC445AF70E2D41FD /* InlineEditableField.swift */,
+				272AF99F8979CDF3C824E7E0 /* LocationProblemNotice.swift */,
 				46F641F035F2EC985C872E58 /* MoveToCollectionMenu.swift */,
 				37F08281F88024D47A957057 /* PhotoGalleryView.swift */,
 				79FDC09024258E6F9CF161B0 /* PhotoThumbnail.swift */,
@@ -740,6 +743,7 @@
 				CA0B4E6C2D6B999B8B10D614 /* InlineEditableField.swift in Sources */,
 				0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */,
 				E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */,
+				83047D0C956AAF947F5F864B /* LocationProblemNotice.swift in Sources */,
 				715C88077FB6AFD97487ECD3 /* MapClusterer.swift in Sources */,
 				5A38E1924BD0717B89CC7748 /* MoveToCollectionMenu.swift in Sources */,
 				92F9612A51CFACAE093B2A75 /* Note.swift in Sources */,

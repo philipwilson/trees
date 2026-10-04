@@ -22,6 +22,11 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>NSCameraUsageDescription</key>
 	<string>Tree Tracker uses the camera to take photos of trees for identification.</string>
+	<key>NSLocationTemporaryUsageDescriptionDictionary</key>
+	<dict>
+		<key>TreeCapture</key>
+		<string>Recording a tree needs your precise location. An approximate one can be several kilometres out.</string>
+	</dict>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Tree Tracker needs your location to record precise GPS coordinates of trees you capture.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
