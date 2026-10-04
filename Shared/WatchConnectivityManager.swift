@@ -13,8 +13,19 @@ final class WatchConnectivityManager: NSObject {
     /// Pending trees that failed to send (Watch side only)
     private(set) var pendingTrees: [WatchTree] = []
 
-    /// Callback for when new trees are received (iPhone side)
+    /// Trees handed to the system that haven't reached the iPhone yet (Watch side only)
+    private(set) var outstandingTransferCount = 0
+
+    /// Callback for trees received but not stored in the inbox (iPhone side).
+    /// Only used as a fallback when the inbox is missing or can't be written.
     var onTreesReceived: (([WatchTree]) -> Void)?
+
+    #if os(iOS)
+    /// Where received trees are kept until saved. Set before `activate()`.
+    @ObservationIgnored var inbox: WatchTreeInbox?
+    /// Called on the main queue after a tree has been stored in the inbox.
+    @ObservationIgnored var onInboxChanged: (() -> Void)?
+    #endif
 
     private var session: WCSession?
     #if os(watchOS)
@@ -59,6 +70,7 @@ final class WatchConnectivityManager: NSObject {
             ]
 
             session.transferUserInfo(context)
+            outstandingTransferCount = session.outstandingUserInfoTransfers.count
         } catch {
             enqueuePendingTree(tree)
         }
@@ -122,6 +134,7 @@ extension WatchConnectivityManager: WCSessionDelegate {
             #endif
 
             #if os(watchOS)
+            self.outstandingTransferCount = session.outstandingUserInfoTransfers.count
             if activationState == .activated && !self.pendingTrees.isEmpty {
                 self.retrySendingPendingTrees()
             }
@@ -143,15 +156,23 @@ extension WatchConnectivityManager: WCSessionDelegate {
 
     #if os(watchOS)
     func session(_ session: WCSession, didFinish userInfoTransfer: WCSessionUserInfoTransfer, error: Error?) {
-        guard let error else { return }
+        guard let error else {
+            DispatchQueue.main.async {
+                self.outstandingTransferCount = session.outstandingUserInfoTransfers.count
+            }
+            return
+        }
         print("WatchConnectivity: tree transfer failed, re-queueing: \(error)")
 
         // The system has given up on this transfer; put the tree back in the
         // pending queue so it is retried instead of being lost.
-        guard let treeData = userInfoTransfer.userInfo["tree"] as? Data,
-              let tree = try? JSONDecoder().decode(WatchTree.self, from: treeData) else { return }
+        let tree = (userInfoTransfer.userInfo["tree"] as? Data)
+            .flatMap { try? JSONDecoder().decode(WatchTree.self, from: $0) }
         DispatchQueue.main.async {
-            self.enqueuePendingTree(tree)
+            if let tree {
+                self.enqueuePendingTree(tree)
+            }
+            self.outstandingTransferCount = session.outstandingUserInfoTransfers.count
         }
     }
     #endif
@@ -167,6 +188,18 @@ extension WatchConnectivityManager: WCSessionDelegate {
     func session(_ session: WCSession, didReceiveUserInfo userInfo: [String: Any] = [:]) {
         #if os(iOS)
         guard let treeData = userInfo["tree"] as? Data else { return }
+
+        // This delivery happens exactly once. Put the payload on disk before
+        // returning, so a failed save later can be retried instead of losing
+        // the tree. Importing happens from the inbox on the main queue.
+        if let inbox, inbox.store(treeData) {
+            DispatchQueue.main.async {
+                self.onInboxChanged?()
+            }
+            return
+        }
+
+        // No inbox, or it couldn't be written: fall back to a direct import
         let tree: WatchTree
         do {
             tree = try JSONDecoder().decode(WatchTree.self, from: treeData)

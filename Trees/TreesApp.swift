@@ -85,15 +85,29 @@ struct TreesApp: App {
 
     private func setupWatchConnectivity() {
         let manager = WatchConnectivityManager.shared
-        manager.activate()
+        let inbox = WatchTreeInbox()
 
-        manager.onTreesReceived = { [modelContainer, noticeCenter] trees in
-            // Delivered on the main queue; using the main context keeps @Query views in sync
-            let importer = WatchTreeImporter(modelContext: modelContainer.mainContext)
-            let imported = importer.importTrees(trees)
+        // Both run on the main queue; using the main context keeps @Query views in sync
+        let announce: ([Tree]) -> Void = { [noticeCenter] imported in
             if let text = NoticeCenter.watchImportText(for: imported) {
                 noticeCenter.show(text, systemImage: "applewatch")
             }
         }
+        let processInbox: () -> Void = { [modelContainer] in
+            let importer = WatchTreeImporter(modelContext: modelContainer.mainContext)
+            announce(inbox.processPending(importTree: importer.importOutcome))
+        }
+
+        // Set before activating: queued deliveries can arrive immediately
+        manager.inbox = inbox
+        manager.onInboxChanged = processInbox
+        manager.onTreesReceived = { [modelContainer] trees in
+            let importer = WatchTreeImporter(modelContext: modelContainer.mainContext)
+            announce(importer.importTrees(trees))
+        }
+        manager.activate()
+
+        // Retry anything received in an earlier session that couldn't be saved
+        processInbox()
     }
 }

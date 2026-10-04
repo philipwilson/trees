@@ -19,6 +19,7 @@
 		2054BD516F84B6FF0A7A2CCD /* iPadMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C3FB447157EC6C8F325BF071 /* iPadMapView.swift */; };
 		24B6438D7031384FBEB248F4 /* UpdateLocationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D4F1B8724EDF51F8ABA3B501 /* UpdateLocationView.swift */; };
 		250A5B96800A59CA51A32265 /* ExporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26A6F644E1C77D04361E90DD /* ExporterTests.swift */; };
+		2A0437900B68535DF2920F50 /* WatchTreeInbox.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2413E17568562F77FEEF8C6B /* WatchTreeInbox.swift */; };
 		2F88C47DD0EDA3E26047A342 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1FE000A01E50BF4C4432D684 /* ContentView.swift */; };
 		2FD792F2C307DD48918EA526 /* SyncStatusButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 48193937CF26C20C285CEA9A /* SyncStatusButton.swift */; };
 		323B4F1757B231D17498E0ED /* LocationFreshnessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6EBA4753E77EB9613736CEFC /* LocationFreshnessTests.swift */; };
@@ -155,6 +156,7 @@
 		1D98FEFE3CF07D58C71596FE /* SyncStateTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SyncStateTests.swift; sourceTree = "<group>"; };
 		1FE000A01E50BF4C4432D684 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		214CE774C065B3434C23D793 /* MapClustererTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MapClustererTests.swift; sourceTree = "<group>"; };
+		2413E17568562F77FEEF8C6B /* WatchTreeInbox.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeInbox.swift; sourceTree = "<group>"; };
 		244065D612BAD7C6916CA3C9 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		26A6F644E1C77D04361E90DD /* ExporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExporterTests.swift; sourceTree = "<group>"; };
 		272AF99F8979CDF3C824E7E0 /* LocationProblemNotice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationProblemNotice.swift; sourceTree = "<group>"; };
@@ -284,6 +286,7 @@
 				E97782A0FC2E0F4A1940A667 /* NoticeCenter.swift */,
 				346D0BA1C9F5D0B1214DDEAB /* SyncMonitor.swift */,
 				E778EC8EE5C7C9982218C879 /* WatchTreeImporter.swift */,
+				2413E17568562F77FEEF8C6B /* WatchTreeInbox.swift */,
 				D5FF190F5952B0902B19B923 /* Exporters */,
 				F7A95200F7C220A6EC3D8CD5 /* Importers */,
 			);
@@ -774,6 +777,7 @@
 				4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */,
 				D4E766862EDBFA98CB8E85D2 /* WatchTree.swift in Sources */,
 				36F07DA5F9D71A35916273D7 /* WatchTreeImporter.swift in Sources */,
+				2A0437900B68535DF2920F50 /* WatchTreeInbox.swift in Sources */,
 				36A9461237B26E728406B79E /* WelcomeView.swift in Sources */,
 				1BA96E74EAC7D3CE24E7184E /* ZoomableImageView.swift in Sources */,
 				BD38C4B50C76E7081D067F0A /* iPadCollectionListView.swift in Sources */,

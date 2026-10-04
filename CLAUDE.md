@@ -37,7 +37,7 @@ iOS app using SwiftUI + SwiftData (iOS 17+) with watchOS companion app (watchOS 
 - **Photo** (@Model): Individual photo with single Data asset (external storage), belongs to Tree or Note
 - **Note** (@Model): Dated observation/note text with optional attached photos, belongs to Tree
 - **Collection** (@Model): Named group of trees with one-to-many relationship (deleteRule: nullify)
-- **LocationManager** (@Observable): Wraps CLLocationManager with `kCLLocationAccuracyBest` for precise GPS capture
+- **LocationManager** (@Observable): Wraps CLLocationManager with `kCLLocationAccuracyBest` for precise GPS capture. Take positions to save from `capturableLocation()`, which rechecks age and accuracy; `currentLocation` is only the live reading
 - **SwiftData ModelContainer**: Configured in TreesApp.swift for Tree, Collection, Photo, and Note models
 
 ### Watch App (TreesWatch/)
@@ -47,6 +47,7 @@ Companion watchOS app for quick tree capture from the wrist.
 - **WatchTree** (Codable struct in `Shared/`): Lightweight transfer object for Watch→iPhone sync
 - **WatchConnectivityManager** (@Observable in `Shared/`): WCSession wrapper handling bidirectional sync
 - **WatchTreeImporter** (iOS only): Converts WatchTree to SwiftData Tree entity, creates Note from watch notes
+- **WatchTreeInbox** (iOS only): Stores each received payload on disk until its tree is saved; anything left is retried at launch
 
 **Sync Behavior:**
 - Trees sent via `WCSession.transferUserInfo()` for reliable background delivery

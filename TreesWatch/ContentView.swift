@@ -5,6 +5,12 @@ struct ContentView: View {
     @State private var lastCapturedTree: WatchTree?
     @State private var connectivityManager = WatchConnectivityManager.shared
 
+    /// Trees not yet on the iPhone: queued here, plus those handed to the
+    /// system that it hasn't delivered yet.
+    private var waitingCount: Int {
+        connectivityManager.pendingTrees.count + connectivityManager.outstandingTransferCount
+    }
+
     var body: some View {
         NavigationStack {
             ScrollView {
@@ -40,10 +46,10 @@ struct ContentView: View {
                         .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 10))
                     }
 
-                    if !connectivityManager.pendingTrees.isEmpty {
+                    if waitingCount > 0 {
                         HStack {
                             Image(systemName: "arrow.triangle.2.circlepath")
-                            Text("\(connectivityManager.pendingTrees.count) pending sync")
+                            Text("\(waitingCount) waiting for iPhone")
                         }
                         .font(.caption)
                         .foregroundStyle(.orange)
