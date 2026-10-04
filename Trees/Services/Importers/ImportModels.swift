@@ -83,6 +83,40 @@ struct ImportedTreeRecord: Codable {
         case noteEntries, treePhotos, collectionId, createdAt, updatedAt
     }
 
+    /// For sources other than JSON (e.g. CSV), which carry no photos or
+    /// structured notes.
+    init(
+        id: String?,
+        latitude: Double,
+        longitude: Double,
+        horizontalAccuracy: Double,
+        altitude: Double?,
+        species: String,
+        variety: String?,
+        rootstock: String?,
+        notes: String,
+        createdAt: String?,
+        updatedAt: String?
+    ) {
+        self.id = id
+        self.latitude = latitude
+        self.longitude = longitude
+        self.horizontalAccuracy = horizontalAccuracy
+        self.altitude = altitude
+        self.species = species
+        self.variety = variety
+        self.rootstock = rootstock
+        self.notes = notes
+        self.createdAt = createdAt
+        self.updatedAt = updatedAt
+        photos = nil
+        photoDates = nil
+        photoDateStrings = nil
+        noteEntries = nil
+        treePhotos = nil
+        collectionId = nil
+    }
+
     init(from decoder: Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         id = try container.decodeIfPresent(String.self, forKey: .id)

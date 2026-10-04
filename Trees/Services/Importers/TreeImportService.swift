@@ -49,8 +49,9 @@ struct TreeImportService {
         var deferredPhotos: [DeferredPhoto] = []
     }
 
-    /// Decodes any of the three export formats: v2 (versioned, structured notes),
-    /// v1 (collections + flat trees), or the oldest bare tree array.
+    /// Decodes any of the three JSON export formats: v2 (versioned, structured
+    /// notes), v1 (collections + flat trees), or the oldest bare tree array.
+    /// Anything else is tried as CSV with latitude and longitude columns.
     nonisolated static func decode(_ data: Data) -> ImportedArchive? {
         let decoder = JSONDecoder()
         if let archive = try? decoder.decode(ImportedArchive.self, from: data) {
@@ -59,7 +60,7 @@ struct TreeImportService {
         if let trees = try? decoder.decode([ImportedTreeRecord].self, from: data) {
             return ImportedArchive(version: nil, collections: nil, trees: trees)
         }
-        return nil
+        return CSVTreeParser.archive(from: data)
     }
 
     /// Imports an archive into the model context and saves. Rolls back and

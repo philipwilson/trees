@@ -39,13 +39,13 @@ struct ImportCollectionView: View {
                     Button {
                         showingFilePicker = true
                     } label: {
-                        Label("Select JSON File", systemImage: "doc.badge.plus")
+                        Label("Select JSON or CSV File", systemImage: "doc.badge.plus")
                     }
                     .disabled(!canImport)
                 } header: {
                     Text("Import")
                 } footer: {
-                    Text("Import trees from a JSON file exported by Tree Tracker.")
+                    Text("Import trees from a JSON file exported by Tree Tracker, or a CSV file with latitude and longitude columns.")
                 }
 
                 if isLoading {
@@ -69,7 +69,7 @@ struct ImportCollectionView: View {
             }
             .fileImporter(
                 isPresented: $showingFilePicker,
-                allowedContentTypes: [.json],
+                allowedContentTypes: [.json, .commaSeparatedText, .tabSeparatedText, .plainText],
                 allowsMultipleSelection: false
             ) { result in
                 handleFileImport(result)
@@ -128,7 +128,7 @@ struct ImportCollectionView: View {
                     if let archive {
                         importArchive(archive)
                     } else {
-                        importResult = ImportResult(success: false, message: "Failed to parse file. Ensure it is a valid Trees JSON export.")
+                        importResult = ImportResult(success: false, message: "Could not read this file. It needs to be a Tree Tracker JSON export, or a CSV file with latitude and longitude columns.")
                         showingResult = true
                     }
                 }
@@ -175,7 +175,7 @@ struct ImportCollectionView: View {
                 details.append("\(summary.remappedIDCount) ID\(summary.remappedIDCount == 1 ? "" : "s") regenerated")
             }
             if summary.skippedCount > 0 {
-                details.append("\(summary.skippedCount) skipped (invalid coordinates)")
+                details.append("\(summary.skippedCount) skipped (missing or invalid coordinates)")
             }
             let detailSuffix = details.isEmpty ? "" : " (\(details.joined(separator: ", ")))"
 

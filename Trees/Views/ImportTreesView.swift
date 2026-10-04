@@ -43,7 +43,7 @@ struct ImportTreesView: View {
                     Button {
                         showingFilePicker = true
                     } label: {
-                        Label("Select JSON File", systemImage: "doc.badge.plus")
+                        Label("Select JSON or CSV File", systemImage: "doc.badge.plus")
                     }
 
                     Picker("Photo Import", selection: $photoImportMode) {
@@ -54,7 +54,7 @@ struct ImportTreesView: View {
                 } header: {
                     Text("Import")
                 } footer: {
-                    Text(photoImportMode.description)
+                    Text("\(photoImportMode.description). CSV files need latitude and longitude columns and carry no photos.")
                 }
 
                 if isLoading {
@@ -78,7 +78,7 @@ struct ImportTreesView: View {
             }
             .fileImporter(
                 isPresented: $showingFilePicker,
-                allowedContentTypes: [.json],
+                allowedContentTypes: [.json, .commaSeparatedText, .tabSeparatedText, .plainText],
                 allowsMultipleSelection: false
             ) { result in
                 handleFileImport(result)
@@ -130,7 +130,7 @@ struct ImportTreesView: View {
                     if let archive {
                         importArchive(archive)
                     } else {
-                        importResult = ImportResult(success: false, message: "Failed to parse file. Ensure it is a valid Trees JSON export.")
+                        importResult = ImportResult(success: false, message: "Could not read this file. It needs to be a Tree Tracker JSON export, or a CSV file with latitude and longitude columns.")
                         showingResult = true
                     }
                 }
@@ -173,7 +173,7 @@ struct ImportTreesView: View {
             messageParts.append("\(summary.alreadyPresentCount) already present (skipped)")
         }
         if summary.skippedCount > 0 {
-            messageParts.append("\(summary.skippedCount) skipped (invalid coordinates)")
+            messageParts.append("\(summary.skippedCount) skipped (missing or invalid coordinates)")
         }
 
         if !summary.deferredPhotos.isEmpty {
