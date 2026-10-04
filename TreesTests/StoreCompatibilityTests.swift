@@ -1,5 +1,6 @@
 import XCTest
 import SwiftData
+import CoreData
 @testable import Trees
 
 /// Guards against schema changes that strand existing users' data.
@@ -105,5 +106,56 @@ final class StoreCompatibilityTests: XCTestCase {
         XCTAssertEqual(try context.fetch(FetchDescriptor<Tree>()).count, 3)
         XCTAssertEqual(apple.treeNotes.count, 2)
         XCTAssertEqual(try context.fetch(FetchDescriptor<Photo>()).count, 3)
+    }
+}
+
+/// The model handed to CloudKit schema initialisation must describe the same
+/// entities and stored fields the app uses, or the deployed schema would be
+/// missing some.
+final class CloudKitSchemaModelTests: XCTestCase {
+    func testManagedObjectModelCoversEveryEntityAndField() throws {
+        let model = try XCTUnwrap(CloudKitSchemaInitializer.makeManagedObjectModel())
+        let entities = Dictionary(uniqueKeysWithValues: model.entities.compactMap { entity in
+            entity.name.map { ($0, entity) }
+        })
+
+        XCTAssertEqual(Set(entities.keys), ["Tree", "Note", "Photo", "Collection"])
+
+        func fields(_ name: String) -> Set<String> {
+            Set(entities[name]?.propertiesByName.keys.map { $0 } ?? [])
+        }
+        XCTAssertEqual(fields("Tree"), [
+            "id", "latitude", "longitude", "horizontalAccuracy", "altitude", "species", "variety",
+            "rootstock", "createdAt", "updatedAt", "collection", "photos", "notes",
+        ])
+        XCTAssertEqual(fields("Note"), ["id", "text", "createdAt", "updatedAt", "tree", "photos"])
+        XCTAssertEqual(fields("Photo"), ["id", "imageData", "captureDate", "createdAt", "tree", "note"])
+        XCTAssertEqual(fields("Collection"), ["id", "name", "createdAt", "updatedAt", "trees"])
+    }
+
+    /// CloudKit requires every relationship to be optional and to have an inverse.
+    func testEveryRelationshipIsOptionalWithAnInverse() throws {
+        let model = try XCTUnwrap(CloudKitSchemaInitializer.makeManagedObjectModel())
+        for entity in model.entities {
+            for (name, relationship) in entity.relationshipsByName {
+                XCTAssertTrue(relationship.isOptional, "\(entity.name ?? "?").\(name) must be optional")
+                XCTAssertNotNil(relationship.inverseRelationship, "\(entity.name ?? "?").\(name) needs an inverse")
+            }
+        }
+    }
+
+    @MainActor
+    func testExportFileNamesUseA24HourTimestamp() throws {
+        let schema = Schema(versionedSchema: TreesSchemaV1.self)
+        let config = ModelConfiguration(schema: schema, isStoredInMemoryOnly: true, cloudKitDatabase: .none)
+        let container = try ModelContainer(for: schema, configurations: [config])
+        let tree = Tree(latitude: 51.5, longitude: -0.12, horizontalAccuracy: 4, species: "Oak")
+        container.mainContext.insert(tree)
+
+        let url = try XCTUnwrap(CSVExporter.exportToFile(trees: [tree], filePrefix: "name-test"))
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let name = url.lastPathComponent
+        XCTAssertNotNil(name.range(of: #"^name-test_\d{4}-\d{2}-\d{2}_\d{6}_\d{3}\.csv$"#, options: .regularExpression), name)
     }
 }

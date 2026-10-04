@@ -18,6 +18,13 @@ struct TreesApp: App {
         let schema = Schema(versionedSchema: TreesSchemaV1.self)
         var cloudSyncActive = false
 
+        #if DEBUG
+        // Developer step before deploying the CloudKit schema; see the type's notes
+        if Self.enableCloudKit, CloudKitSchemaInitializer.isRequested {
+            CloudKitSchemaInitializer.run(containerIdentifier: Self.cloudKitContainerIdentifier)
+        }
+        #endif
+
         if Self.enableCloudKit {
             do {
                 let cloudConfig = ModelConfiguration(

@@ -126,6 +126,9 @@ iCloud sync via CloudKit is enabled. Trees, Collections, Photos, and Notes sync 
 
 To disable iCloud sync (e.g., for testing), set `enableCloudKit = false` in `Trees/TreesApp.swift` line 11.
 
+### Before Deploying the CloudKit Schema
+CloudKit adds fields to the development schema only as records use them. To push the complete model, run a debug build once on a signed-in device with the launch argument `-initializeCloudKitSchema YES` (**CloudKitSchemaInitializer**, debug builds only), check the Xcode console for "CloudKit schema: done", then review and deploy in the CloudKit Console. Repeat after any model change. Production schema changes are additive only.
+
 ### How iCloud Sync Works
 - Uses SwiftData with CloudKit private database
 - Container: `iCloud.com.treetracker.Trees`

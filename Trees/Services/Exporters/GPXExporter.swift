@@ -82,6 +82,9 @@ struct GPXExporter {
 
     private static func formattedDate() -> String {
         let formatter = DateFormatter()
+        // Fixed locale: with the device set to 12-hour time, the user's locale
+        // rewrites HH and the name comes out as e.g. "44444_008 PM"
+        formatter.locale = Locale(identifier: "en_US_POSIX")
         formatter.dateFormat = "yyyy-MM-dd_HHmmss_SSS"
         return formatter.string(from: Date())
     }
