@@ -49,9 +49,19 @@ struct ExportView: View {
 
     private var filePrefix: String {
         if let name = collectionName {
-            return name.replacingOccurrences(of: " ", with: "_").lowercased()
+            return Self.sanitizedFilePrefix(name)
         }
         return "trees"
+    }
+
+    /// Turns a collection name into a safe filename prefix. Path separators and
+    /// other punctuation would otherwise make the temp-file write fail.
+    static func sanitizedFilePrefix(_ name: String) -> String {
+        let mapped = name.lowercased().map { character -> Character in
+            character.isLetter || character.isNumber || character == "-" || character == "_" ? character : "_"
+        }
+        let prefix = String(mapped)
+        return prefix.contains(where: { $0 != "_" }) ? prefix : "trees"
     }
 
     var body: some View {

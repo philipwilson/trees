@@ -81,4 +81,18 @@ final class ExporterTests: XCTestCase {
         let gpx = GPXExporter.export(trees: [tree])
         XCTAssertTrue(gpx.contains("<name>Unknown Tree</name>"))
     }
+
+    // MARK: - File prefix
+
+    func testFilePrefixReplacesPathSeparatorsAndPunctuation() {
+        XCTAssertEqual(ExportView.sanitizedFilePrefix("North/South: Field 2"), "north_south__field_2")
+        XCTAssertEqual(ExportView.sanitizedFilePrefix("Victoria's Orchard"), "victoria_s_orchard")
+        XCTAssertEqual(ExportView.sanitizedFilePrefix("pre-2020_plot"), "pre-2020_plot")
+    }
+
+    func testFilePrefixFallsBackWhenNothingUsableRemains() {
+        XCTAssertEqual(ExportView.sanitizedFilePrefix(""), "trees")
+        XCTAssertEqual(ExportView.sanitizedFilePrefix("///"), "trees")
+        XCTAssertEqual(ExportView.sanitizedFilePrefix("🌳🌳"), "trees")
+    }
 }

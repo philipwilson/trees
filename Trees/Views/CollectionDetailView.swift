@@ -155,7 +155,7 @@ struct CollectionDetailView: View {
             }
         }
         .sheet(isPresented: $showingExportSheet) {
-            ExportView(trees: collectionTrees, collectionName: collection.name)
+            ExportView(trees: collectionTrees, collections: [collection], collectionName: collection.name)
         }
         .sheet(isPresented: $showingAddTreesSheet) {
             AddTreesToCollectionView(collection: collection, availableTrees: unassignedTrees)

@@ -121,14 +121,8 @@ struct TreeMapView: View {
     }
 
     private func centerOnUser() {
-        if let location = locationManager.currentLocation {
-            position = .region(MKCoordinateRegion(
-                center: location.coordinate,
-                span: MKCoordinateSpan(latitudeDelta: 0.01, longitudeDelta: 0.01)
-            ))
-        } else {
-            locationManager.requestSingleLocation()
-        }
+        // Tracks the map's own live user location rather than a stored fix
+        position = .userLocation(fallback: .automatic)
     }
 }
 

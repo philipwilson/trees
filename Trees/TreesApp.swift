@@ -28,7 +28,9 @@ struct TreesApp: App {
             } catch {
                 print("CloudKit ModelContainer failed, falling back to local-only: \(error)")
                 do {
-                    let localConfig = ModelConfiguration(schema: schema)
+                    // .none is required: the default (.automatic) would pick the
+                    // CloudKit container back up from the entitlements.
+                    let localConfig = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
                     modelContainer = try ModelContainer(
                         for: schema,
                         migrationPlan: TreesMigrationPlan.self,
@@ -40,7 +42,7 @@ struct TreesApp: App {
             }
         } else {
             do {
-                let localConfig = ModelConfiguration(schema: schema)
+                let localConfig = ModelConfiguration(schema: schema, cloudKitDatabase: .none)
                 modelContainer = try ModelContainer(
                     for: schema,
                     migrationPlan: TreesMigrationPlan.self,
@@ -70,9 +72,9 @@ struct TreesApp: App {
         manager.activate()
 
         manager.onTreesReceived = { [modelContainer] trees in
-            let context = ModelContext(modelContainer)
-            let importer = WatchTreeImporter(modelContext: context)
-            importer.importTrees(trees)
+            // Delivered on the main queue; using the main context keeps @Query views in sync
+            let importer = WatchTreeImporter(modelContext: modelContainer.mainContext)
+            _ = importer.importTrees(trees)
         }
     }
 }
