@@ -21,6 +21,7 @@ final class SyncStateTests: XCTestCase {
         var state = SyncState(isCloudSyncActive: true)
         XCTAssertEqual(state.status, .upToDate)
         XCTAssertEqual(state.title, "iCloud Sync On")
+        XCTAssertEqual(state.systemImage, "icloud", "no tick before any sync has completed")
 
         let event = UUID()
         state.apply(eventID: event, endDate: nil, succeeded: false, failure: nil)
@@ -30,6 +31,7 @@ final class SyncStateTests: XCTestCase {
         XCTAssertEqual(state.status, .upToDate)
         XCTAssertEqual(state.lastSyncDate, finished)
         XCTAssertEqual(state.title, "Up to Date")
+        XCTAssertEqual(state.systemImage, "checkmark.icloud")
     }
 
     func testOverlappingEventsStaySyncingUntilAllFinish() {
@@ -62,6 +64,27 @@ final class SyncStateTests: XCTestCase {
         state.apply(eventID: retry, endDate: finished, succeeded: true, failure: nil)
         XCTAssertEqual(state.status, .upToDate)
         XCTAssertFalse(state.needsAttention)
+    }
+
+    /// The icon must never show a tick that the facts don't support.
+    func testIconForEachSituation() {
+        var state = SyncState(isCloudSyncActive: true)
+        let event = UUID()
+
+        state.apply(eventID: event, endDate: nil, succeeded: false, failure: nil)
+        XCTAssertEqual(state.systemImage, "arrow.triangle.2.circlepath.icloud")
+
+        state.apply(eventID: event, endDate: finished, succeeded: false, failure: "No network connection.")
+        XCTAssertEqual(state.systemImage, "exclamationmark.icloud", "a first sync that failed is not a tick")
+
+        state.apply(eventID: UUID(), endDate: finished, succeeded: true, failure: nil)
+        XCTAssertEqual(state.systemImage, "checkmark.icloud")
+
+        // A later failure replaces the tick, and a later success restores it
+        state.apply(eventID: UUID(), endDate: finished, succeeded: false, failure: "iCloud is busy.")
+        XCTAssertEqual(state.systemImage, "exclamationmark.icloud")
+        state.apply(eventID: UUID(), endDate: finished, succeeded: true, failure: nil)
+        XCTAssertEqual(state.systemImage, "checkmark.icloud")
     }
 
     func testMissingAccountTakesPriorityAndRecovers() {

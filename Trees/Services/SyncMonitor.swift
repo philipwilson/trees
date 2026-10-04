@@ -100,7 +100,9 @@ struct SyncState: Equatable {
         case .off: return "icloud.slash"
         case .noAccount, .failed: return "exclamationmark.icloud"
         case .syncing: return "arrow.triangle.2.circlepath.icloud"
-        case .upToDate: return "checkmark.icloud"
+        // The tick is a claim that a sync has completed, so it waits for one;
+        // until then sync is merely switched on.
+        case .upToDate: return lastSyncDate == nil ? "icloud" : "checkmark.icloud"
         }
     }
 
