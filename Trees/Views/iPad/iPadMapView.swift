@@ -6,7 +6,9 @@ struct iPadMapView: View {
     var onBack: (() -> Void)?
 
     @Environment(\.modelContext) private var modelContext
-    @Query private var trees: [Tree]
+    @Query(sort: \Tree.createdAt, order: .reverse) private var trees: [Tree]
+    @Query(sort: \Collection.name) private var collections: [Collection]
+    @State private var filter = TreeFilter()
     @AppStorage("mapShowVariety") private var showVariety = false
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedTree: Tree?
@@ -20,36 +22,20 @@ struct iPadMapView: View {
     @State private var locationManager = LocationManager()
 
     var filteredTrees: [Tree] {
-        if activeSearchText.isEmpty {
-            return trees
-        }
-        return trees.filter { $0.matches(searchText: activeSearchText) }
+        filter.apply(to: trees, searchText: activeSearchText)
     }
 
     var body: some View {
         NavigationStack {
             ZStack(alignment: .topTrailing) {
-                Map(position: $position, selection: $selectedTree) {
-                    ForEach(trees) { tree in
-                        Annotation(
-                            labelFor(tree),
-                            coordinate: CLLocationCoordinate2D(
-                                latitude: tree.latitude,
-                                longitude: tree.longitude
-                            ),
-                            anchor: .bottom
-                        ) {
-                            TreeMapPin(tree: tree, isSelected: selectedTree?.id == tree.id)
-                        }
-                        .tag(tree)
-                    }
-
-                    UserAnnotation()
-                }
-                .mapControls {
-                    MapCompass()
-                    MapScaleView()
-                }
+                TreeMapCanvas(
+                    // The same trees as the side panel, so search and
+                    // filters narrow the pins too
+                    trees: filteredTrees,
+                    position: $position,
+                    selectedTree: $selectedTree,
+                    showVariety: showVariety
+                )
                 .ignoresSafeArea(edges: .bottom)
 
                 // Floating panel
@@ -111,6 +97,13 @@ struct iPadMapView: View {
                             Label("Back", systemImage: "chevron.left")
                         }
                     }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    TreeFilterMenu(
+                        filter: $filter,
+                        collections: collections,
+                        speciesOptions: TreeFilter.speciesOptions(in: trees)
+                    )
                 }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
@@ -261,13 +254,6 @@ struct iPadMapView: View {
         .frame(width: 320)
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(color: .black.opacity(0.15), radius: 8, x: 0, y: 4)
-    }
-
-    private func labelFor(_ tree: Tree) -> String {
-        if showVariety, let variety = tree.variety, !variety.isEmpty {
-            return variety
-        }
-        return tree.species.isEmpty ? "Tree" : tree.species
     }
 
     private func centerOnUser() {

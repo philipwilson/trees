@@ -5,6 +5,8 @@ import MapKit
 struct TreeMapView: View {
     @Environment(\.modelContext) private var modelContext
     @Query private var trees: [Tree]
+    @Query(sort: \Collection.name) private var collections: [Collection]
+    @State private var filter = TreeFilter()
     @AppStorage("mapShowVariety") private var showVariety = false
     @State private var position: MapCameraPosition = .automatic
     @State private var selectedTree: Tree?
@@ -12,30 +14,19 @@ struct TreeMapView: View {
     @State private var showingOfflineTip = false
     @State private var locationManager = LocationManager()
 
+    private var visibleTrees: [Tree] {
+        filter.apply(to: trees)
+    }
+
     var body: some View {
         NavigationStack {
             ZStack(alignment: .bottomTrailing) {
-                Map(position: $position, selection: $selectedTree) {
-                    ForEach(trees) { tree in
-                        Annotation(
-                            labelFor(tree),
-                            coordinate: CLLocationCoordinate2D(
-                                latitude: tree.latitude,
-                                longitude: tree.longitude
-                            ),
-                            anchor: .bottom
-                        ) {
-                            TreeMapPin(tree: tree, isSelected: selectedTree?.id == tree.id)
-                        }
-                        .tag(tree)
-                    }
-
-                    UserAnnotation()
-                }
-                .mapControls {
-                    MapCompass()
-                    MapScaleView()
-                }
+                TreeMapCanvas(
+                    trees: visibleTrees,
+                    position: $position,
+                    selectedTree: $selectedTree,
+                    showVariety: showVariety
+                )
 
                 VStack(spacing: 12) {
                     Button {
@@ -66,6 +57,20 @@ struct TreeMapView: View {
             .navigationTitle("Map")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    if filter.isActive {
+                        Text("\(visibleTrees.count) of \(trees.count)")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
+                ToolbarItem(placement: .topBarTrailing) {
+                    TreeFilterMenu(
+                        filter: $filter,
+                        collections: collections,
+                        speciesOptions: TreeFilter.speciesOptions(in: trees)
+                    )
+                }
                 ToolbarItem(placement: .topBarTrailing) {
                     Menu {
                         Button {
@@ -111,13 +116,6 @@ struct TreeMapView: View {
                 Text("To use maps without signal, download your area for offline use in Apple Maps.\n\nOpen Apple Maps → tap your profile → Offline Maps → Download New Map.")
             }
         }
-    }
-
-    private func labelFor(_ tree: Tree) -> String {
-        if showVariety, let variety = tree.variety, !variety.isEmpty {
-            return variety
-        }
-        return tree.species.isEmpty ? "Tree" : tree.species
     }
 
     private func centerOnUser() {
