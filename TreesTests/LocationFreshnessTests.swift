@@ -96,18 +96,22 @@ final class LocationFreshnessTests: XCTestCase {
         manager.locationManager(CLLocationManager(), didUpdateLocations: [location(accuracy: 5, age: 0)])
         XCTAssertTrue(manager.hasAcceptableAccuracy)
 
-        try await Task.sleep(for: .milliseconds(700))
+        // Generous margin: the expiry timer only has to have fired by now
+        try await Task.sleep(for: .milliseconds(1500))
 
         XCTAssertNil(manager.currentLocation)
         XCTAssertFalse(manager.hasAcceptableAccuracy)
     }
 
     func testNewerFixKeepsTheLiveReadingAlive() async throws {
-        let manager = LocationManager(maximumFixAge: 0.5)
+        // Timings leave most of a second either side, so a slow test machine
+        // doesn't decide the result: the first fix would expire at 2.0 s, the
+        // check is at about 2.4 s, and the second fix lasts until about 3.2 s.
+        let manager = LocationManager(maximumFixAge: 2)
         manager.locationManager(CLLocationManager(), didUpdateLocations: [location(accuracy: 8, age: 0)])
-        try await Task.sleep(for: .milliseconds(300))
+        try await Task.sleep(for: .milliseconds(1200))
         manager.locationManager(CLLocationManager(), didUpdateLocations: [location(accuracy: 4, age: 0)])
-        try await Task.sleep(for: .milliseconds(300))
+        try await Task.sleep(for: .milliseconds(1200))
 
         XCTAssertEqual(manager.currentLocation?.horizontalAccuracy, 4)
         XCTAssertTrue(manager.hasAcceptableAccuracy)

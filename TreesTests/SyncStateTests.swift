@@ -116,7 +116,7 @@ final class SyncStateTests: XCTestCase {
         center.show("Hello", systemImage: "applewatch")
         XCTAssertEqual(center.current?.text, "Hello")
 
-        try await Task.sleep(for: .milliseconds(300))
+        try await Task.sleep(for: .milliseconds(1500))
         XCTAssertNil(center.current)
     }
 

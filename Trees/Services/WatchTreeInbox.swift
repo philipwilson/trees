@@ -29,8 +29,15 @@ final class WatchTreeInbox: Sendable {
     func store(_ payload: Data) -> Bool {
         do {
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            // Time-ordered names so trees are imported in the order they arrived
-            let name = String(format: "%013lld-%@.json", Int64(Date().timeIntervalSince1970 * 1000), UUID().uuidString)
+            // Names sort in arrival order. The clock time orders trees across
+            // launches; the uptime counter orders ones that arrive within the
+            // same millisecond, where the clock alone would tie.
+            let name = String(
+                format: "%013lld-%020llu-%@.json",
+                Int64(Date().timeIntervalSince1970 * 1000),
+                DispatchTime.now().uptimeNanoseconds,
+                UUID().uuidString
+            )
             try payload.write(to: directory.appending(path: name), options: .atomic)
             return true
         } catch {
