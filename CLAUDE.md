@@ -104,6 +104,7 @@ Created in `TreesApp` and passed through the environment:
 - **SpeciesTextField**: Text field with autocomplete suggestions from preset species + previously-used species
 - **NoteRowView**: Displays a Note with date, text, and thumbnail photos
 - **AddNoteView**: Sheet for adding a note, or editing one when `editing:` is passed
+- **PhotoEncoder** (`Utilities/`): encodes picked/captured photos, capped at 2560 px on the long edge unless "Keep Full-Size Photos" (in Settings & About) is on
 - **PhotoThumbnail**: Cached, background-decoded thumbnail; use this instead of decoding `imageData` in a view body
 - **MoveToCollectionMenu**: Context-menu submenu for reassigning a tree
 - **DeleteConfirmation** (`deleteConfirmation(_:...)`): confirmation dialog for list deletes

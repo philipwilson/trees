@@ -105,11 +105,12 @@ struct PhotosPicker: View {
     }
 
     private func addPhoto(_ image: UIImage, captureDate: Date?) {
+        let keepFullSize = UserDefaults.standard.bool(forKey: PhotoEncoder.keepFullSizeKey)
         Task {
-            // JPEG-encoding a full-resolution photo takes long enough to
-            // stutter the picker's dismissal if done on the main thread
+            // Resizing and JPEG-encoding a full-resolution photo takes long
+            // enough to stutter the picker's dismissal if done on the main thread
             let data = await Task.detached(priority: .userInitiated) {
-                image.jpegData(compressionQuality: 0.8)
+                PhotoEncoder.jpegData(from: image, keepFullSize: keepFullSize)
             }.value
             if let data {
                 capturedPhotos.append(CapturedPhoto(data: data, captureDate: captureDate))

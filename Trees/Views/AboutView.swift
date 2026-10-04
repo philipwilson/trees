@@ -6,11 +6,12 @@ enum AppLinks {
     static let support = URL(string: "https://github.com/philipwilson/trees/issues")!
 }
 
-/// App version, a plain-language privacy summary, and links to the privacy
-/// policy and support. App Review requires the policy to be reachable from
+/// App version, the photo size setting, a plain-language privacy summary,
+/// and links to the privacy policy and support. App Review requires the policy to be reachable from
 /// inside the app.
 struct AboutView: View {
     @Environment(\.dismiss) private var dismiss
+    @AppStorage(PhotoEncoder.keepFullSizeKey) private var keepFullSizePhotos = false
     @State private var showingWelcome = false
 
     static var versionText: String {
@@ -42,6 +43,16 @@ struct AboutView: View {
                 }
 
                 Section {
+                    Toggle("Keep Full-Size Photos", isOn: $keepFullSizePhotos)
+                } header: {
+                    Text("Photos")
+                } footer: {
+                    Text(keepFullSizePhotos
+                         ? "New photos are stored at the camera's full resolution. They take about twice the space on your devices and in iCloud."
+                         : "New photos are stored at up to \(Int(PhotoEncoder.maximumLongEdge)) pixels on the long side, which is as sharp as the app can display and takes about half the space of a full-size photo. Photos you already have are not changed.")
+                }
+
+                Section {
                     Text("Your trees, photos and notes are stored on this device and, if you use iCloud, in your own private iCloud account so they sync between your devices. The developer cannot see them. There are no accounts, analytics or ads.")
                         .font(.subheadline)
                     Link(destination: AppLinks.privacyPolicy) {
@@ -64,7 +75,7 @@ struct AboutView: View {
                     Text("Help")
                 }
             }
-            .navigationTitle("About")
+            .navigationTitle("Settings & About")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) {

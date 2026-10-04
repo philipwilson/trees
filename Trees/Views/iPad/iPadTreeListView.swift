@@ -112,7 +112,7 @@ struct iPadTreeListView: View {
                         Button {
                             showingAbout = true
                         } label: {
-                            Label("About Tree Tracker", systemImage: "info.circle")
+                            Label("Settings & About", systemImage: "gearshape")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
