@@ -97,6 +97,23 @@ struct ImportTreesView: View {
         }
     }
 
+    /// Says what happened to the photos, including any that will not arrive,
+    /// so the import never claims more than it did.
+    static func photoQueueSummary(_ outcome: PendingPhotoImportQueue.EnqueueResult) -> String {
+        func photos(_ count: Int) -> String { "\(count) photo\(count == 1 ? "" : "s")" }
+        var text = ""
+        if outcome.queued > 0 {
+            text += " Adding \(photos(outcome.queued)) in the background; if the app closes first, they continue next time it opens."
+        }
+        if outcome.failed > 0 {
+            text += " \(photos(outcome.failed)) could not be stored on this device and \(outcome.failed == 1 ? "was" : "were") not imported. Free up space and import the file again."
+        }
+        if outcome.unreadable > 0 {
+            text += " \(photos(outcome.unreadable)) in the file \(outcome.unreadable == 1 ? "was" : "were") damaged and could not be read."
+        }
+        return text
+    }
+
     private func handleFileImport(_ result: Result<[URL], Error>) {
         switch result {
         case .success(let urls):
@@ -184,12 +201,10 @@ struct ImportTreesView: View {
             loadingMessage = "Preparing photos..."
             isLoading = true
             Task {
-                let queuedCount = await queue.enqueue(deferredPhotos)
+                let outcome = await queue.enqueue(deferredPhotos)
                 isLoading = false
                 var message = "Imported \(messageParts.joined(separator: ", "))."
-                if queuedCount > 0 {
-                    message += " Adding \(queuedCount) photo\(queuedCount == 1 ? "" : "s") in the background; if the app closes first, they continue next time it opens."
-                }
+                message += Self.photoQueueSummary(outcome)
                 importResult = ImportResult(success: true, message: message)
                 showingResult = true
             }
