@@ -121,7 +121,7 @@ struct iPadMapView: View {
                         Button {
                             showingOfflineTip = true
                         } label: {
-                            Label("Offline Maps", systemImage: "arrow.down.circle")
+                            Label("Using the Map Offline", systemImage: "wifi.slash")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
@@ -160,10 +160,10 @@ struct iPadMapView: View {
                     // Superseded by a newer keystroke
                 }
             }
-            .alert("Offline Maps", isPresented: $showingOfflineTip) {
+            .alert("Using the Map Offline", isPresented: $showingOfflineTip) {
                 Button("OK") {}
             } message: {
-                Text("To use maps without signal, download your area for offline use in Apple Maps.\n\nOpen Apple Maps → tap your profile → Offline Maps → Download New Map.")
+                Text("Capturing trees works with no signal: positions come from GPS and everything is saved on this device.\n\nThe map background needs a connection. Areas you viewed recently may still appear, but that isn't guaranteed, and maps downloaded in the Apple Maps app aren't available to other apps.")
             }
         }
     }

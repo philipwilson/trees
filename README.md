@@ -11,10 +11,10 @@ An iOS app for capturing precise GPS locations of trees. Built for orchardists, 
 - **Collections** - Organize trees into named groups (e.g., "Victoria's Orchard", "Street Trees Survey").
 - **Map View** - See all trees on an interactive map with toggleable species/variety labels.
 - **Export** - Share data in CSV (spreadsheets), JSON (backup/interchange), or GPX (GPS apps).
-- **Import** - Restore collections from JSON exports.
+- **Import** - Restore from JSON exports, or bring in trees from a CSV file with latitude and longitude columns.
 - **Apple Watch App** - Quick tree capture from your wrist with GPS accuracy display and species selection.
 - **Watch Complication** - Add Tree Tracker to your watch face for one-tap access to capture trees.
-- **Fully Offline** - All data stored locally. No account or internet required.
+- **Works Offline** - Trees are captured by GPS and stored on your device; no account or signal is needed. Map backgrounds and iCloud sync need a connection.
 
 ## Screenshots
 

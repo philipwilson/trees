@@ -11,6 +11,7 @@ struct iPadTreeListView: View {
     /// tree's notes) doesn't run on each keystroke
     @State private var activeSearchText = ""
     @State private var pendingDeletion = PendingDeletion<Tree>()
+    @State private var showingAbout = false
     @Query(sort: \Collection.name) private var collections: [Collection]
     @State private var filter = TreeFilter()
     @AppStorage("treeSortOrder") private var sortOrder: TreeSortOrder = .newest
@@ -81,6 +82,9 @@ struct iPadTreeListView: View {
                 modelContext.delete(tree)
             }
         }
+        .sheet(isPresented: $showingAbout) {
+            AboutView()
+        }
         .navigationTitle("Trees")
         .toolbar {
             if !photoViewerState.isPresented {
@@ -103,6 +107,12 @@ struct iPadTreeListView: View {
                             } label: {
                                 Label("Find Duplicates", systemImage: "doc.on.doc")
                             }
+                        }
+                        Divider()
+                        Button {
+                            showingAbout = true
+                        } label: {
+                            Label("About Tree Tracker", systemImage: "info.circle")
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")

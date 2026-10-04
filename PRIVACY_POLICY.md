@@ -1,6 +1,6 @@
 # Privacy Policy for Tree Tracker
 
-**Last updated: March 7, 2026**
+**Last updated: October 4, 2026**
 
 ## Overview
 
@@ -21,7 +21,7 @@ Tree Tracker ("the App") is designed to help you record and track the locations 
 - The App does **not** collect analytics, crash reports, or usage statistics
 - The App does **not** display advertising or share data with advertisers
 - The App does **not** collect your name, email address, or any account information
-- The App does **not** transmit your data to any third-party servers
+- The App does **not** send your data to the developer or to any third party. The only services involved are Apple's, as described below (iCloud for syncing and Apple Maps for the map)
 
 ## How Your Data Is Used
 
@@ -38,23 +38,27 @@ All tree records, photos, and notes are stored locally on your device using Appl
 ### iCloud Sync
 If you are signed into iCloud, your data is synced across your devices using Apple's CloudKit service. This data is stored in your private iCloud account and is not accessible to the developer or any third party. You can disable iCloud sync in your device's Settings.
 
+### Apple Maps
+The map is provided by Apple's MapKit. To draw the map, your device requests map imagery for the area being displayed from Apple, and showing your position on the map uses your device's location. Choosing "Get Directions" opens the Apple Maps app with that tree's coordinates. Apple's handling of this is covered by Apple's privacy policy; the developer receives none of it.
+
 ### Apple Watch
 If you use the companion watchOS app, tree data captured on your watch is transferred to your iPhone via Apple's WatchConnectivity framework. This transfer happens directly between your devices.
 
 ## Data Sharing
 
-Your data is never shared with third parties. The only ways data leaves the App are:
+Your data is never shared with the developer, advertisers, or data brokers. The only ways data leaves your device are:
 - **Export**: When you explicitly choose to export your data as CSV, JSON, or GPX files
-- **iCloud Sync**: Between your own devices via your private iCloud account
+- **iCloud Sync**: To your private iCloud account, and from there to your other devices
 - **Watch Sync**: Between your Apple Watch and iPhone
+- **Apple Maps**: Map requests for the area you are viewing, and tree coordinates when you ask for directions
 
 ## Camera and Photo Library
 
-The App requests access to your camera and photo library solely to let you attach photos to tree records. Photos are stored within the App's data and are not uploaded to any external service.
+The App requests access to your camera and photo library solely to let you attach photos to tree records. Photos are stored within the App's data on your device. If iCloud sync is on, they are also stored in your private iCloud account, as described above. They are not sent anywhere else.
 
 ## Location Data
 
-The App requests location access solely to record GPS coordinates when you capture a tree. Location data is stored only within your tree records and is not transmitted to any external service. You can revoke location access at any time in your device's Settings.
+The App requests location access solely to record GPS coordinates when you capture a tree. Location data is stored only within your tree records. If iCloud sync is on, those records are stored in your private iCloud account, as described above. Your location is not sent to the developer or any third party. You can revoke location access, or turn off Precise Location, at any time in your device's Settings; the App needs precise location to record a tree accurately.
 
 ## Data Retention and Deletion
 

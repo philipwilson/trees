@@ -14,6 +14,7 @@ struct TreeListView: View {
     @State private var showingExportSheet = false
     @State private var showingImportSheet = false
     @State private var showingDuplicatesSheet = false
+    @State private var showingAbout = false
     @State private var pendingDeletion = PendingDeletion<Tree>()
     @State private var filter = TreeFilter()
     @AppStorage("treeSortOrder") private var sortOrder: TreeSortOrder = .newest
@@ -83,6 +84,12 @@ struct TreeListView: View {
                                     Label("Find Duplicates", systemImage: "doc.on.doc")
                                 }
                             }
+                            Divider()
+                            Button {
+                                showingAbout = true
+                            } label: {
+                                Label("About Tree Tracker", systemImage: "info.circle")
+                            }
                         } label: {
                             Image(systemName: "ellipsis.circle")
                                 .accessibilityLabel("More")
@@ -122,6 +129,9 @@ struct TreeListView: View {
             }
             .sheet(isPresented: $showingDuplicatesSheet) {
                 DuplicateTreesView()
+            }
+            .sheet(isPresented: $showingAbout) {
+                AboutView()
             }
             .deleteConfirmation(
                 $pendingDeletion,

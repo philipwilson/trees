@@ -130,3 +130,16 @@ final class SyncStateTests: XCTestCase {
         XCTAssertNil(center.current)
     }
 }
+
+final class AboutTests: XCTestCase {
+    func testPublicLinksPointAtTheProjectPages() {
+        XCTAssertEqual(AppLinks.privacyPolicy.scheme, "https")
+        XCTAssertTrue(AppLinks.privacyPolicy.absoluteString.hasSuffix("PRIVACY_POLICY.md"))
+        XCTAssertEqual(AppLinks.support.scheme, "https")
+    }
+
+    func testVersionTextHasVersionAndBuild() {
+        let text = AboutView.versionText
+        XCTAssertTrue(text.range(of: #"^\d+\.\d+(\.\d+)? \(.+\)$"#, options: .regularExpression) != nil, text)
+    }
+}

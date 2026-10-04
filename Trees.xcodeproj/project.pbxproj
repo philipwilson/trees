@@ -51,6 +51,7 @@
 		706732CB57140F2201A8D395 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = C73D6F74D4C09FFF51C58226 /* PrivacyInfo.xcprivacy */; };
 		715C88077FB6AFD97487ECD3 /* MapClusterer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9B81410FBE0873884BDD019E /* MapClusterer.swift */; };
 		777CAA964A438818A81B83E5 /* iPadContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD413525F9C7B61836CA443B /* iPadContentView.swift */; };
+		77F0C209799B9D15F1C8A44E /* AboutView.swift in Sources */ = {isa = PBXBuildFile; fileRef = DC6485D13B89C4481B3740B2 /* AboutView.swift */; };
 		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
 		7F7AB1938A6739C379B587C7 /* TreeFilterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = CC77885A9F5572569C4CCD50 /* TreeFilterTests.swift */; };
 		83047D0C956AAF947F5F864B /* LocationProblemNotice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 272AF99F8979CDF3C824E7E0 /* LocationProblemNotice.swift */; };
@@ -216,6 +217,7 @@
 		D55967246F76EEBC3747DEB7 /* ImageDownsampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDownsampler.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		D766ECC0499426D602D0F8C0 /* WatchTreeImporterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchTreeImporterTests.swift; sourceTree = "<group>"; };
+		DC6485D13B89C4481B3740B2 /* AboutView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AboutView.swift; sourceTree = "<group>"; };
 		DE76365F8AFD79DA86E9B50B /* iPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSidebarView.swift; sourceTree = "<group>"; };
 		DE765DFD9B91970C3D79C7FC /* PendingPhotoImportQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingPhotoImportQueue.swift; sourceTree = "<group>"; };
 		DEA89460FC189E7CEBC3771C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
@@ -240,6 +242,7 @@
 		0665D2684998AB7EC0A8E32E /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				DC6485D13B89C4481B3740B2 /* AboutView.swift */,
 				52DE749FADD0EB13A46F2E7A /* CaptureTreeView.swift */,
 				9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */,
 				6DDE1784DB8250757C69B763 /* CollectionListView.swift */,
@@ -721,6 +724,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				77F0C209799B9D15F1C8A44E /* AboutView.swift in Sources */,
 				9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */,
 				F0ECD25D6291205F476B22B1 /* CSVExporter.swift in Sources */,
 				9C38A07823A17B1568CD6D01 /* CSVTreeParser.swift in Sources */,
