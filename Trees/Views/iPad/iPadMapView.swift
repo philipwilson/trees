@@ -54,6 +54,7 @@ struct iPadMapView: View {
                         }
                     } label: {
                         Image(systemName: showingTreeList ? "sidebar.right" : "sidebar.left")
+                            .accessibilityLabel(showingTreeList ? "Hide Tree List" : "Show Tree List")
                             .font(.title3)
                             .padding(12)
                             .background(.regularMaterial)
@@ -64,6 +65,7 @@ struct iPadMapView: View {
                         centerOnUser()
                     } label: {
                         Image(systemName: "location.fill")
+                            .accessibilityLabel("Center on My Location")
                             .font(.title3)
                             .padding(12)
                             .background(.regularMaterial)
@@ -74,6 +76,7 @@ struct iPadMapView: View {
                         showingCaptureSheet = true
                     } label: {
                         Image(systemName: "plus")
+                            .accessibilityLabel("Capture Tree")
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundStyle(.white)
@@ -122,6 +125,7 @@ struct iPadMapView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .accessibilityLabel("Map Options")
                     }
                 }
             }
@@ -179,6 +183,7 @@ struct iPadMapView: View {
                         searchText = ""
                     } label: {
                         Image(systemName: "xmark.circle.fill")
+                            .accessibilityLabel("Clear Search")
                             .foregroundStyle(.secondary)
                     }
                 }
@@ -204,6 +209,7 @@ struct iPadMapView: View {
                             HStack(spacing: 12) {
                                 if let firstPhoto = tree.treePhotos.first {
                                     PhotoThumbnail(photo: firstPhoto, maxDimension: 40)
+                                        .accessibilityHidden(true)
                                         .frame(width: 40, height: 40)
                                         .clipShape(RoundedRectangle(cornerRadius: 6))
                                 } else {

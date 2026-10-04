@@ -52,6 +52,8 @@ struct TreeRowView: View {
                             .font(.caption2)
                     }
                     .foregroundStyle(.secondary)
+                    .accessibilityElement(children: .ignore)
+                    .accessibilityLabel("\(tree.treePhotos.count) photo\(tree.treePhotos.count == 1 ? "" : "s")")
                 }
             }
         }

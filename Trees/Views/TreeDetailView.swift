@@ -201,6 +201,7 @@ struct TreeDetailView: View {
                         showingDeleteConfirmation = true
                     } label: {
                         Image(systemName: "trash")
+                            .accessibilityLabel("Delete Tree")
                     }
                 }
             }
@@ -322,6 +323,7 @@ struct NoteRowView: View {
                     Label("\(note.notePhotos.count)", systemImage: "photo")
                         .font(.caption)
                         .foregroundStyle(.secondary)
+                        .accessibilityLabel("\(note.notePhotos.count) photo\(note.notePhotos.count == 1 ? "" : "s")")
                 }
             }
 
@@ -340,6 +342,9 @@ struct NoteRowView: View {
                                 .onTapGesture {
                                     viewerRequest = PhotoViewerRequest(id: photo.id)
                                 }
+                                .accessibilityLabel("Note photo")
+                                .accessibilityHint("Opens the photo full screen")
+                                .accessibilityAddTraits(.isButton)
                         }
                     }
                 }

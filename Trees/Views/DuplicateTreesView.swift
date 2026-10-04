@@ -63,6 +63,7 @@ struct DuplicateTreesView: View {
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
+                                .accessibilityLabel("Selection Options")
                         }
                     }
                 }
@@ -111,6 +112,8 @@ struct DuplicateTreesView: View {
                             .foregroundStyle(selectedForDeletion.contains(tree.persistentModelID) ? .red : .secondary)
                     }
                     .buttonStyle(.plain)
+                    .accessibilityLabel(selectedForDeletion.contains(tree.persistentModelID) ? "Selected for deletion" : "Not selected")
+                    .accessibilityHint("Toggles whether this copy will be deleted")
 
                     VStack(alignment: .leading, spacing: 4) {
                         Text(tree.species.isEmpty ? "Unknown Species" : tree.species)
@@ -132,6 +135,7 @@ struct DuplicateTreesView: View {
 
                     if let photo = tree.treePhotos.first {
                         PhotoThumbnail(photo: photo, maxDimension: 50)
+                            .accessibilityHidden(true)
                             .frame(width: 50, height: 50)
                             .clipShape(RoundedRectangle(cornerRadius: 6))
                     }

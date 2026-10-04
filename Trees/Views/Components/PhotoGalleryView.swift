@@ -49,6 +49,11 @@ struct PhotoGalleryView: View {
                             .onTapGesture {
                                 viewerRequest = PhotoViewerRequest(id: photo.id)
                             }
+                            .accessibilityLabel(photo.captureDate.map {
+                                "Photo, \($0.formatted(date: .abbreviated, time: .omitted))"
+                            } ?? "Photo")
+                            .accessibilityHint("Opens the photo full screen")
+                            .accessibilityAddTraits(.isButton)
 
                         if let captureDate = photo.captureDate {
                             Text(captureDate.formatted(date: .abbreviated, time: .omitted))
@@ -268,6 +273,7 @@ struct EditablePhotoGalleryView: View {
                             capturedPhotos.removeAll { $0.id == photo.id }
                         } label: {
                             Image(systemName: "xmark.circle.fill")
+                                .accessibilityLabel("Remove Photo")
                                 .font(.title3)
                                 .foregroundStyle(.white, .red)
                         }

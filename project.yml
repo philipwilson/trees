@@ -44,7 +44,6 @@ targets:
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
         NSLocationWhenInUseUsageDescription: Tree Tracker needs your location to record precise GPS coordinates of trees you capture.
-        NSLocationAlwaysAndWhenInUseUsageDescription: Tree Tracker needs your location to record precise GPS coordinates of trees you capture.
         NSCameraUsageDescription: Tree Tracker uses the camera to take photos of trees for identification.
         NSPhotoLibraryUsageDescription: Tree Tracker needs access to your photos to attach existing images to tree records.
         UIBackgroundModes:
@@ -100,8 +99,6 @@ targets:
         WKCompanionAppBundleIdentifier: com.treetracker.Trees
         WKRunsIndependentlyOfCompanionApp: true
         NSLocationWhenInUseUsageDescription: Tree Tracker needs your location to record GPS coordinates of trees.
-        NSMicrophoneUsageDescription: Tree Tracker uses the microphone for voice dictation of species names.
-        NSSpeechRecognitionUsageDescription: Tree Tracker uses speech recognition to convert your voice to text for species names.
     settings:
       base:
         INFOPLIST_FILE: TreesWatch/Info.plist

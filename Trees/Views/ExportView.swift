@@ -100,6 +100,7 @@ struct ExportView: View {
                         } label: {
                             HStack {
                                 Image(systemName: format.icon)
+                                    .accessibilityHidden(true)
                                     .frame(width: 24)
                                     .foregroundStyle(.primary)
                                 VStack(alignment: .leading) {
@@ -113,9 +114,11 @@ struct ExportView: View {
                                 if selectedFormat == format {
                                     Image(systemName: "checkmark")
                                         .foregroundStyle(.blue)
+                                        .accessibilityHidden(true)
                                 }
                             }
                         }
+                        .accessibilityAddTraits(selectedFormat == format ? .isSelected : [])
                     }
                 } header: {
                     Text("Format")

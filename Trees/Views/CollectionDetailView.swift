@@ -70,6 +70,7 @@ struct CollectionDetailView: View {
                             showingAddTreesSheet = true
                         } label: {
                             Image(systemName: "plus.circle")
+                                .accessibilityLabel("Add Existing Trees")
                         }
                     }
                 }
@@ -158,6 +159,7 @@ struct CollectionDetailView: View {
                     .disabled(unassignedTrees.isEmpty)
                 } label: {
                     Image(systemName: "ellipsis.circle")
+                        .accessibilityLabel("Collection Options")
                 }
             }
         }

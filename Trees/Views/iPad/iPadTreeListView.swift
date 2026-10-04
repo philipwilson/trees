@@ -106,6 +106,7 @@ struct iPadTreeListView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .accessibilityLabel("More")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {

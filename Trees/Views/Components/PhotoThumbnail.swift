@@ -35,6 +35,9 @@ struct PhotoThumbnail: View {
                 Color.secondary.opacity(0.15)
             }
         }
+        .accessibilityElement()
+        .accessibilityLabel("Photo")
+        .accessibilityAddTraits(.isImage)
         .task(id: id) {
             loaded = nil
             guard ImageDownsampler.cachedThumbnail(id: id, maxDimension: maxDimension) == nil else { return }

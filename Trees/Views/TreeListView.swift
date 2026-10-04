@@ -85,6 +85,7 @@ struct TreeListView: View {
                             }
                         } label: {
                             Image(systemName: "ellipsis.circle")
+                                .accessibilityLabel("More")
                         }
                     }
                     ToolbarItem(placement: .topBarLeading) {
@@ -105,6 +106,7 @@ struct TreeListView: View {
                             showingCaptureSheet = true
                         } label: {
                             Image(systemName: "plus")
+                                .accessibilityLabel("Capture Tree")
                         }
                     }
                 }

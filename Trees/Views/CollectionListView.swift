@@ -36,6 +36,7 @@ struct CollectionListView: View {
                         showingImportSheet = true
                     } label: {
                         Image(systemName: "square.and.arrow.down")
+                            .accessibilityLabel("Import Collection")
                     }
                 }
                 ToolbarItem(placement: .topBarTrailing) {
@@ -44,6 +45,7 @@ struct CollectionListView: View {
                         showingNewCollectionSheet = true
                     } label: {
                         Image(systemName: "plus")
+                            .accessibilityLabel("New Collection")
                     }
                 }
             }
@@ -94,6 +96,7 @@ struct CollectionRowView: View {
             Image(systemName: "folder.fill")
                 .foregroundStyle(.orange)
                 .font(.title2)
+                .accessibilityHidden(true)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(collection.name)

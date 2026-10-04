@@ -33,6 +33,7 @@ struct TreeMapView: View {
                         centerOnUser()
                     } label: {
                         Image(systemName: "location.fill")
+                            .accessibilityLabel("Center on My Location")
                             .font(.title3)
                             .padding(12)
                             .background(.regularMaterial)
@@ -43,6 +44,7 @@ struct TreeMapView: View {
                         showingCaptureSheet = true
                     } label: {
                         Image(systemName: "plus")
+                            .accessibilityLabel("Capture Tree")
                             .font(.title2)
                             .fontWeight(.semibold)
                             .foregroundStyle(.white)
@@ -88,6 +90,7 @@ struct TreeMapView: View {
                         }
                     } label: {
                         Image(systemName: "ellipsis.circle")
+                            .accessibilityLabel("Map Options")
                     }
                 }
             }
