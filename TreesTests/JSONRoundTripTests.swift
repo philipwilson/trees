@@ -296,6 +296,84 @@ final class JSONRoundTripTests: XCTestCase {
         XCTAssertEqual(treePhoto.captureDate, ImportDateParser.date(from: "2026-01-02T03:04:05Z"))
     }
 
+    /// The photo export path streams JSON to a file by hand rather than through
+    /// JSONEncoder for the whole document, so it needs its own round trip: the
+    /// file must be valid JSON and import back to the same data.
+    func testStreamedPhotoExportFileRoundTrips() throws {
+        let sourceContainer = try makeContainer()
+        let sourceContext = sourceContainer.mainContext
+
+        let collection = Collection(name: "Orchard, \"North\"")
+        sourceContext.insert(collection)
+
+        let apple = Tree(latitude: 51.5, longitude: -0.12, horizontalAccuracy: 4.2, species: "Apple")
+        sourceContext.insert(apple)
+        apple.collection = collection
+        apple.addPhoto(treePhotoData, capturedAt: Date(timeIntervalSince1970: 1_700_001_000))
+        let note = apple.addNote(text: "Line one\nLine \"two\"", photos: [notePhotoData])
+
+        // No photos or notes: exercises the separator between trees
+        let pear = Tree(latitude: 50.0, longitude: 1.0, horizontalAccuracy: 9.0, species: "Pear")
+        sourceContext.insert(pear)
+        let plum = Tree(latitude: 49.0, longitude: 2.0, horizontalAccuracy: 3.0, species: "Plum")
+        sourceContext.insert(plum)
+        plum.addPhoto(Data([0xFF, 0xD8, 0x09]), capturedAt: nil)
+        try sourceContext.save()
+
+        let url = try XCTUnwrap(JSONExporter.exportToFile(
+            trees: [apple, pear, plum], collections: [collection], includePhotos: true, filePrefix: "roundtrip-test"
+        ))
+        defer { try? FileManager.default.removeItem(at: url) }
+        XCTAssertEqual(url.pathExtension, "json")
+
+        let data = try Data(contentsOf: url)
+        XCTAssertNoThrow(try JSONSerialization.jsonObject(with: data), "streamed export is not valid JSON")
+        let archive = try XCTUnwrap(TreeImportService.decode(data))
+        XCTAssertEqual(archive.version, JSONExporter.formatVersion)
+        XCTAssertEqual(archive.trees.count, 3)
+
+        let destContainer = try makeContainer()
+        let destContext = destContainer.mainContext
+        let summary = try TreeImportService(modelContext: destContext).importArchive(archive, photoHandling: .immediate)
+        XCTAssertEqual(summary.importedCount, 3)
+        XCTAssertEqual(summary.collectionsCreated, 1)
+        XCTAssertEqual(summary.photoCount, 3)
+
+        let imported = try destContext.fetch(FetchDescriptor<Tree>())
+        let importedApple = try XCTUnwrap(imported.first { $0.id == apple.id })
+        XCTAssertEqual(importedApple.collection?.name, "Orchard, \"North\"")
+        XCTAssertEqual(importedApple.treePhotos.map(\.imageData), [treePhotoData])
+        XCTAssertEqual(importedApple.treeNotes.map(\.text), [note.text])
+        XCTAssertEqual(importedApple.treeNotes.first?.notePhotos.map(\.imageData), [notePhotoData])
+
+        let importedPear = try XCTUnwrap(imported.first { $0.id == pear.id })
+        XCTAssertNil(importedPear.collection)
+        XCTAssertTrue(importedPear.allPhotos.isEmpty)
+
+        let importedPlum = try XCTUnwrap(imported.first { $0.id == plum.id })
+        XCTAssertEqual(importedPlum.treePhotos.map(\.imageData), [Data([0xFF, 0xD8, 0x09])])
+        XCTAssertNil(importedPlum.treePhotos.first?.captureDate)
+    }
+
+    /// With photos off, the file export takes the non-streaming path and must
+    /// carry no image data.
+    func testFileExportWithoutPhotosOmitsImageData() throws {
+        let container = try makeContainer()
+        let context = container.mainContext
+        let tree = Tree(latitude: 51.5, longitude: -0.12, horizontalAccuracy: 4.2, species: "Apple")
+        context.insert(tree)
+        tree.addPhoto(treePhotoData)
+        try context.save()
+
+        let url = try XCTUnwrap(JSONExporter.exportToFile(trees: [tree], includePhotos: false, filePrefix: "roundtrip-test"))
+        defer { try? FileManager.default.removeItem(at: url) }
+
+        let archive = try XCTUnwrap(TreeImportService.decode(try Data(contentsOf: url)))
+        XCTAssertEqual(archive.trees.count, 1)
+        XCTAssertNil(archive.trees[0].treePhotos)
+        XCTAssertNil(archive.trees[0].photos)
+    }
+
     /// Invalid coordinates are skipped, not imported.
     func testInvalidCoordinatesSkipped() throws {
         let json = """

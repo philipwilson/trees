@@ -1,0 +1,42 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  unit-tests:
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The build-number script counts commits, so it needs full history
+          fetch-depth: 0
+
+      - name: Show Xcode version
+        run: xcodebuild -version
+
+      # Trees.xcodeproj is checked in, so xcodegen is not needed here.
+      # Simulator builds are signed to run locally and need no team credentials.
+      - name: Build and test
+        run: |
+          set -o pipefail
+          xcodebuild test \
+            -project Trees.xcodeproj \
+            -scheme Trees \
+            -destination 'platform=iOS Simulator,name=iPhone 17' \
+            -resultBundlePath TestResults.xcresult \
+            | grep -E --line-buffered "error:|warning: |Test Suite|Test Case.*(failed|passed)|Executed|\*\* TEST|\*\* BUILD"
+
+      - name: Upload test results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: TestResults
+          path: TestResults.xcresult
