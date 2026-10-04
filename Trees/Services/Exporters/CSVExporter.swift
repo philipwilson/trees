@@ -19,7 +19,8 @@ struct CSVExporter {
                 tree.id.uuidString,
                 String(tree.latitude),
                 String(tree.longitude),
-                String(tree.horizontalAccuracy),
+                // Blank rather than 0 when unknown, so it re-imports as unknown
+                tree.hasKnownAccuracy ? String(tree.horizontalAccuracy) : "",
                 altitudeStr,
                 speciesEscaped,
                 varietyEscaped,

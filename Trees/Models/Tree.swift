@@ -50,8 +50,17 @@ class Tree {
 }
 
 extension Tree {
+    /// Stored as `horizontalAccuracy` when the accuracy of a position isn't
+    /// known (e.g. imported from a spreadsheet). A real GPS fix is always
+    /// greater than zero.
+    static let unknownAccuracy: Double = 0
+
+    var hasKnownAccuracy: Bool {
+        horizontalAccuracy > 0
+    }
+
     var accuracyDescription: String {
-        String(format: "%.1fm", horizontalAccuracy)
+        hasKnownAccuracy ? String(format: "%.1fm", horizontalAccuracy) : "Unknown"
     }
 
     var coordinateString: String {

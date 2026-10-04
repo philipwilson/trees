@@ -29,9 +29,9 @@ enum CSVTreeParser {
     }
 
     /// Returns nil if the data isn't text, or has no latitude and longitude
-    /// columns. Rows whose coordinates can't be read are kept with an
+    /// columns. Rows where either coordinate can't be read are kept with an
     /// out-of-range latitude, so the import counts them as skipped instead
-    /// of dropping them silently.
+    /// of dropping them silently or placing them somewhere wrong.
     static func archive(from data: Data) -> ImportedArchive? {
         guard var text = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .isoLatin1) else {
             return nil
@@ -69,11 +69,19 @@ enum CSVTreeParser {
                 return Double(value)
             }
 
+            // Both coordinates must be readable. Substituting a default for
+            // either would save the tree at a real but wrong place.
+            let latitude = number(.latitude)
+            let longitude = number(.longitude)
+            let hasPosition = latitude != nil && longitude != nil
+
             return ImportedTreeRecord(
                 id: field(.id),
-                latitude: number(.latitude) ?? Self.invalidLatitude,
-                longitude: number(.longitude) ?? 0,
-                horizontalAccuracy: max(number(.accuracy) ?? 0, 0),
+                latitude: hasPosition ? latitude ?? Self.invalidLatitude : Self.invalidLatitude,
+                longitude: longitude ?? 0,
+                // A spreadsheet rarely records accuracy; store "unknown"
+                // rather than a figure that reads as a perfect fix.
+                horizontalAccuracy: number(.accuracy).flatMap { $0 > 0 ? $0 : nil } ?? Tree.unknownAccuracy,
                 altitude: number(.altitude),
                 species: field(.species) ?? "",
                 variety: field(.variety),

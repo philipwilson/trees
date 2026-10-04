@@ -42,6 +42,8 @@ enum TreeSortOrder: String, CaseIterable, Identifiable {
             }
         case .accuracy:
             return trees.sorted { lhs, rhs in
+                // Unknown accuracy is stored as zero but is not "most accurate"
+                if lhs.hasKnownAccuracy != rhs.hasKnownAccuracy { return lhs.hasKnownAccuracy }
                 if lhs.horizontalAccuracy != rhs.horizontalAccuracy {
                     return lhs.horizontalAccuracy < rhs.horizontalAccuracy
                 }

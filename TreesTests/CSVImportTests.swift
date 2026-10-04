@@ -84,7 +84,7 @@ final class CSVImportTests: XCTestCase {
         XCTAssertEqual(archive.trees[0].species, "Oak")
         XCTAssertNil(archive.trees[0].variety)
         XCTAssertNil(archive.trees[0].id)
-        XCTAssertEqual(archive.trees[0].horizontalAccuracy, 0)
+        XCTAssertEqual(archive.trees[0].horizontalAccuracy, Tree.unknownAccuracy)
         XCTAssertEqual(archive.trees[1].variety, "Conference")
         XCTAssertEqual(archive.trees[1].latitude, 50.5)
 
@@ -107,17 +107,64 @@ final class CSVImportTests: XCTestCase {
     }
 
     func testRowsWithUnreadableCoordinatesAreReportedAsSkipped() throws {
-        let csv = "species,latitude,longitude\nGood,51.0,-1.0\nNoLat,,-1.0\nText,north,west\nShort\n"
+        let csv = """
+        species,latitude,longitude
+        Good,51.0,-1.0
+        NoLat,,-1.0
+        NoLon,51.5,
+        BadLon,51.5,invalid
+        Text,north,west
+        Short
+        """
         let archive = try XCTUnwrap(TreeImportService.decode(Data(csv.utf8)))
-        XCTAssertEqual(archive.trees.count, 4)
+        XCTAssertEqual(archive.trees.count, 6)
 
         let container = try makeContainer()
         let context = container.mainContext
         let summary = try TreeImportService(modelContext: context).importArchive(archive, photoHandling: .none)
 
         XCTAssertEqual(summary.importedCount, 1)
-        XCTAssertEqual(summary.skippedCount, 3)
-        XCTAssertEqual(try context.fetch(FetchDescriptor<Tree>()).map(\.species), ["Good"])
+        XCTAssertEqual(summary.skippedCount, 5)
+        let imported = try context.fetch(FetchDescriptor<Tree>())
+        XCTAssertEqual(imported.map(\.species), ["Good"])
+        XCTAssertFalse(imported.contains { $0.longitude == 0 }, "an unreadable longitude must never become 0")
+    }
+
+    /// A position on the equator or prime meridian is legitimate when the
+    /// file actually says so.
+    func testExplicitZeroCoordinatesAreAccepted() throws {
+        let csv = "species,latitude,longitude\nGreenwich,51.4779,0\nEquator,0.0,36.9\n"
+        let archive = try XCTUnwrap(CSVTreeParser.archive(from: Data(csv.utf8)))
+        let container = try makeContainer()
+        let summary = try TreeImportService(modelContext: container.mainContext).importArchive(archive, photoHandling: .none)
+
+        XCTAssertEqual(summary.importedCount, 2)
+        XCTAssertEqual(summary.skippedCount, 0)
+    }
+
+    func testMissingOrZeroAccuracyIsUnknownNotPerfect() throws {
+        let csv = "species,latitude,longitude,accuracy\nNone,51.0,-1.0,\nZero,51.0,-1.0,0\nNegative,51.0,-1.0,-1\nReal,51.0,-1.0,4.5\n"
+        let archive = try XCTUnwrap(CSVTreeParser.archive(from: Data(csv.utf8)))
+        XCTAssertEqual(archive.trees.map(\.horizontalAccuracy), [0, 0, 0, 4.5])
+
+        let container = try makeContainer()
+        let context = container.mainContext
+        _ = try TreeImportService(modelContext: context).importArchive(archive, photoHandling: .none)
+        let trees = try context.fetch(FetchDescriptor<Tree>())
+        let unknown = try XCTUnwrap(trees.first { $0.species == "None" })
+        let real = try XCTUnwrap(trees.first { $0.species == "Real" })
+
+        XCTAssertFalse(unknown.hasKnownAccuracy)
+        XCTAssertEqual(unknown.accuracyDescription, "Unknown")
+        XCTAssertTrue(real.hasKnownAccuracy)
+        XCTAssertEqual(real.accuracyDescription, "4.5m")
+
+        // Unknown sorts after every known accuracy, and exports as blank
+        XCTAssertEqual(TreeSortOrder.accuracy.sorted(trees).first?.species, "Real")
+        let exported = CSVExporter.export(trees: [unknown])
+        let reimported = try XCTUnwrap(CSVTreeParser.archive(from: Data(exported.utf8)))
+        XCTAssertEqual(reimported.trees.first?.horizontalAccuracy, Tree.unknownAccuracy)
+        XCTAssertFalse(exported.contains(",0.0,"))
     }
 
     func testFilesWithoutCoordinateColumnsAreRejected() {

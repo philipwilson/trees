@@ -3,8 +3,15 @@ import SwiftUI
 struct AccuracyBadge: View {
     let accuracy: Double
 
+    /// Zero or less means the accuracy was never recorded
+    private var isUnknown: Bool {
+        accuracy <= 0
+    }
+
     private var color: Color {
-        if accuracy < 5 {
+        if isUnknown {
+            return .gray
+        } else if accuracy < 5 {
             return .green
         } else if accuracy < 15 {
             return .yellow
@@ -14,11 +21,13 @@ struct AccuracyBadge: View {
     }
 
     private var label: String {
-        String(format: "%.1fm", accuracy)
+        isUnknown ? "Unknown" : String(format: "%.1fm", accuracy)
     }
 
     private var qualityDescription: String {
-        if accuracy < 5 {
+        if isUnknown {
+            return "not recorded"
+        } else if accuracy < 5 {
             return "excellent"
         } else if accuracy < 15 {
             return "moderate"
