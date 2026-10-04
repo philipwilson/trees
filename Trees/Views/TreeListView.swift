@@ -87,6 +87,9 @@ struct TreeListView: View {
                             Image(systemName: "ellipsis.circle")
                         }
                     }
+                    ToolbarItem(placement: .topBarLeading) {
+                        SyncStatusButton()
+                    }
                     ToolbarItem(placement: .topBarTrailing) {
                         if !trees.isEmpty {
                             TreeFilterMenu(

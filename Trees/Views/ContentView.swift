@@ -1,9 +1,14 @@
 import SwiftUI
+import SwiftData
 
 struct ContentView: View {
     var isCloudSyncActive = true
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
     @Environment(PendingPhotoImportQueue.self) private var photoImportQueue: PendingPhotoImportQueue?
+    @Environment(NoticeCenter.self) private var noticeCenter: NoticeCenter?
+    @Environment(\.modelContext) private var modelContext
+    @AppStorage("hasSeenWelcome") private var hasSeenWelcome = false
+    @State private var showingWelcome = false
     @State private var showingSyncWarning = false
 
     var body: some View {
@@ -15,18 +20,32 @@ struct ContentView: View {
             }
         }
         .overlay(alignment: .top) {
-            if let queue = photoImportQueue, queue.isRunning {
-                Label("Adding photos \(queue.completedCount)/\(queue.totalCount)", systemImage: "photo.on.rectangle")
-                    .font(.caption)
-                    .monospacedDigit()
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 6)
-                    .background(.regularMaterial, in: Capsule())
-                    .padding(.top, 4)
-                    .transition(.opacity)
+            VStack(spacing: 6) {
+                if let queue = photoImportQueue, queue.isRunning {
+                    Label("Adding photos \(queue.completedCount)/\(queue.totalCount)", systemImage: "photo.on.rectangle")
+                        .monospacedDigit()
+                        .statusCapsule()
+                }
+                if let notice = noticeCenter?.current {
+                    Label(notice.text, systemImage: notice.systemImage)
+                        .statusCapsule()
+                        .onTapGesture {
+                            noticeCenter?.dismiss()
+                        }
+                }
             }
+            .padding(.top, 4)
         }
         .animation(.default, value: photoImportQueue?.isRunning)
+        .animation(.default, value: noticeCenter?.current)
+        .sheet(isPresented: $showingWelcome, onDismiss: {
+            // Held back so the alert doesn't fight the welcome sheet
+            if !isCloudSyncActive {
+                showingSyncWarning = true
+            }
+        }) {
+            WelcomeView()
+        }
         .alert("Photo Import Incomplete", isPresented: Binding(
             get: { photoImportQueue?.failureMessage != nil },
             set: { if !$0 { photoImportQueue?.failureMessage = nil } }
@@ -36,7 +55,13 @@ struct ContentView: View {
             if let message = photoImportQueue?.failureMessage { Text(message) }
         }
         .onAppear {
-            if !isCloudSyncActive {
+            if !hasSeenWelcome {
+                hasSeenWelcome = true
+                // Only for a genuinely new user, not someone updating the app
+                let treeCount = (try? modelContext.fetchCount(FetchDescriptor<Tree>())) ?? 0
+                showingWelcome = treeCount == 0
+            }
+            if !isCloudSyncActive && !showingWelcome {
                 showingSyncWarning = true
             }
         }
@@ -45,6 +70,17 @@ struct ContentView: View {
         } message: {
             Text("iCloud sync could not be enabled. Your data will be stored locally only and won't sync across devices.")
         }
+    }
+}
+
+private extension View {
+    /// The floating pill used for background status at the top of the screen.
+    func statusCapsule() -> some View {
+        font(.caption)
+            .padding(.horizontal, 12)
+            .padding(.vertical, 6)
+            .background(.regularMaterial, in: Capsule())
+            .transition(.opacity)
     }
 }
 

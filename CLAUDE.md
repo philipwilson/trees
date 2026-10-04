@@ -21,6 +21,9 @@ xcodebuild -project Trees.xcodeproj -scheme Trees -destination 'generic/platform
 xcrun simctl install booted ~/Library/Developer/Xcode/DerivedData/Trees-*/Build/Products/Debug-iphonesimulator/Trees.app
 xcrun simctl launch booted com.treetracker.Trees
 
+# Run unit tests (TreesTests; also run by GitHub Actions on push)
+xcodebuild test -project Trees.xcodeproj -scheme Trees -destination 'platform=iOS Simulator,name=iPhone 17'
+
 # Open in Xcode
 open Trees.xcodeproj
 ```
@@ -70,6 +73,8 @@ WidgetKit-based complication for quick app launch from watch face.
 - **TreeDetailView**: @Bindable tree for inline editing, collection assignment, embedded map, photo gallery, notes list with Add Note
 - **CollectionListView**: List all collections, create new, import from JSON
 - **CollectionDetailView**: View/edit collection, add/remove trees, export collection
+- **UpdateLocationView**: Replaces a tree's saved position with a fresh GPS fix
+- **WelcomeView**: First-run sheet, shown once when the store has no trees (`hasSeenWelcome` in @AppStorage)
 
 ### Export/Import System
 Three exporters in `Services/Exporters/` produce file URLs for sharing (accept optional `filePrefix` for collection exports):
@@ -77,7 +82,17 @@ Three exporters in `Services/Exporters/` produce file URLs for sharing (accept o
 - **JSONExporter**: Full data with optional base64-encoded photos
 - **GPXExporter**: Standard GPS waypoint format for mapping apps
 
-Import via **ImportCollectionView** and **ImportTreesView**: parses JSON exports into collections or standalone trees.
+Import via **ImportCollectionView** and **ImportTreesView**, both through **TreeImportService**: parses JSON exports, or CSV with latitude/longitude columns (**CSVTreeParser**), into collections or standalone trees. Deferred photos go through **PendingPhotoImportQueue**, which spools them to disk and resumes at launch.
+
+### List and Map Filtering
+- **TreeFilter** / **TreeSortOrder** (`Models/TreeFilter.swift`): collection + species filter and sort order, shared by the tree lists and both maps; `Tree.matches(searchText:)` is the single search definition
+- **TreeFilterMenu**: toolbar menu bound to a `TreeFilter` (and optionally a sort order)
+- **TreeMapCanvas**: the Map used by both `TreeMapView` and `iPadMapView`; pins are clustered by **MapClusterer** (grid-based, pure, unit-tested)
+
+### App-wide Status
+Created in `TreesApp` and passed through the environment:
+- **SyncMonitor**: reduces CloudKit sync events and account changes into a `SyncState`, shown by **SyncStatusButton**
+- **NoticeCenter**: brief top-of-screen notices (e.g. a tree arriving from the watch), rendered in `ContentView`
 
 ### UI Components
 - **AccuracyBadge**: Color-coded accuracy display (green < 5m, yellow < 15m, red > 15m)
@@ -86,7 +101,10 @@ Import via **ImportCollectionView** and **ImportTreesView**: parses JSON exports
 - **EditablePhotoGalleryView**: For adding photos during capture/editing (works with raw Data before Photo entities created)
 - **SpeciesTextField**: Text field with autocomplete suggestions from preset species + previously-used species
 - **NoteRowView**: Displays a Note with date, text, and thumbnail photos
-- **AddNoteView**: Sheet for adding new notes with optional photos
+- **AddNoteView**: Sheet for adding a note, or editing one when `editing:` is passed
+- **PhotoThumbnail**: Cached, background-decoded thumbnail; use this instead of decoding `imageData` in a view body
+- **MoveToCollectionMenu**: Context-menu submenu for reassigning a tree
+- **DeleteConfirmation** (`deleteConfirmation(_:...)`): confirmation dialog for list deletes
 
 ### iPad Support (Trees/Views/iPad/)
 Adaptive layout using `horizontalSizeClass` environment value:

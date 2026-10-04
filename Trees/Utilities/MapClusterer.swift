@@ -133,7 +133,11 @@ enum MapClusterer {
     /// edge aren't clipped. Tight groups are widened enough to zoom into
     /// without the map refusing the span, but stay under the clustering
     /// threshold so zooming to a cluster always splits it.
-    static func boundingRegion(of coordinates: [CLLocationCoordinate2D], padding: Double = 1.6) -> MKCoordinateRegion {
+    static func boundingRegion(
+        of coordinates: [CLLocationCoordinate2D],
+        padding: Double = 1.6,
+        minimumSpan: CLLocationDegrees = minimumClusteringSpan * 0.8
+    ) -> MKCoordinateRegion {
         guard let first = coordinates.first else {
             return MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
@@ -148,7 +152,6 @@ enum MapClusterer {
             minLon = min(minLon, coordinate.longitude)
             maxLon = max(maxLon, coordinate.longitude)
         }
-        let minimumSpan = minimumClusteringSpan * 0.8
         return MKCoordinateRegion(
             center: CLLocationCoordinate2D(latitude: (minLat + maxLat) / 2, longitude: (minLon + maxLon) / 2),
             span: MKCoordinateSpan(

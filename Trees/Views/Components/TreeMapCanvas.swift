@@ -51,6 +51,20 @@ struct TreeMapCanvas: View {
         .onMapCameraChange(frequency: .onEnd) { context in
             visibleRegion = context.region
         }
+        .onAppear {
+            frameAllTreesIfUnpositioned()
+        }
+    }
+
+    /// The automatic camera fits the pins edge to edge, which leaves them
+    /// under the floating buttons. Start with some room around them instead.
+    private func frameAllTreesIfUnpositioned() {
+        guard position == .automatic, !trees.isEmpty else { return }
+        position = .region(MapClusterer.boundingRegion(
+            of: trees.map { CLLocationCoordinate2D(latitude: $0.latitude, longitude: $0.longitude) },
+            padding: 1.8,
+            minimumSpan: 0.004
+        ))
     }
 
     private func label(for tree: Tree) -> String {

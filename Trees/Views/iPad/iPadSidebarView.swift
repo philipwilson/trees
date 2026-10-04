@@ -55,6 +55,13 @@ struct iPadSidebarView: View {
             }
         }
         .buttonStyle(.plain)
+        .safeAreaInset(edge: .bottom) {
+            SyncStatusButton(showsTitle: true)
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 12)
+        }
         .navigationTitle("Tree Tracker")
         .listStyle(.sidebar)
     }

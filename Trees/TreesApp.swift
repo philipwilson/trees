@@ -6,6 +6,10 @@ struct TreesApp: App {
     let modelContainer: ModelContainer
     let isCloudSyncActive: Bool
     private let photoImportQueue: PendingPhotoImportQueue
+    private let syncMonitor: SyncMonitor
+    private let noticeCenter = NoticeCenter()
+
+    private static let cloudKitContainerIdentifier = "iCloud.com.treetracker.Trees"
 
     // Set to true once Apple Developer Program enrollment is approved
     private static let enableCloudKit = true
@@ -18,7 +22,7 @@ struct TreesApp: App {
             do {
                 let cloudConfig = ModelConfiguration(
                     schema: schema,
-                    cloudKitDatabase: .private("iCloud.com.treetracker.Trees")
+                    cloudKitDatabase: .private(Self.cloudKitContainerIdentifier)
                 )
                 modelContainer = try ModelContainer(
                     for: schema,
@@ -58,6 +62,11 @@ struct TreesApp: App {
         photoImportQueue = PendingPhotoImportQueue(modelContainer: modelContainer)
         // Pick up photos from an import that was interrupted last session
         photoImportQueue.resume()
+        syncMonitor = SyncMonitor(
+            isCloudSyncActive: cloudSyncActive,
+            containerIdentifier: Self.cloudKitContainerIdentifier
+        )
+        syncMonitor.start()
         setupWatchConnectivity()
     }
 
@@ -68,6 +77,8 @@ struct TreesApp: App {
             ContentView(isCloudSyncActive: isCloudSyncActive)
                 .environment(photoViewerState)
                 .environment(photoImportQueue)
+                .environment(syncMonitor)
+                .environment(noticeCenter)
         }
         .modelContainer(modelContainer)
     }
@@ -76,10 +87,13 @@ struct TreesApp: App {
         let manager = WatchConnectivityManager.shared
         manager.activate()
 
-        manager.onTreesReceived = { [modelContainer] trees in
+        manager.onTreesReceived = { [modelContainer, noticeCenter] trees in
             // Delivered on the main queue; using the main context keeps @Query views in sync
             let importer = WatchTreeImporter(modelContext: modelContainer.mainContext)
-            _ = importer.importTrees(trees)
+            let imported = importer.importTrees(trees)
+            if let text = NoticeCenter.watchImportText(for: imported) {
+                noticeCenter.show(text, systemImage: "applewatch")
+            }
         }
     }
 }
