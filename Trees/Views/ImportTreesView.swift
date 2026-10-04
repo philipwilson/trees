@@ -5,11 +5,13 @@ import UniformTypeIdentifiers
 struct ImportTreesView: View {
     @Environment(\.modelContext) private var modelContext
     @Environment(\.dismiss) private var dismiss
+    @Environment(PendingPhotoImportQueue.self) private var photoImportQueue
 
     @State private var showingFilePicker = false
     @State private var importResult: ImportResult?
     @State private var showingResult = false
     @State private var isLoading = false
+    @State private var loadingMessage = "Reading file..."
     @State private var photoImportMode: PhotoImportMode = .withDelay
 
     enum PhotoImportMode: String, CaseIterable {
@@ -20,7 +22,7 @@ struct ImportTreesView: View {
         var description: String {
             switch self {
             case .none: return "Import tree data only, no photos"
-            case .withDelay: return "Import photos one at a time for reliable sync"
+            case .withDelay: return "Add photos gradually in the background for reliable sync"
             case .immediate: return "Import all photos at once (may not sync)"
             }
         }
@@ -59,7 +61,7 @@ struct ImportTreesView: View {
                     Section {
                         HStack {
                             ProgressView()
-                            Text("Reading file...")
+                            Text(loadingMessage)
                                 .foregroundStyle(.secondary)
                         }
                     }
@@ -113,6 +115,7 @@ struct ImportTreesView: View {
             return
         }
 
+        loadingMessage = "Reading file..."
         isLoading = true
 
         Task.detached {
@@ -174,12 +177,22 @@ struct ImportTreesView: View {
         }
 
         if !summary.deferredPhotos.isEmpty {
-            importResult = ImportResult(
-                success: true,
-                message: "Imported \(messageParts.joined(separator: " and ")). Adding \(summary.photoCount) photos in background — keep the app open until they finish."
-            )
-            showingResult = true
-            startDeferredPhotoImport(summary: summary, messageParts: messageParts)
+            // The queue owns the photos from here: it spools them to disk and
+            // keeps adding them after this view is gone, or after a relaunch.
+            let deferredPhotos = summary.deferredPhotos
+            let queue = photoImportQueue
+            loadingMessage = "Preparing photos..."
+            isLoading = true
+            Task {
+                let queuedCount = await queue.enqueue(deferredPhotos)
+                isLoading = false
+                var message = "Imported \(messageParts.joined(separator: ", "))."
+                if queuedCount > 0 {
+                    message += " Adding \(queuedCount) photo\(queuedCount == 1 ? "" : "s") in the background; if the app closes first, they continue next time it opens."
+                }
+                importResult = ImportResult(success: true, message: message)
+                showingResult = true
+            }
         } else {
             if summary.photoCount > 0 {
                 messageParts.append("\(summary.photoCount) photo\(summary.photoCount == 1 ? "" : "s")")
@@ -191,47 +204,14 @@ struct ImportTreesView: View {
             showingResult = true
         }
     }
-
-    /// Drip-feeds photos one tree at a time so CloudKit sync keeps up.
-    /// Intentionally not cancelled when this view disappears: the task only
-    /// references container-owned objects, and the user has already been told
-    /// the photos are being added in the background.
-    private func startDeferredPhotoImport(summary: TreeImportService.Summary, messageParts: [String]) {
-        let service = TreeImportService(modelContext: modelContext)
-        let batches = summary.deferredPhotos
-
-        Task { @MainActor in
-            var failedPhotoBatchSaves = 0
-            for (index, batch) in batches.enumerated() {
-                // Wait before adding each tree's photos
-                try? await Task.sleep(for: .seconds(2))
-
-                for photo in batch.photos {
-                    service.attach(photo, to: batch.tree)
-                }
-
-                do {
-                    try modelContext.save()
-                    print("🌐 Import: Added \(batch.photos.count) photos to tree \(index + 1)/\(batches.count)")
-                } catch {
-                    failedPhotoBatchSaves += 1
-                    print("🌐 Import: Failed to save delayed photos for tree \(index + 1): \(error)")
-                }
-            }
-
-            if failedPhotoBatchSaves > 0 {
-                importResult = ImportResult(
-                    success: false,
-                    message: "Imported \(messageParts.joined(separator: ", ")), but failed to save delayed photos for \(failedPhotoBatchSaves) tree\(failedPhotoBatchSaves == 1 ? "" : "s")."
-                )
-                showingResult = true
-            }
-            print("🌐 Import: Finished adding all photos")
-        }
-    }
 }
 
 #Preview {
-    ImportTreesView()
-        .modelContainer(for: [Tree.self, Collection.self], inMemory: true)
+    let container = try! ModelContainer(
+        for: Tree.self, Collection.self,
+        configurations: ModelConfiguration(isStoredInMemoryOnly: true)
+    )
+    return ImportTreesView()
+        .modelContainer(container)
+        .environment(PendingPhotoImportQueue(modelContainer: container))
 }

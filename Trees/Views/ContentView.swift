@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     var isCloudSyncActive = true
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(PendingPhotoImportQueue.self) private var photoImportQueue: PendingPhotoImportQueue?
     @State private var showingSyncWarning = false
 
     var body: some View {
@@ -12,6 +13,27 @@ struct ContentView: View {
             } else {
                 iPhoneContentView()
             }
+        }
+        .overlay(alignment: .top) {
+            if let queue = photoImportQueue, queue.isRunning {
+                Label("Adding photos \(queue.completedCount)/\(queue.totalCount)", systemImage: "photo.on.rectangle")
+                    .font(.caption)
+                    .monospacedDigit()
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 6)
+                    .background(.regularMaterial, in: Capsule())
+                    .padding(.top, 4)
+                    .transition(.opacity)
+            }
+        }
+        .animation(.default, value: photoImportQueue?.isRunning)
+        .alert("Photo Import Incomplete", isPresented: Binding(
+            get: { photoImportQueue?.failureMessage != nil },
+            set: { if !$0 { photoImportQueue?.failureMessage = nil } }
+        )) {
+            Button("OK") { photoImportQueue?.failureMessage = nil }
+        } message: {
+            if let message = photoImportQueue?.failureMessage { Text(message) }
         }
         .onAppear {
             if !isCloudSyncActive {

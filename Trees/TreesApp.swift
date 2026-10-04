@@ -5,6 +5,7 @@ import SwiftData
 struct TreesApp: App {
     let modelContainer: ModelContainer
     let isCloudSyncActive: Bool
+    private let photoImportQueue: PendingPhotoImportQueue
 
     // Set to true once Apple Developer Program enrollment is approved
     private static let enableCloudKit = true
@@ -54,6 +55,9 @@ struct TreesApp: App {
         }
 
         isCloudSyncActive = cloudSyncActive
+        photoImportQueue = PendingPhotoImportQueue(modelContainer: modelContainer)
+        // Pick up photos from an import that was interrupted last session
+        photoImportQueue.resume()
         setupWatchConnectivity()
     }
 
@@ -63,6 +67,7 @@ struct TreesApp: App {
         WindowGroup {
             ContentView(isCloudSyncActive: isCloudSyncActive)
                 .environment(photoViewerState)
+                .environment(photoImportQueue)
         }
         .modelContainer(modelContainer)
     }

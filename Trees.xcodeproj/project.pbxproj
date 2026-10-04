@@ -25,6 +25,7 @@
 		402A3954254CC0D8A5EFA0CF /* TreesWatchWidget.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 76590D14DD7583E2B6569B1B /* TreesWatchWidget.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		4351B836B3A19F5CFAB79BE9 /* Photo.swift in Sources */ = {isa = PBXBuildFile; fileRef = DEA89460FC189E7CEBC3771C /* Photo.swift */; };
 		444682DC75A6EE918DD141F4 /* TreeRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */; };
+		4D9B8E061560D7DEDA92F2C8 /* PendingPhotoImportQueueTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 949494AC673467512AD9977F /* PendingPhotoImportQueueTests.swift */; };
 		4E2C76072EAE7E6CE922194D /* WatchConnectivityManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 141132C59D4A6E56090C7FB3 /* WatchConnectivityManager.swift */; };
 		4EDB0B6A5BF748798DBF2AB2 /* TreeDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61B8886E85F005476434A363 /* TreeDetailView.swift */; };
 		53B5F26AB2B8D036868A7496 /* iPadTreeListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4D06A53E5F7477F6B192AB9 /* iPadTreeListView.swift */; };
@@ -36,6 +37,7 @@
 		777CAA964A438818A81B83E5 /* iPadContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FD413525F9C7B61836CA443B /* iPadContentView.swift */; };
 		7D1C4CB7243676FF8DB894FE /* CollectionListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DDE1784DB8250757C69B763 /* CollectionListView.swift */; };
 		8B46E9C5FCD41F533D26BAA2 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 244065D612BAD7C6916CA3C9 /* Assets.xcassets */; };
+		8BCA84D9628BADD198249196 /* PendingPhotoImportQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = DE765DFD9B91970C3D79C7FC /* PendingPhotoImportQueue.swift */; };
 		9022CDA83CE5FD2CD8F29102 /* AccuracyBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E6443DD38C7A3A7E83FDA76E /* AccuracyBadge.swift */; };
 		92F9612A51CFACAE093B2A75 /* Note.swift in Sources */ = {isa = PBXBuildFile; fileRef = E3346EB3009C6E848F543F4F /* Note.swift */; };
 		96D5CF27333F585FBC9859BA /* ImportModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = DED1CC855CD3A5BD574DFFF3 /* ImportModels.swift */; };
@@ -149,6 +151,7 @@
 		90BB573F33485C488B3F53E5 /* Trees.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Trees.entitlements; sourceTree = "<group>"; };
 		90CD1A8A52A81C1EE2EFBE76 /* TreeRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreeRowView.swift; sourceTree = "<group>"; };
 		918FF906634160BF4712F217 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		949494AC673467512AD9977F /* PendingPhotoImportQueueTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingPhotoImportQueueTests.swift; sourceTree = "<group>"; };
 		9AA3A92D0DE14A3726217238 /* TreesWatchWidget.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TreesWatchWidget.swift; sourceTree = "<group>"; };
 		9AD296987421F4A6311D98F3 /* WatchLocationManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchLocationManager.swift; sourceTree = "<group>"; };
 		9BA55FA3BE6C6AC3D2B78320 /* CollectionDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CollectionDetailView.swift; sourceTree = "<group>"; };
@@ -166,6 +169,7 @@
 		D55967246F76EEBC3747DEB7 /* ImageDownsampler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageDownsampler.swift; sourceTree = "<group>"; };
 		D622F80312FFD765AB887763 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		DE76365F8AFD79DA86E9B50B /* iPadSidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = iPadSidebarView.swift; sourceTree = "<group>"; };
+		DE765DFD9B91970C3D79C7FC /* PendingPhotoImportQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PendingPhotoImportQueue.swift; sourceTree = "<group>"; };
 		DEA89460FC189E7CEBC3771C /* Photo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Photo.swift; sourceTree = "<group>"; };
 		DED1CC855CD3A5BD574DFFF3 /* ImportModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImportModels.swift; sourceTree = "<group>"; };
 		DF1914A7A9A551F6872204CD /* ZoomableImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableImageView.swift; sourceTree = "<group>"; };
@@ -303,6 +307,7 @@
 				26A6F644E1C77D04361E90DD /* ExporterTests.swift */,
 				9C3E63C447D3BE5D84446D14 /* JSONRoundTripTests.swift */,
 				6EBA4753E77EB9613736CEFC /* LocationFreshnessTests.swift */,
+				949494AC673467512AD9977F /* PendingPhotoImportQueueTests.swift */,
 			);
 			path = TreesTests;
 			sourceTree = "<group>";
@@ -355,6 +360,7 @@
 			isa = PBXGroup;
 			children = (
 				DED1CC855CD3A5BD574DFFF3 /* ImportModels.swift */,
+				DE765DFD9B91970C3D79C7FC /* PendingPhotoImportQueue.swift */,
 				5BEA2508886C1420F0DAD468 /* TreeImportService.swift */,
 			);
 			path = Importers;
@@ -602,6 +608,7 @@
 				250A5B96800A59CA51A32265 /* ExporterTests.swift in Sources */,
 				E0ECE713DFDBE2F2C48ACECD /* JSONRoundTripTests.swift in Sources */,
 				323B4F1757B231D17498E0ED /* LocationFreshnessTests.swift in Sources */,
+				4D9B8E061560D7DEDA92F2C8 /* PendingPhotoImportQueueTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -629,6 +636,7 @@
 				0885632F980C9F5824201D73 /* JSONExporter.swift in Sources */,
 				E441CFC3F2A6B91FC723A805 /* LocationManager.swift in Sources */,
 				92F9612A51CFACAE093B2A75 /* Note.swift in Sources */,
+				8BCA84D9628BADD198249196 /* PendingPhotoImportQueue.swift in Sources */,
 				4351B836B3A19F5CFAB79BE9 /* Photo.swift in Sources */,
 				BAA3C58BC6408D4A254791AF /* PhotoGalleryView.swift in Sources */,
 				FC486FA60042D4A57696DA06 /* SpeciesTextField.swift in Sources */,

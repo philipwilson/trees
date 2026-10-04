@@ -12,8 +12,9 @@ struct TreeImportService {
         case none
         /// Attach photos during the import pass
         case immediate
-        /// Return photos in `Summary.deferredPhotos` for the caller to drip-feed
-        /// (one tree at a time, for reliable CloudKit sync)
+        /// Return photos in `Summary.deferredPhotos` for the caller to hand to
+        /// `PendingPhotoImportQueue`, which drip-feeds them one tree at a time
+        /// for reliable CloudKit sync
         case deferred
     }
 
@@ -26,12 +27,16 @@ struct TreeImportService {
         case remap
     }
 
-    /// A decoded photo not yet attached to its target.
-    struct PendingPhoto {
-        let data: Data
-        let captureDate: Date?
+    /// A photo not yet attached to its target. Targets are identified by ID
+    /// rather than model reference so the photo can outlive this import (and
+    /// the app session), and the image stays base64 — sharing storage with the
+    /// decoded archive — until the queue writes it to disk.
+    struct DeferredPhoto: Sendable {
+        let treeID: UUID
         /// When set, the photo belongs to this note; otherwise to the tree.
-        let note: Note?
+        let noteID: UUID?
+        let base64: String
+        let captureDate: Date?
     }
 
     struct Summary {
@@ -41,7 +46,7 @@ struct TreeImportService {
         var photoCount = 0
         var remappedIDCount = 0
         var alreadyPresentCount = 0
-        var deferredPhotos: [(tree: Tree, photos: [PendingPhoto])] = []
+        var deferredPhotos: [DeferredPhoto] = []
     }
 
     /// Decodes any of the three export formats: v2 (versioned, structured notes),
@@ -147,8 +152,6 @@ struct TreeImportService {
                 tree.collection = collection
             }
 
-            var pending: [PendingPhoto] = []
-
             if let noteRecords = record.noteEntries {
                 // v2: structured notes with original dates and their own photos
                 for noteRecord in noteRecords {
@@ -161,16 +164,11 @@ struct TreeImportService {
                     if tree.notes == nil { tree.notes = [] }
                     tree.notes?.append(note)
 
-                    guard photoHandling != .none else { continue }
                     for photoRecord in noteRecord.photos ?? [] {
-                        guard let data = Data(base64Encoded: photoRecord.data) else { continue }
-                        summary.photoCount += 1
-                        let photo = PendingPhoto(data: data, captureDate: photoRecord.parsedCaptureDate, note: note)
-                        if photoHandling == .immediate {
-                            attach(photo, to: tree)
-                        } else {
-                            pending.append(photo)
-                        }
+                        handlePhoto(
+                            base64: photoRecord.data, captureDate: photoRecord.parsedCaptureDate,
+                            tree: tree, note: note, photoHandling: photoHandling, summary: &summary
+                        )
                     }
                 }
             } else if !record.notes.isEmpty {
@@ -181,37 +179,24 @@ struct TreeImportService {
                 tree.notes?.append(note)
             }
 
-            if photoHandling != .none {
-                if let treePhotoRecords = record.treePhotos {
-                    // v2: tree-owned photos only (note photos handled above)
-                    for photoRecord in treePhotoRecords {
-                        guard let data = Data(base64Encoded: photoRecord.data) else { continue }
-                        summary.photoCount += 1
-                        let photo = PendingPhoto(data: data, captureDate: photoRecord.parsedCaptureDate, note: nil)
-                        if photoHandling == .immediate {
-                            attach(photo, to: tree)
-                        } else {
-                            pending.append(photo)
-                        }
-                    }
-                } else if let legacyPhotos = record.photos {
-                    // v1: flat array, everything reattaches to the tree
-                    for (index, base64) in legacyPhotos.enumerated() {
-                        guard let data = Data(base64Encoded: base64) else { continue }
-                        summary.photoCount += 1
-                        let photo = PendingPhoto(data: data, captureDate: record.legacyCaptureDate(at: index), note: nil)
-                        if photoHandling == .immediate {
-                            attach(photo, to: tree)
-                        } else {
-                            pending.append(photo)
-                        }
-                    }
+            if let treePhotoRecords = record.treePhotos {
+                // v2: tree-owned photos only (note photos handled above)
+                for photoRecord in treePhotoRecords {
+                    handlePhoto(
+                        base64: photoRecord.data, captureDate: photoRecord.parsedCaptureDate,
+                        tree: tree, note: nil, photoHandling: photoHandling, summary: &summary
+                    )
+                }
+            } else if let legacyPhotos = record.photos {
+                // v1: flat array, everything reattaches to the tree
+                for (index, base64) in legacyPhotos.enumerated() {
+                    handlePhoto(
+                        base64: base64, captureDate: record.legacyCaptureDate(at: index),
+                        tree: tree, note: nil, photoHandling: photoHandling, summary: &summary
+                    )
                 }
             }
 
-            if !pending.isEmpty {
-                summary.deferredPhotos.append((tree: tree, photos: pending))
-            }
             summary.importedCount += 1
         }
 
@@ -224,11 +209,37 @@ struct TreeImportService {
         return summary
     }
 
-    /// Attaches a pending photo to its note or tree. Constructs the Photo
-    /// directly (not via the add* helpers) so imported updatedAt values survive.
-    func attach(_ pending: PendingPhoto, to tree: Tree) {
-        let photo = Photo(imageData: pending.data, captureDate: pending.captureDate)
-        if let note = pending.note {
+    private func handlePhoto(
+        base64: String,
+        captureDate: Date?,
+        tree: Tree,
+        note: Note?,
+        photoHandling: PhotoHandling,
+        summary: inout Summary
+    ) {
+        switch photoHandling {
+        case .none:
+            return
+        case .immediate:
+            guard let data = Data(base64Encoded: base64) else { return }
+            summary.photoCount += 1
+            Self.attachPhoto(data: data, captureDate: captureDate, to: tree, note: note)
+        case .deferred:
+            // Not decoded here; the queue decodes one photo at a time while
+            // spooling to disk and drops any that turn out to be invalid.
+            summary.photoCount += 1
+            summary.deferredPhotos.append(
+                DeferredPhoto(treeID: tree.id, noteID: note?.id, base64: base64, captureDate: captureDate)
+            )
+        }
+    }
+
+    /// Attaches photo data to the note if given, otherwise to the tree.
+    /// Constructs the Photo directly (not via the add* helpers) so imported
+    /// updatedAt values survive.
+    static func attachPhoto(data: Data, captureDate: Date?, to tree: Tree, note: Note?) {
+        let photo = Photo(imageData: data, captureDate: captureDate)
+        if let note {
             photo.note = note
             if note.photos == nil { note.photos = [] }
             note.photos?.append(photo)

@@ -262,31 +262,38 @@ final class JSONRoundTripTests: XCTestCase {
         XCTAssertEqual(imported.treePhotos.map(\.imageData), payloads)
     }
 
-    /// Deferred mode must hand photos back to the caller instead of attaching them.
-    func testDeferredModeReturnsPhotoBatches() throws {
-        let photoBase64 = treePhotoData.base64EncodedString()
+    /// Deferred mode must hand photos back to the caller, addressed by tree
+    /// and note ID, instead of attaching them.
+    func testDeferredModeReturnsPhotosByTargetID() throws {
+        let treeBase64 = treePhotoData.base64EncodedString()
+        let noteBase64 = notePhotoData.base64EncodedString()
         let json = """
-        [{"latitude": 50.0, "longitude": 0.5, "horizontalAccuracy": 3.0, "species": "Oak", "notes": "",
-          "photos": ["\(photoBase64)"]}]
+        {"version": 2, "collections": [], "trees": [{
+          "latitude": 50.0, "longitude": 0.5, "horizontalAccuracy": 3.0, "species": "Oak", "notes": "n",
+          "noteEntries": [{"text": "n", "photos": [{"data": "\(noteBase64)"}]}],
+          "treePhotos": [{"data": "\(treeBase64)", "captureDate": "2026-01-02T03:04:05Z"}]
+        }]}
         """
         let archive = try XCTUnwrap(TreeImportService.decode(Data(json.utf8)))
         let container = try makeContainer()
         let context = container.mainContext
-        let service = TreeImportService(modelContext: context)
-        let summary = try service.importArchive(archive, photoHandling: .deferred)
+        let summary = try TreeImportService(modelContext: context).importArchive(archive, photoHandling: .deferred)
 
-        XCTAssertEqual(summary.photoCount, 1)
-        XCTAssertEqual(summary.deferredPhotos.count, 1)
         let imported = try XCTUnwrap(try context.fetch(FetchDescriptor<Tree>()).first)
-        XCTAssertTrue(imported.treePhotos.isEmpty)
+        let note = try XCTUnwrap(imported.treeNotes.first)
+        XCTAssertTrue(imported.allPhotos.isEmpty)
 
-        // Attaching the batch afterwards lands the photo on the tree
-        for pending in summary.deferredPhotos[0].photos {
-            service.attach(pending, to: summary.deferredPhotos[0].tree)
-        }
-        try context.save()
-        XCTAssertEqual(imported.treePhotos.count, 1)
-        XCTAssertEqual(imported.treePhotos.first?.imageData, treePhotoData)
+        XCTAssertEqual(summary.photoCount, 2)
+        XCTAssertEqual(summary.deferredPhotos.count, 2)
+        XCTAssertTrue(summary.deferredPhotos.allSatisfy { $0.treeID == imported.id })
+
+        let notePhoto = try XCTUnwrap(summary.deferredPhotos.first { $0.noteID != nil })
+        XCTAssertEqual(notePhoto.noteID, note.id)
+        XCTAssertEqual(notePhoto.base64, noteBase64)
+
+        let treePhoto = try XCTUnwrap(summary.deferredPhotos.first { $0.noteID == nil })
+        XCTAssertEqual(treePhoto.base64, treeBase64)
+        XCTAssertEqual(treePhoto.captureDate, ImportDateParser.date(from: "2026-01-02T03:04:05Z"))
     }
 
     /// Invalid coordinates are skipped, not imported.
